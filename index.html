@@ -227,7 +227,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         RWANDAMKET Home Decor
       </a>
     </h2>
-    <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
   <!-- 2. Events Management -->
@@ -238,7 +238,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         RWANDAMKET Events Management
       </a>
     </h2>
-    <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
   <!-- 3. Gikondo -->
@@ -250,6 +250,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
       </a>
     </h2>
     <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
   <!-- 4. Merez -->
@@ -260,7 +261,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         RWANDAMKET MEREZ
       </a>
     </h2>
-    <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
   <!-- 5. KFC -->
@@ -271,7 +272,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         KFC
       </a>
     </h2>
-    <div class="product-container"></div>
+   <div id="marketProducts"></div>
   </div>
 
   <!-- 6. Chefs -->
@@ -282,7 +283,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         RWANDAMKET Chefs
       </a>
     </h2>
-    <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
   <!-- 7. Kicukiro -->
@@ -293,7 +294,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         RWANDAMKET KICUKIRO
       </a>
     </h2>
-    <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
   <!-- 8. Kimihurura -->
@@ -304,7 +305,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
         RWANDAMKET KIMIHURURA
       </a>
     </h2>
-    <div class="product-container"></div>
+    <div id="marketProducts"></div>
   </div>
 
 </div>
@@ -397,12 +398,16 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
   <!-- 3️⃣ Your custom JS code (loading products, handling clicks) -->
   <script>
     // loadProducts() function and click event listeners here
+    
       async function loadProducts(marketName, container) {
+        console.log("Market clicked:", marketName);
   const { data, error } = await db
     .from("products")
     .select("*")
     .eq("market", marketName);
-
+       console.log("Fetching market:", marketName);
+console.log("Supabase result:", data, error); 
+console.log("Supabase returned:", data, error);
   if (error) {
     container.innerHTML = `<p>Error loading products</p>`;
     console.error(error);
