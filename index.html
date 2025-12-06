@@ -385,67 +385,77 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
       <!-- 1️⃣ Load Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 2️⃣ Initialize Supabase client -->
 <script>
-  const { createClient } = supabase;
+// 1️⃣ Initialize Supabase
+const supabase = supabase.createClient(
+  "YOUR_SUPABASE_URL", // replace with your Supabase URL
+  "YOUR_ANON_PUBLIC_KEY" // replace with your anon key
+);
 
-  const db = createClient(
-    "YOUR_SUPABASE_URL",
-    "YOUR_ANON_PUBLIC_KEY"
-  );
-</script>
+// 2️⃣ Function to load products
+async function loadProducts(marketName, container) {
+  console.log("Loading products for market:", marketName);
 
-  <!-- 3️⃣ Your custom JS code (loading products, handling clicks) -->
-  <script>
-    // loadProducts() function and click event listeners here
-    
-      async function loadProducts(marketName, container) {
-        console.log("Market clicked:", marketName);
-  const { data, error } = await db
-    .from("products")
-    .select("*")
-    .eq("market", marketName);
-       console.log("Fetching market:", marketName);
-console.log("Supabase result:", data, error); 
-console.log("Supabase returned:", data, error);
-  if (error) {
-    container.innerHTML = `<p>Error loading products</p>`;
-    console.error(error);
-    return;
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("market", marketName);
+
+    if (error) {
+      console.error("Supabase error:", error);
+      container.innerHTML = `<p style="color:red;">Error loading products</p>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = `<p>No products found for ${marketName}</p>`;
+      return;
+    }
+
+    // Build table HTML
+    let html = `<table class="product-table">
+                  <tr><th>Product</th><th>Price</th><th>Order</th></tr>`;
+    data.forEach(item => {
+      html += `<tr>
+                 <td>${item.name}</td>
+                 <td>$${item.price}</td>
+                 <td><a href="https://wa.me/250786979388?text=I want this ${item.name}">Order</a></td>
+               </tr>`;
+    });
+    html += `</table>`;
+
+    container.innerHTML = html;
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    container.innerHTML = `<p style="color:red;">Unexpected error loading products</p>`;
   }
-
-  let html = `<table class="product-table">
-                <tr><th>Product</th><th>Price</th><th>Order</th></tr>`;
-  data.forEach(item => {
-    html += `<tr>
-               <td>${item.name}</td>
-               <td>${item.price}</td>
-               <td><a href="https://wa.me/250786979388?text=I want this ${item.name}">Order</a></td>
-             </tr>`;
-  });
-  html += `</table>`;
-  container.innerHTML = html;
 }
 
-// Attach click event listeners to card titles
+// 3️⃣ Attach click events to markets
 const marketLinks = document.querySelectorAll(".market-link");
 
 marketLinks.forEach(link => {
   link.addEventListener("click", async () => {
     const container = link.closest(".card").querySelector(".product-container");
-    const marketName = link.dataset.market;
+    const marketName = link.textContent.trim(); // removes spaces
 
-    container.classList.toggle("open");
+    console.log("Market clicked:", marketName);
 
+    // Close other containers
     document.querySelectorAll(".product-container").forEach(other => {
       if (other !== container) other.classList.remove("open");
     });
 
+    // Toggle current container
+    container.classList.toggle("open");
+
+    // Load products
     await loadProducts(marketName, container);
   });
 });
-  </script>
-
+</script>
 
 <script>
 // Fade-in cards on scroll
