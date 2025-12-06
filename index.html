@@ -387,7 +387,7 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
 
 <script>
 // 1️⃣ Initialize Supabase
-const supabase = supabase.createClient(
+const supabase = db.createClient(
   "https://sbthvusuujryxhmvmiai.supabase.co", // replace with your Supabase URL
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8" // replace with your anon key
 );
@@ -397,7 +397,7 @@ async function loadProducts(marketName, container) {
   console.log("Loading products for market:", marketName);
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("products")
       .select("*")
       .eq("market", marketName);
@@ -419,7 +419,7 @@ async function loadProducts(marketName, container) {
     data.forEach(item => {
       html += `<tr>
                  <td>${item.name}</td>
-                 <td>$${item.price}</td>
+                 <td>${item.price}</td>
                  <td><a href="https://wa.me/250786979388?text=I want this ${item.name}">Order</a></td>
                </tr>`;
     });
