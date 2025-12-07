@@ -462,49 +462,50 @@ scrollBtn.addEventListener("click", () => {
 });
 </script>
 
-<script>
-// --- SUPABASE CLIENT SETUP (REQUIRED) ---
-// IMPORTANT: You MUST place your actual URL and Key here!
-// Otherwise, 'supabase' will be undefined and the function will fail.
-const SUPABASE_URL = 'https://sbthvusuujryxhmvmiai.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8'; 
-const supabase = supabase.createClient(https://sbthvusuujryxhmvmiai.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8);
 
-// --- DATA FETCHING FUNCTION ---
+  <script>
+// --- 1. SUPABASE CLIENT SETUP (FIXED) ---
+// Note: Using the provided URLs/Keys directly as variables in the createClient function.
+const SUPABASE_URL = 'https://sbthvusuujryxhmvmiai.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8';
+
+// CRITICAL FIX: Arguments must be strings (using the defined variables is cleanest)
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+// --- 2. DATA FETCHING FUNCTION (Product Table & Rendering Logic FIX) ---
 async function fetchAndRenderProducts(marketIdentifier) {
     try {
-        const { data: Product, error } = await supabase
+        // FIX: Table name is 'Product'
+        const { data: products, error } = await supabase
             .from('Product')
             .select('name, price, image_url')
-            .eq('market', marketIdentifier); // Filters by your 'market' column
+            .eq('market', marketIdentifier);
 
         if (error) throw error;
 
-        if (Product.length === 0) {
-            return `<p class="no-Product">No products found for this market yet.</p>`;
+        // Using 'products' for the iteration variable for clarity
+        if (products.length === 0) {
+            return `<p class="no-products">No products found for this market yet.</p>`;
         }
 
-        // Generate the Table HTML
+        // FIX: Corrected Table Header (<th>) to match data fields
         let tableHTML = `
             <table>
                 <thead>
                     <tr>
-                        <th></th>
-                         <th></th>
+                        <th>Image</th> 
                         <th>Product Name</th>
                         <th>Price</th>
-                        <th>Market</th>
-                        <th>Image_url</th>
                     </tr>
                 </thead>
                 <tbody>
         `;
 
-        Product.forEach(product => {
+        products.forEach(product => {
+            // FIX: Corrected Table Data (<td>) to align with headers
             tableHTML += `
                 <tr>
-                    <td></td>
-                    <td></td>
                     <td><img src="${product.image_url}" alt="${product.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
                     <td>${product.name}</td>
                     <td>$${product.price}</td>
@@ -517,38 +518,35 @@ async function fetchAndRenderProducts(marketIdentifier) {
 
     } catch (error) {
         console.error('Error fetching Product:', error.message);
-        return `<p class="error-message">Could not load products. Please check your Supabase setup.</p>`;
+        return `<p class="error-message">Could not load products. Please check your Supabase setup and RLS policy.</p>`;
     }
 }
 
 
-// --- TOGGLE LOGIC ---
+// --- 3. TOGGLE LOGIC (Remains Correct) ---
 document.addEventListener('DOMContentLoaded', () => {
     const toggleLinks = document.querySelectorAll('.market-toggle');
     
     toggleLinks.forEach(link => {
-        // Make the event listener function asynchronous
         link.addEventListener('click', async function(event) {
-            event.preventDefault(); 
+            event.preventDefault();
             
             // 1. Get all related elements
             const marketCard = this.closest('.market-card');
             const container = marketCard.querySelector('.market-content');
             const icon = this.querySelector('.toggle-icon');
-            const marketIdentifier = this.dataset.marketIdentifier; 
+            const marketIdentifier = this.dataset.marketIdentifier;
 
             const isCurrentlyVisible = container.classList.contains('visible-products');
 
             if (isCurrentlyVisible) {
-                // --- CLOSING LOGIC (Remove classes first) ---
+                // --- CLOSING LOGIC ---
                 container.classList.remove('visible-products');
                 container.classList.add('hidden-products');
                 icon.classList.remove('rotated');
                 
             } else {
-                // --- OPENING LOGIC (Add classes and FETCH DATA) ---
-
-                // Set a temporary loading message and expand the container
+                // --- OPENING LOGIC (FETCH DATA) ---
                 container.innerHTML = `<p class="placeholder-text">Loading products...</p>`;
                 container.classList.remove('hidden-products');
                 container.classList.add('visible-products');
@@ -557,15 +555,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Fetch the data and wait for it
                 const contentHTML = await fetchAndRenderProducts(marketIdentifier);
                 
-                // Insert the final content (table or error message)
+                // Insert the final content
                 container.innerHTML = contentHTML;
             }
         });
     });
 });
 </script>
-
-
 
 </body>
 </html>
