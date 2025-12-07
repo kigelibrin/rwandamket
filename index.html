@@ -10,7 +10,6 @@
 <meta name="author" content="Kigeli Brin">
 <title>Rwandamket - Your Food & Grocery Delivery in Rwanda</title>
 <style>
-
 .product-container {
   /* Basic style for the "white space" */
   background-color: #fff;
@@ -79,6 +78,7 @@
     border: 3px solid #4CAF50; /* Optional: green border like header */
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
+
 /* Reset & base styles */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -236,13 +236,11 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
 <div class="markets-container">
 
   <!-- MARKET CARD TEMPLATE -->
-  
    <div class="market-card">
-  
   <div class="card-header">
     <img src="https://images.pexels.com/photos/34818757/pexels-photo-34818757.jpeg" alt="Home Decor">
-    <h2 class="market-title market-toggle">
-    <a class="market-link " marketIdentifier="RWANDAMKET Home Decor">RWANDAMKET Home Decor</a>
+    <h2 class="market-title">
+    <a class="market-link market-toggle">RWANDAMKET Home Decor</a>
     <span class="toggle-icon">▼</span>
     </h2>
     </div>
@@ -251,10 +249,14 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
 
+
+
+
     <div class="market-card">
       <div class="card-header">
+  
     <img src="https://www.brides.com/thmb/VWQUatbUA7KtCp5GnaiSVbwlFPY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/recirc-nigerian-engagement-ceremony-wedding-los-angeles-couple-portrait-janna-brown-1224-1faeae53f5934f919d2251d3a377cd2a.jpg" alt="Events">
-    <h2 class="market-title"><a class="market-link market-toggle" marketIdentifier="RWANDAMKET Events Management">RWANDAMKET Events Management</a>
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET Events Management">RWANDAMKET Events Management</a>
     <span class="toggle-icon">▼</span>
     </h2>
     </div>
@@ -263,10 +265,13 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
   
+ 
+ 
+ 
   <div class="market-card">
    <div class="card-header">
     <img src="https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=1200&q=80" alt="Gikondo">
-    <h2 class="market-title"><a class="market-link market-toggle" marketIdentifier="RWANDAMKET Gikondo">RWANDAMKET Gikondo</a>
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET Gikondo">RWANDAMKET Gikondo</a>
     <span class="toggle-icon">▼</span>
     </h2>
     </div>
@@ -274,6 +279,9 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     <p>Loading products for Rwandamket Gikondo...</p>
     </div>
   </div>
+
+
+
 
   <div class="market-card">
     <div class="card-header">
@@ -287,6 +295,8 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
   
+  
+ 
   <div class="market-card"> 
   <div class="card-header">
     <img src="https://images.pexels.com/photos/12118980/pexels-photo-12118980.jpeg" alt="KFC">
@@ -299,7 +309,9 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
   
-
+  
+  
+ 
   <div class="market-card"> 
   <div class="card-header">
     <img src="https://images.unsplash.com/photo-1528712306091-ed0763094c98?auto=format&fit=crop&w=600&q=80" alt="Chefs">
@@ -312,6 +324,10 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
   
+  
+  
+  
+ 
   <div class="market-card">
   <div class="card-header">
     <img src="https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg" alt="Kicukiro">
@@ -324,11 +340,12 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
   
+  
+  
   <div class="market-card">
   <div class="card-header">
     <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80" alt="Kimihurura">
-    <h2 class="market-title">
-      <a class="market-link market-toggle" data-market-identifier="RWANDAMKET KIMIHURURA">RWANDAMKET KIMIHURURA</a>
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET KIMIHURURA">RWANDAMKET KIMIHURURA</a>
     <span class="toggle-icon">▼</span>
     </h2>
     </div>
@@ -337,6 +354,8 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
   </div>
 </div>
+
+
 </section>
 
 <h1 class="section-title" id="partners">OUR TEAM & PARTNERS</h1>
@@ -441,107 +460,34 @@ scrollBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script>
-// --- 1. SUPABASE CLIENT SETUP (FIXED) ---
-// Note: Using the provided URLs/Keys directly as variables in the createClient function.
-const SUPABASE_URL = 'https://sbthvusuujryxhmvmiai.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8';
-
-// CRITICAL FIX: Arguments must be strings (using the defined variables is cleanest)
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-// --- 2. DATA FETCHING FUNCTION (Product Table & Rendering Logic FIX) ---
-async function fetchAndRenderProducts(marketIdentifier) {
-    try {
-        // FIX: Table name is 'Product'
-        const { data: products, error } = await supabase
-            .from('Product')
-            .select('name, price, image_url')
-            .eq('market', marketIdentifier);
-
-        if (error) throw error;
-
-        // Using 'products' for the iteration variable for clarity
-        if (products.length === 0) {
-            return `<p class="no-products">No products found for this market yet.</p>`;
-        }
-
-        // FIX: Corrected Table Header (<th>) to match data fields
-        let tableHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product Name</th> 
-                        <th>Price</th>
-                        <th>Image</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
-        products.forEach(product => {
-            // FIX: Corrected Table Data (<td>) to align with headers
-            tableHTML += `
-                <tr>
-                    <td>${product.name}</td>
-                    <td>$${product.price}</td>
-                    <td><img src="${product.image_url}" alt="${product.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
-                </tr>
-            `;
-        });
-
-        tableHTML += `</tbody></table>`;
-        return tableHTML;
-
-    } catch (error) {
-        console.error('Error fetching Product:', error.message);
-        return `<p class="error-message">Could not load products. Please check your Supabase setup and RLS policy.</p>`;
-    }
-}
-
-
-// --- 3. TOGGLE LOGIC (Remains Correct) ---
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     const toggleLinks = document.querySelectorAll('.market-toggle');
     
     toggleLinks.forEach(link => {
-        link.addEventListener('click', async function(event) {
-            event.preventDefault();
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); // Stop the link from navigating away
             
-            // 1. Get all related elements
             const marketCard = this.closest('.market-card');
             const container = marketCard.querySelector('.market-content');
             const icon = this.querySelector('.toggle-icon');
-            const marketIdentifier = this.dataset.marketIdentifier;
+            
+            // Toggle the visibility classes on the specific container
+            container.classList.toggle('visible-products');
+            container.classList.toggle('hidden-products');
 
-            const isCurrentlyVisible = container.classList.contains('visible-products');
-
-            if (isCurrentlyVisible) {
-                // --- CLOSING LOGIC ---
-                container.classList.remove('visible-products');
-                container.classList.add('hidden-products');
-                icon.classList.remove('rotated');
-                
-            } else {
-                // --- OPENING LOGIC (FETCH DATA) ---
-                container.innerHTML = `<p class="placeholder-text">Loading products...</p>`;
-                container.classList.remove('hidden-products');
-                container.classList.add('visible-products');
-                icon.classList.add('rotated');
-                
-                // Fetch the data and wait for it
-                const contentHTML = await fetchAndRenderProducts(marketIdentifier);
-                
-                // Insert the final content
-                container.innerHTML = contentHTML;
-            }
+            // Toggle the rotation class on the icon
+            icon.classList.toggle('rotated');
+            
+            // *** This is where your Supabase function would be called! ***
         });
     });
 });
 </script>
+
+
+
 
 </body>
 </html>
