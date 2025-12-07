@@ -470,7 +470,7 @@ const SUPABASE_URL = 'https://sbthvusuujryxhmvmiai.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8';
 
 // CRITICAL FIX: Arguments must be strings (using the defined variables is cleanest)
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = supabase.createClient('https://sbthvusuujryxhmvmiai.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8');
 
 
 // --- 2. DATA FETCHING FUNCTION (Product Table & Rendering Logic FIX) ---
