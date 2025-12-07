@@ -473,15 +473,15 @@ const supabase = supabase.createClient(https://sbthvusuujryxhmvmiai.supabase.co,
 // --- DATA FETCHING FUNCTION ---
 async function fetchAndRenderProducts(marketIdentifier) {
     try {
-        const { data: products, error } = await supabase
-            .from('products')
+        const { data: Product, error } = await supabase
+            .from('Product')
             .select('name, price, image_url')
             .eq('market', marketIdentifier); // Filters by your 'market' column
 
         if (error) throw error;
 
-        if (products.length === 0) {
-            return `<p class="no-products">No products found for this market yet.</p>`;
+        if (Product.length === 0) {
+            return `<p class="no-Product">No products found for this market yet.</p>`;
         }
 
         // Generate the Table HTML
@@ -500,9 +500,11 @@ async function fetchAndRenderProducts(marketIdentifier) {
                 <tbody>
         `;
 
-        products.forEach(product => {
+        Product.forEach(product => {
             tableHTML += `
                 <tr>
+                    <td></td>
+                    <td></td>
                     <td><img src="${product.image_url}" alt="${product.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
                     <td>${product.name}</td>
                     <td>$${product.price}</td>
@@ -514,7 +516,7 @@ async function fetchAndRenderProducts(marketIdentifier) {
         return tableHTML;
 
     } catch (error) {
-        console.error('Error fetching products:', error.message);
+        console.error('Error fetching Product:', error.message);
         return `<p class="error-message">Could not load products. Please check your Supabase setup.</p>`;
     }
 }
