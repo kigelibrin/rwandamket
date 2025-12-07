@@ -483,9 +483,25 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', async function(event) {
             event.preventDefault(); // Stop the link from navigating away
             
-            const marketIdentifier = this.dataset.marketIdentifier;
-            const contentHTML = await fetchAndRenderProducts(marketIdentifier);
-            container.innerHTML = contentHTML;
+
+// ... inside the toggleLinks.forEach loop ...
+link.addEventListener('click', async function(event) {
+    // ...
+    // Get the unique identifier from the data attribute
+    // We changed this from 'data-market-slug' to 'data-market-identifier'
+    const marketIdentifier = this.dataset.marketIdentifier; 
+
+    // ... inside the else block (when opening) ...
+    // 2. Await the data fetch and rendering
+    const contentHTML = await fetchAndRenderProducts(marketIdentifier);
+    
+    // 3. Insert the final content (table or error message)
+    container.innerHTML = contentHTML;
+    // ...
+});
+// ...
+
+            
             
             const marketCard = this.closest('.market-card');
             const container = marketCard.querySelector('.market-content');
