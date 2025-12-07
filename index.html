@@ -1,59 +1,90 @@
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // Replace these placeholders with your actual keys
+    const SUPABASE_URL = 'https://sbthvusuujryxhmvmiai.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8';
+
+    const supabase = supabase.createClient( 'https://sbthvusuujryxhmvmiai.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8');
+</script>
+
+
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Rwandamket - Quick and reliable grocery, meal, and essentials delivery in Rwanda.">
 <meta name="keywords" content="Rwanda, delivery, groceries, meals, chefs, Simba Rebero, KFC">
 <meta name="author" content="Kigeli Brin">
-
 <title>Rwandamket - Your Food & Grocery Delivery in Rwanda</title>
 <style>
 
 .product-container {
+  /* Basic style for the "white space" */
+  background-color: #fff;
+  padding: 15px; /* Default padding when open */
+  transition: max-height 0.5s ease-out, padding 0.5s ease-out; /* Makes the reveal smooth */
+}
+
+.hidden-products {
+  /* This is the key to hiding it while allowing a smooth reveal */
   max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s ease;
-  background: #f9f9f9;
-  padding: 0 15px;
-  border-radius: 8px;
-  margin-top: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden; /* Ensures no content leaks out */
 }
 
-.product-container.open {
-  max-height: 500px;
-  padding: 15px;
+
+
+.visible-products {
+  /* A large height value ensures all your content (product table) fits */
+  max-height: 1000px;
+  /* The padding will transition back to 15px */
 }
 
-.market-link {
-  cursor: pointer;
-  color: #1e90ff;
-  transition: 0.3s;
+.rotated {
+  /* Rotates the arrow icon when the content is open */
+  transform: rotate(180deg);
 }
 
-.market-link:hover {
-  color: #187bcd;
-  text-decoration: underline;
+
+
+
+/* Add this to your existing CSS file */
+.market-card img {
+  /* Enforce a fixed width and height */
+  width: 140px;
+  height: 140px;
+  
+  /* Use 'object-fit: cover' to ensure the image covers the 
+     50x50 area without being distorted. */
+  object-fit: cover;
+  
+  /* Makes the image corners slightly rounded, which is professional */
+  border-radius: 15px; 
+  
+  /* Adds space between the image and the text */
+  margin-right: 15px; 
+}
+.card-header {
+  display: flex; /* Makes the image and the title align horizontally */
+  align-items: center; /* Vertically centers the image and text */
+  padding: 10px; 
+  background-color: #f9f9f9; 
+  object-fit: cover;
+  border-radius: 50%; /* Makes the images circular */
+  margin-bottom: 1rem;
+    border: 3px solid #4CAF50; /* Optional: green border like header */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.product-table {
-  width: 100%;
-  border-collapse: collapse;
-}
 
-.product-table td, .product-table th {
-  border-bottom: 1px solid #ddd;
-  padding: 8px;
-}
 
-.product-table tr:hover {
-  background: #eef6ff;
-}
-
-    
 .card img {
     width: 150px;
     height: 150px;
@@ -219,131 +250,126 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
 <section class="container">
 <div class="markets-container">
 
-  <!-- 1. Home Decor -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/34818757/pexels-photo-34818757.jpeg" alt="Home Decor">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET Home Decor">
-        RWANDAMKET Home Decor
-      </a>
-    </h2>
-    <div id="marketProducts"></div>
-  </div>
-
-  <!-- 2. Events Management -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg" alt="Events Management">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET Events Management">
-        RWANDAMKET Events Management
-      </a>
-    </h2>
-    <div id="marketProducts"></div>
-  </div>
-
-  <!-- 3. Gikondo -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/27971900/pexels-photo-27971900.jpeg" alt="Gikondo">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET Gikondo">
-        RWANDAMKET Gikondo
-      </a>
-    </h2>
-    <div class="product-container"></div>
-    <div id="marketProducts"></div>
-  </div>
-
-  <!-- 4. Merez -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/20643430/pexels-photo-20643430.jpeg" alt="Merez">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET MEREZ">
-        RWANDAMKET MEREZ
-      </a>
-    </h2>
-    <div id="marketProducts"></div>
-  </div>
-
-  <!-- 5. KFC -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg" alt="KFC">
-    <h2>
-      <a class="market-link" data-market="KFC">
-        KFC
-      </a>
-    </h2>
-   <div id="marketProducts"></div>
-  </div>
-
-  <!-- 6. Chefs -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/3687047/pexels-photo-3687047.jpeg" alt="Chefs">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET Chefs">
-        RWANDAMKET Chefs
-      </a>
-    </h2>
-    <div id="marketProducts"></div>
-  </div>
-
-  <!-- 7. Kicukiro -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/27758290/pexels-photo-27758290.jpeg" alt="Kicukiro">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET KICUKIRO">
-        RWANDAMKET KICUKIRO
-      </a>
-    </h2>
-    <div id="marketProducts"></div>
-  </div>
-
-  <!-- 8. Kimihurura -->
-  <div class="card">
-    <img src="https://images.pexels.com/photos/304164/pexels-photo-304164.jpeg" alt="Kimihurura">
-    <h2>
-      <a class="market-link" data-market="RWANDAMKET KIMIHURURA">
-        RWANDAMKET KIMIHURURA
-      </a>
-    </h2>
-    <div id="marketProducts"></div>
-  </div>
-
-</div>
-
+  <!-- MARKET CARD TEMPLATE -->
+  <div class="market-card"></div>
+   <div class="market-card">
   
-</section>
-<h1 class="section-title">LET US KNOW HOW WE CAN HELP YOU</h1>
-<form action="#" method="POST">
-    <fieldset>
-        <label>Order:</label>
-        <input type="text" name="myorder" placeholder="Tell us your order please..." required>
-        <label>Name:</label>
-        <input type="text" name="mynames" placeholder="Your name please..." required>
-        <label>Location:</label>
-        <input type="text" name="mylocation" placeholder="Your location please..." required>
-        <label>Telephone:</label>
-        <input type="tel" name="mynumber" placeholder="Your number please..." required>
-        <button type="submit" class="btn-send">Send</button>
-    </fieldset>
-</form>
-
-<h1 class="section-title" id="contact">CONTACT US</h1>
-<section class="container">
-    <div class="card" style="grid-column: 1 / -1;">
-        <h2>Get in Touch</h2>
-        <p>We’d love to hear from you! Whether it’s a question about orders, a suggestion, or feedback — our team at Rwandamket is here to help.</p>
-        <form action="#" method="POST">
-            <fieldset>
-                <label>Name:</label>
-                <input type="text" name="name" placeholder="Your name..." required>
-                <label>Email:</label>
-                <input type="email" name="email" placeholder="Your email..." required>
-                <label>Feedback:</label>
-                <textarea name="feedback" rows="4" placeholder="Your feedback..." required></textarea>
-                <button type="submit" class="btn-send">Send</button>
-            </fieldset>
-        </form>
+  <div class="card-header">
+    <img src="https://images.pexels.com/photos/34818757/pexels-photo-34818757.jpeg" alt="Home Decor">
+    <h2 class="market-title">
+    <a class="market-link market-toggle" data-market-identifier="RWANDAMKET Home Decor">RWANDAMKET Home Decor</a>
+    <span class="toggle-icon">▼</span>
+    </h2>
     </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading products for Home Decor...</p>
+    </div>
+  </div>
+
+  <div class="market-card"></div>
+    <div class="market-card">
+      <div class="card-header">
+  
+    <img src="https://www.brides.com/thmb/VWQUatbUA7KtCp5GnaiSVbwlFPY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/recirc-nigerian-engagement-ceremony-wedding-los-angeles-couple-portrait-janna-brown-1224-1faeae53f5934f919d2251d3a377cd2a.jpg" alt="Events">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET Events Management">RWANDAMKET Events Management</a>
+    <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading services for Events management...</p>
+    </div>
+  </div>
+  
+   <div class="market-card"></div>
+  <div class="market-card">
+   <div class="card-header">
+    <img src="https://images.unsplash.com/photo-1615870216519-2f9fa575fa5c?auto=format&fit=crop&w=1200&q=80" alt="Gikondo">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET Gikondo">RWANDAMKET Gikondo</a>
+    <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading products for Rwandamket Gikondo...</p>
+    </div>
+  </div>
+
+
+  <div class="market-card"></div>
+  <div class="market-card">
+    <div class="card-header">
+    <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80" alt="Merez">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET MEREZ">RWANDAMKET MEREZ</a>
+    <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading products for Rwandamket Merez...</p>
+    </div>
+  </div>
+  
+  
+  
+ <div class="market-card"></div>
+  <div class="market-card"> 
+  <div class="card-header">
+    <img src="https://images.pexels.com/photos/12118980/pexels-photo-12118980.jpeg" alt="KFC">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="KFC">KFC</a>
+     <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading products for KFC...</p>
+    </div>
+  </div>
+  
+  
+  
+  
+   <div class="market-card"></div>
+  <div class="market-card"> 
+  <div class="card-header">
+    <img src="https://images.unsplash.com/photo-1528712306091-ed0763094c98?auto=format&fit=crop&w=600&q=80" alt="Chefs">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET Chefs">RWANDAMKET Chefs</a>
+     <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading Chefs for handling your meals...</p>
+    </div>
+  </div>
+  
+  
+  
+  
+  
+   <div class="market-card"></div>
+  <div class="market-card">
+  <div class="card-header">
+    <img src="https://images.pexels.com/photos/616401/pexels-photo-616401.jpeg" alt="Kicukiro">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET KICUKIRO">RWANDAMKET KICUKIRO</a>
+     <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading products for Rwandamket Kicukiro...</p>
+    </div>
+  </div>
+  
+  
+  
+  <div class="market-card"></div>
+  <div class="market-card">
+  <div class="card-header">
+    <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80" alt="Kimihurura">
+    <h2 class="market-title"><a class="market-link market-toggle" data-market-identifier="RWANDAMKET KIMIHURURA">RWANDAMKET KIMIHURURA</a>
+    <span class="toggle-icon">▼</span>
+    </h2>
+    </div>
+    <div class="product-container market-content hidden-products">
+    <p>Loading products for Rwandamket Kimihurura...</p>
+    </div>
+  </div>
+</div>
 </section>
 
 <h1 class="section-title" id="partners">OUR TEAM & PARTNERS</h1>
@@ -365,6 +391,26 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
     </div>
 </section>
 
+
+<h1 class="section-title" id="contact">CONTACT US</h1>
+<section class="container">
+    <div class="card" style="grid-column: 1 / -1;">
+        <h2>Get in Touch</h2>
+        <p>We’d love to hear from you! Whether it’s a question about orders, a suggestion, or feedback — our team at Rwandamket is here to help.</p>
+        <form action="#" method="POST">
+            <fieldset>
+                <label>Name:</label>
+                <input type="text" name="name" placeholder="Your name..." required>
+                <label>Email:</label>
+                <input type="email" name="email" placeholder="Your email..." required>
+                <label>Feedback:</label>
+                <textarea name="feedback" rows="4" placeholder="Your feedback..." required></textarea>
+                <button type="submit" class="btn-send">Send</button>
+            </fieldset>
+        </form>
+    </div>
+</section>
+
 <footer>
     <div class="footer-content">
         <h3>Rwandamket</h3>
@@ -381,81 +427,6 @@ footer .socials a:hover { color: #4CAF50; transform: scale(1.05); }
 </footer>
 <!-- Scroll to top button -->
 <button id="scrollTopBtn" title="Go to top">↑</button>
-
-      <!-- 1️⃣ Load Supabase library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-// 1️⃣ Initialize Supabase
-const supabase = db.createClient(
-  "https://sbthvusuujryxhmvmiai.supabase.co", // replace with your Supabase URL
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8" // replace with your anon key
-);
-
-// 2️⃣ Function to load products
-async function loadProducts(marketName, container) {
-  console.log("Loading products for market:", marketName);
-
-  try {
-    const { data, error } = await db
-      .from("products")
-      .select("*")
-      .eq("market", marketName);
-
-    if (error) {
-      console.error("Supabase error:", error);
-      container.innerHTML = `<p style="color:red;">Error loading products</p>`;
-      return;
-    }
-
-    if (!data || data.length === 0) {
-      container.innerHTML = `<p>No products found for ${marketName}</p>`;
-      return;
-    }
-
-    // Build table HTML
-    let html = `<table class="product-table">
-                  <tr><th>Product</th><th>Price</th><th>Order</th></tr>`;
-    data.forEach(item => {
-      html += `<tr>
-                 <td>${item.name}</td>
-                 <td>${item.price}</td>
-                 <td><a href="https://wa.me/250786979388?text=I want this ${item.name}">Order</a></td>
-               </tr>`;
-    });
-    html += `</table>`;
-
-    container.innerHTML = html;
-
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    container.innerHTML = `<p style="color:red;">Unexpected error loading products</p>`;
-  }
-}
-
-// 3️⃣ Attach click events to markets
-const marketLinks = document.querySelectorAll(".market-link");
-
-marketLinks.forEach(link => {
-  link.addEventListener("click", async () => {
-    const container = link.closest(".card").querySelector(".product-container");
-    const marketName = link.textContent.trim(); // removes spaces
-
-    console.log("Market clicked:", marketName);
-
-    // Close other containers
-    document.querySelectorAll(".product-container").forEach(other => {
-      if (other !== container) other.classList.remove("open");
-    });
-
-    // Toggle current container
-    container.classList.toggle("open");
-
-    // Load products
-    await loadProducts(marketName, container);
-  });
-});
-</script>
 
 <script>
 // Fade-in cards on scroll
@@ -503,6 +474,92 @@ scrollBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const toggleLinks = document.querySelectorAll('.market-toggle');
+    
+    toggleLinks.forEach(link => {
+        link.addEventListener('click', async function(event) {
+            event.preventDefault(); // Stop the link from navigating away
+            
+            const marketIdentifier = this.dataset.marketIdentifier;
+            const contentHTML = await fetchAndRenderProducts(marketIdentifier);
+            container.innerHTML = contentHTML;
+            
+            const marketCard = this.closest('.market-card');
+            const container = marketCard.querySelector('.market-content');
+            const icon = this.querySelector('.toggle-icon');
+            
+            // Toggle the visibility classes on the specific container
+            container.classList.toggle('visible-products');
+            container.classList.toggle('hidden-products');
+
+            // Toggle the rotation class on the icon
+            icon.classList.toggle('rotated');
+            
+            // *** This is where your Supabase function would be called! ***
+        });
+    });
+});
+</script>
+
+<script>
+
+/**
+ * Fetches products from Supabase and generates an HTML table.
+ * @param {string} marketIdentifier - The value of the 'market' column (e.g., 'Home Decor').
+ * @returns {string} The HTML string of the product table.
+ */
+async function fetchAndRenderProducts(marketIdentifier) {
+    try {
+        // Corrected: Selecting your specific columns
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('name, price, image_url') 
+            // Corrected: Filtering using your 'market' column
+            .eq('market', marketIdentifier); 
+
+        if (error) throw error;
+
+        if (products.length === 0) {
+            return `<p class="no-products">No products found for this market yet.</p>`;
+        }
+
+        // Generate the Table HTML
+        let tableHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th></th> <th>Product Name</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        products.forEach(product => {
+            tableHTML += `
+                <tr>
+                    <td><img src="${product.image_url}" alt="${product.name}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
+                    <td>${product.name}</td>
+                    <td>$${product.price}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `</tbody></table>`;
+        return tableHTML;
+
+    } catch (error) {
+        console.error('Error fetching products:', error.message);
+        return `<p class="error-message">Could not load products. Please check your Supabase connection.</p>`;
+    }
+}
+
+</script>
+
+
 
 </body>
 </html>
