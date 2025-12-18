@@ -526,16 +526,6 @@ scrollBtn.addEventListener("click", () => {
 </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script>
-// --- 1. SUPABASE CLIENT SETUP (FIXED) ---
-// Note: Using the provided URLs/Keys directly as variables in the createClient function.
-const SUPABASE_URL = 'https://sbthvusuujryxhmvmiai.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNidGh2dXN1dWpyeXhobXZtaWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMTAzOTgsImV4cCI6MjA4MDU4NjM5OH0.6cxPKY78RNZlaPs3hqEtYQ-9M9kyzYEAmDEvc2wjln8';
-
-// CRITICAL FIX: Arguments must be strings (using the defined variables is cleanest)
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  </script>
-
 <script>
 // --- Market Toggle and Data Fetching (INTEGRATED VERSION) ---
 const toggleLinks = document.querySelectorAll('.market-toggle');
