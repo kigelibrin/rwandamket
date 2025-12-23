@@ -80,8 +80,8 @@ body {
     /* This creates the dark tint over the image */
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                 url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80');
-    background-size: cover;
-    background-position: center;
+    background-size: cover !important;
+    background-position: center !important;
     /* FORCE text to be white */
     color: #ffffff !important; 
     padding: 0 10%;
