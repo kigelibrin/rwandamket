@@ -1,0 +1,186 @@
+<!--Note:The template file will be copied to a new file. When you change the code of the template file you can create new file with this base code. -->
+/* ----------------------------------------------------------------
+   1. GLOBAL VARIABLES
+----------------------------------------------------------------- */
+:root {
+    --primary-green: #2e7d32;      /* Deep, professional green */
+    --accent-green: #4caf50;       /* Lighter green for hovers */
+    --whatsapp-green: #25D366;     
+    --dark-text: #1a1a1a;
+    --light-text: #666666;
+    --bg-light: #f4f7f4;
+    --white: #ffffff;
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --border-radius: 12px;
+}
+
+/* ----------------------------------------------------------------
+   2. RESET & BASE STYLES
+----------------------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--dark-text);
+    background-color: var(--white);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ----------------------------------------------------------------
+   3. NAVIGATION
+----------------------------------------------------------------- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    background: var(--white);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-logo {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary-green);
+    letter-spacing: -1px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--dark-text);
+    margin-right: 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.nav-links a:hover {
+    color: var(--primary-green);
+}
+
+/* ----------------------------------------------------------------
+   4. HERO SECTION
+----------------------------------------------------------------- */
+.hero {
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    color: var(--white);
+    padding: 0 10%;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+}
+
+.text-green { color: var(--accent-green); }
+
+/* ----------------------------------------------------------------
+   5. BUTTONS
+----------------------------------------------------------------- */
+.btn-primary, .btn-large {
+    background: var(--primary-green);
+    color: var(--white);
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+}
+
+.btn-primary:hover, .btn-large:hover {
+    background: var(--accent-green);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+}
+
+/* ----------------------------------------------------------------
+   6. MARKET CARDS & GRID
+----------------------------------------------------------------- */
+.section-container {
+    padding: 4rem 5%;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 3rem;
+}
+
+.markets-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.market-card {
+    background: var(--white);
+    border: 1px solid #eee;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.market-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background: var(--white);
+}
+
+.market-header:hover { background: var(--bg-light); }
+
+.market-header img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 1.5rem;
+}
+
+.market-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+    background: var(--bg-light);
+}
+
+.market-content.active {
+    max-height: 2000px; /* Adjust based on content */
+}
+
+/* ----------------------------------------------------------------
+   7. RESPONSIVENESS
+----------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .hero h1 { font-size: 2.5rem; }
+    .nav-links { display: none; } /* We will add a mobile menu later */
+}
