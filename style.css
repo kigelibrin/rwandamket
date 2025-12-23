@@ -3,20 +3,21 @@
    1. GLOBAL VARIABLES
 ----------------------------------------------------------------- */
 :root {
-    --primary-green: #2e7d32;      /* Deep, professional green */
-    --accent-green: #4caf50;       /* Lighter green for hovers */
+    --primary-green: #2e7d32;      /* Professional "Forest" Green */
+    --accent-green: #4caf50;       /* Action Green */
     --whatsapp-green: #25D366;     
     --dark-text: #1a1a1a;
-    --light-text: #666666;
-    --bg-light: #f4f7f4;
+    --light-text: #ffffff;         /* For text on dark backgrounds */
+    --muted-text: #666666;         /* For subtext on white backgrounds */
+    --bg-light: #f9fbf9;           /* Soft off-white to reduce eye strain */
     --white: #ffffff;
-    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    --shadow: 0 4px 12px rgba(0,0,0,0.08);
-    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow: 0 10px 30px rgba(0,0,0,0.1);
+    --border-radius: 16px;
 }
 
 /* ----------------------------------------------------------------
-   2. RESET & BASE STYLES
+   2. BODY & TYPOGRAPHY
 ----------------------------------------------------------------- */
 * {
     margin: 0;
@@ -24,45 +25,44 @@
     box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: var(--dark-text);
-    background-color: var(--white);
+    background-color: var(--bg-light);
     line-height: 1.6;
-    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* ----------------------------------------------------------------
-   3. NAVIGATION
+   3. PROFESSIONAL HEADER (NAVBAR)
 ----------------------------------------------------------------- */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 5%;
-    background: var(--white);
-    box-shadow: var(--shadow);
+    padding: 1rem 8%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px); /* Modern frosted-glass effect */
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
 .nav-logo {
-    font-weight: 700;
-    font-size: 1.5rem;
+    font-weight: 800;
+    font-size: 1.4rem;
     color: var(--primary-green);
-    letter-spacing: -1px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .nav-links a {
     text-decoration: none;
     color: var(--dark-text);
-    margin-right: 1.5rem;
-    font-weight: 500;
+    margin-right: 2rem;
+    font-weight: 600;
+    font-size: 0.95rem;
     transition: var(--transition);
 }
 
@@ -71,15 +71,17 @@ body {
 }
 
 /* ----------------------------------------------------------------
-   4. HERO SECTION
+   4. HERO SECTION (READABILITY FIX)
 ----------------------------------------------------------------- */
 .hero {
-    height: 80vh;
+    position: relative;
+    height: 85vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+    /* This gradient acts as a "tint" to make white text readable */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
                 url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80');
     background-size: cover;
     background-position: center;
@@ -87,100 +89,56 @@ body {
     padding: 0 10%;
 }
 
-.hero h1 {
-    font-size: 3.5rem;
-    margin-bottom: 1rem;
-    line-height: 1.1;
+.hero-content {
+    max-width: 800px;
 }
 
-.text-green { color: var(--accent-green); }
+.hero h1 {
+    font-size: clamp(2.5rem, 5vw, 4rem); /* Responsive font size */
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+    /* Shadow adds a "lift" to the text for better readability */
+    text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.hero p {
+    font-size: 1.25rem;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    opacity: 0.95;
+}
 
 /* ----------------------------------------------------------------
-   5. BUTTONS
+   5. BUTTONS (THE "PHYSICS")
 ----------------------------------------------------------------- */
 .btn-primary, .btn-large {
     background: var(--primary-green);
     color: var(--white);
-    padding: 0.8rem 1.5rem;
+    padding: 0.8rem 1.8rem;
     border: none;
     border-radius: 50px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: var(--transition);
     text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
 }
 
 .btn-large {
-    padding: 1rem 2.5rem;
+    padding: 1.1rem 2.8rem;
     font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
 }
 
 .btn-primary:hover, .btn-large:hover {
-    background: var(--accent-green);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4);
+    filter: brightness(1.1);
 }
 
-/* ----------------------------------------------------------------
-   6. MARKET CARDS & GRID
------------------------------------------------------------------ */
-.section-container {
-    padding: 4rem 5%;
-}
-
-.section-title {
-    text-align: center;
-    font-size: 2.2rem;
-    margin-bottom: 3rem;
-}
-
-.markets-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.market-card {
-    background: var(--white);
-    border: 1px solid #eee;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    transition: var(--transition);
-}
-
-.market-header {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    cursor: pointer;
-    background: var(--white);
-}
-
-.market-header:hover { background: var(--bg-light); }
-
-.market-header img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-right: 1.5rem;
-}
-
-.market-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease-out;
-    background: var(--bg-light);
-}
-
-.market-content.active {
-    max-height: 2000px; /* Adjust based on content */
-}
-
-/* ----------------------------------------------------------------
-   7. RESPONSIVENESS
------------------------------------------------------------------ */
-@media (max-width: 768px) {
-    .hero h1 { font-size: 2.5rem; }
-    .nav-links { display: none; } /* We will add a mobile menu later */
+.btn-primary:active, .btn-large:active {
+    transform: translateY(0) scale(0.98);
 }
