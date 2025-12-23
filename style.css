@@ -1,320 +1,136 @@
-<!--Note:The template file will be copied to a new file. When you change the code of the template file you can create new file with this base code. -->
 /* ----------------------------------------------------------------
-   1. GLOBAL VARIABLES
+   1. HEADER & NAVIGATION (FIXES OVERLAPPING)
 ----------------------------------------------------------------- */
-:root {
-    --primary-green: #2e7d32;      /* Professional "Forest" Green */
-    --accent-green: #4caf50;       /* Action Green */
-    --whatsapp-green: #25D366;     
-    --dark-text: #1a1a1a;
-    --light-text: #ffffff;         /* For text on dark backgrounds */
-    --muted-text: #666666;         /* For subtext on white backgrounds */
-    --bg-light: #f9fbf9;           /* Soft off-white to reduce eye strain */
-    --white: #ffffff;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow: 0 10px 30px rgba(0,0,0,0.1);
-    --border-radius: 16px;
+/* --- Desktop Logic (Keep it simple) --- */
+@media (min-width: 769px) {
+    .nav-links {
+        display: flex;
+        gap: 20px;
+    }
 }
 
-/* ----------------------------------------------------------------
-   2. BODY & TYPOGRAPHY
------------------------------------------------------------------ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* --- Mobile Logic (The Dropdown) --- */
+@media (max-width: 768px) {
+    .navbar {
+        position: relative; /* Necessary for absolute positioning of links */
+        flex-wrap: wrap;    /* Allows links to drop to the next line */
+    }
+
+    .nav-links {
+        /* Initial Hidden State */
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        position: absolute;
+        top: 80px; /* Position it exactly under the navbar */
+        left: 0;
+        background: #ffffff;
+        padding: 0 5%;
+        overflow: hidden;
+        
+        /* Smooth Animation Properties */
+        max-height: 0; 
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+        z-index: 999;
+    }
+
+    /* The "Active" state triggered by JS */
+    .nav-links.active {
+        max-height: 300px; /* Big enough to show all links */
+        opacity: 1;
+        transform: translateY(0);
+        padding: 20px 5%;
+    }
+
+    .nav-links a {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        width: 100%;
+        color: #1a1a1a !important; /* Ensure visibility */
+    }
 }
 
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--dark-text);
-    background-color: var(--bg-light);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ----------------------------------------------------------------
-   3. PROFESSIONAL HEADER (NAVBAR)
------------------------------------------------------------------ */
-/* Update the Navbar container */
 .navbar {
-    display: flex;
-    justify-content: space-between; /* Logo on left, Button on right */
-    align-items: center;
-    padding: 0.8rem 5%;
-    background: #ffffff;
-    height: 70px; /* Fixed height for consistency */
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 10px 5% !important;
+    background: #ffffff !important;
+    height: 80px !important;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-/* Hide navigation links on small mobile screens to prevent clutter */
+.nav-logo {
+    font-weight: 800 !important;
+    color: #2e7d32 !important;
+    font-size: 1.2rem !important;
+    margin: 0 !important;
+}
+
+/* On Mobile: Hide the text links to stop the stacking mess */
 @media (max-width: 768px) {
     .nav-links {
-        display: none; /* We will add a 'Hamburger' menu for these later */
+        display: none !important; 
     }
-    
-    .nav-logo {
-        font-size: 1.1rem; /* Slightly smaller logo for mobile */
-    }
-
-    .btn-primary {
-        padding: 0.6rem 1rem; /* Smaller button for mobile */
-        font-size: 0.85rem;
-    }
-}
-
-/* Ensure Logo and Button don't touch the screen edges */
-.nav-logo {
-    margin-right: auto; /* Pushes everything else to the right */
 }
 
 /* ----------------------------------------------------------------
-   4. HERO SECTION (READABILITY FIX)
+   2. HERO SECTION (FIXES BLACK TEXT ON IMAGE)
 ----------------------------------------------------------------- */
 .hero {
     position: relative;
-    height: 85vh;
+    height: 70vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    /* This creates the dark tint over the image */
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80');
+    /* This adds a dark tint to the image so white text pops */
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80') !important;
     background-size: cover !important;
     background-position: center !important;
-    /* FORCE text to be white */
-    color: #ffffff !important; 
-    padding: 0 10%;
 }
 
 .hero h1, .hero p {
-    color: #ffffff !important; /* Ensures the text is white regardless of other rules */
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8); /* Stronger shadow for "pop" */
-}
-
-.hero p {
-    font-size: 1.25rem;
-    margin-bottom: 2.5rem;
-    font-weight: 400;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    opacity: 0.95;
+    color: #ffffff !important; /* FORCES TEXT TO BE WHITE */
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.8) !important;
+    margin-bottom: 20px;
 }
 
 /* ----------------------------------------------------------------
-   5. BUTTONS (THE "PHYSICS")
+   3. MARKETS SECTION (CLEANER LIST)
 ----------------------------------------------------------------- */
-.btn-primary, .btn-large {
-    background: var(--primary-green);
-    color: var(--white);
-    padding: 0.8rem 1.8rem;
-    border: none;
-    border-radius: 50px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
-    text-decoration: none;
-    display: inline-block;
-    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
+.section-container {
+    padding: 40px 5% !important;
+    background: #f9f9f9;
 }
 
-.btn-large {
-    padding: 1.1rem 2.8rem;
-    font-size: 1.1rem;
-    background: linear-gradient(135deg, var(--primary-green), var(--accent-green));
-}
-
-.btn-primary:hover, .btn-large:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4);
-    filter: brightness(1.1);
-}
-
-.btn-primary:active, .btn-large:active {
-    transform: translateY(0) scale(0.98);
-}
-/* ----------------------------------------------------------------
-   6. MARKETS & PRODUCT GRID
------------------------------------------------------------------ */
-.markets-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* The "Accordion" Header for each Market */
-.market-header {
-    background: var(--white);
-    padding: 1.2rem;
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(0,0,0,0.05);
-    transition: var(--transition);
-}
-
-.market-header:hover {
-    transform: translateX(5px);
-    border-color: var(--primary-green);
-}
-
-.market-header img {
-    width: 70px;
-    height: 70px;
-    border-radius: 12px;
-    object-fit: cover;
-    margin-right: 1.5rem;
-}
-
-.market-title-wrapper {
-    flex-grow: 1;
-}
-
-.market-title-wrapper h3 {
-    font-size: 1.2rem;
-    color: var(--primary-green);
-}
-
-.toggle-icon {
-    font-size: 1.2rem;
-    color: var(--primary-green);
-    transition: transform 0.4s ease;
-}
-
-.toggle-icon.rotated {
-    transform: rotate(180deg);
-}
-
-/* The Product Grid inside the Market */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.product-card {
-    background: var(--white);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
-    transition: var(--transition);
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-}
-
-.product-card img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-}
-
-.product-info {
-    padding: 15px;
-}
-
-.product-price {
-    color: var(--primary-green);
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin: 10px 0;
+.market-card {
+    background: white !important;
+    border-radius: 12px !important;
+    margin-bottom: 15px !important;
+    padding: 15px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+    border: 1px solid #eee !important;
 }
 
 /* ----------------------------------------------------------------
-   7. THE FOOTER
+   4. FOOTER (FIXES BLACK TEXT ON BLACK BACKGROUND)
 ----------------------------------------------------------------- */
 .footer {
-    background: #1a1a1a;
-    color: var(--white);
-    padding: 4rem 8% 2rem;
-    margin-top: 5rem;
+    background: #1a1a1a !important; /* Black background */
+    color: #ffffff !important;      /* White text */
+    padding: 40px 5% !important;
+    text-align: center !important;
 }
 
-.footer-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 40px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 3rem;
-}
-
-.footer-brand h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: var(--accent-green);
-}
-
-.footer-links h4, .footer-contact h4 {
-    margin-bottom: 1.2rem;
-    font-size: 1.1rem;
-}
-
-.footer-links ul {
-    list-style: none;
-}
-
-.footer-links li {
-    margin-bottom: 0.8rem;
-}
-
-.footer-links a {
-    color: #bbb;
+.footer p, .footer h3, .footer a {
+    color: #ffffff !important;      /* FORCES ALL FOOTER CONTENT TO BE WHITE */
     text-decoration: none;
-    transition: var(--transition);
-}
-
-.footer-links a:hover {
-    color: var(--accent-green);
-    padding-left: 5px;
-}
-
-.footer-contact p {
-    color: #bbb;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.footer-bottom {
-    text-align: center;
-    padding-top: 2rem;
-    color: #666;
-    font-size: 0.9rem;
-}
-
-/* ----------------------------------------------------------------
-   8. WHATSAPP FALLBACK UI
------------------------------------------------------------------ */
-.whatsapp-fallback {
-    text-align: center;
-    padding: 40px;
-    background: #fff;
-    border-radius: 16px;
-    border: 2px dashed #eee;
-}
-
-.btn-whatsapp {
-    background-color: var(--whatsapp-green);
-    color: white;
-    padding: 12px 25px;
-    border-radius: 50px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    margin-top: 15px;
-    transition: var(--transition);
-}
-
-.btn-whatsapp:hover {
-    filter: brightness(1.1);
-    transform: scale(1.05);
 }
