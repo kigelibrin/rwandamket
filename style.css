@@ -102,11 +102,27 @@
     margin-bottom: 15px;
 }
 
-/* 5. Future Market Styling (Ready for when we add data) */
+/* 5. Future Market Styling */
+.section-container {
+    padding: 0 8%;
+    background: #f9fbf9;
+}
+
 .market-card {
     background: var(--white);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.market-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
 }
