@@ -127,3 +127,52 @@
     transform: translateY(-5px);
     border-color: var(--primary);
 }
+/* --- BUTTON STYLING --- */
+
+/* 1. The Navbar "Get Started" Button */
+.btn-primary {
+    background-color: var(--primary) !important; /* Professional Green */
+    color: var(--white) !important;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 50px; /* Pill shape */
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+}
+
+.btn-primary:hover {
+    background-color: #1b5e20 !important; /* Darker green on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+}
+
+/* 2. The Hero "Explore Markets" Button */
+.btn-large {
+    background-color: transparent !important;
+    color: var(--white) !important; /* Turned to White as requested */
+    padding: 14px 30px;
+    border: 2px solid var(--white) !important; /* White border for premium feel */
+    border-radius: 50px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.95rem;
+}
+
+.btn-large:hover {
+    background-color: var(--white) !important;
+    color: var(--primary) !important; /* Flips to green on hover */
+    transform: scale(1.05);
+}
+
+/* 3. Small Text Correction for Hero */
+.text-green {
+    color: #81c784 !important; /* A lighter green that shows up better on the dark image */
+    font-weight: 700;
+}
