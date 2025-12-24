@@ -1,9 +1,10 @@
-<!--Note:The template file will be copied to a new file. When you change the code of the template file you can create new file with this base code. -->
 document.addEventListener('DOMContentLoaded', () => {
     const getStartedBtn = document.getElementById('getStartedBtn');
-    const navLinks = document.getElementById('navLinks');
+    // Using querySelector to find the class '.nav-links' 
+    // This is safer as it matches your current HTML class
+    const navLinks = document.querySelector('.nav-links');
 
-    if (getStartedBtn) {
+    if (getStartedBtn && navLinks) {
         getStartedBtn.addEventListener('click', () => {
             // Toggle the dropdown
             navLinks.classList.toggle('active');
@@ -14,6 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 getStartedBtn.textContent = 'Get Started';
             }
+        });
+
+        // Professional touch: Close menu when a link is clicked
+        const links = navLinks.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                getStartedBtn.textContent = 'Get Started';
+            });
         });
     }
 });
