@@ -27,3 +27,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+// Function to display markets on the page
+function displayMarkets() {
+    const marketList = document.getElementById('market-list');
+    if (!marketList) return;
+
+    const markets = getMarkets();
+    marketList.innerHTML = ''; // Clear the "Loading" text
+
+    markets.forEach(market => {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        card.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <img src="${market.image}" alt="${market.name}" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover;">
+                <div>
+                    <h3 style="color: var(--primary); margin-bottom: 5px;">${market.name}</h3>
+                    <p style="font-size: 0.9rem; color: #666;">${market.description}</p>
+                </div>
+            </div>
+            <button class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;">View Items</button>
+        `;
+        
+        // When clicked, it could open a WhatsApp link or a new section
+        card.onclick = () => {
+            window.open(`https://wa.me/${market.whatsapp}?text=I am interested in ${market.name}`, '_blank');
+        };
+
+        marketList.appendChild(card);
+    });
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    displayMarkets();
+});
