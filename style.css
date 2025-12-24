@@ -59,6 +59,19 @@
     }
 }
 
+/* Ensure links are visible on Desktop */
+@media (min-width: 769px) {
+    .nav-links {
+        display: flex !important;
+        max-height: none !important;
+        opacity: 1 !important;
+        position: static !important; /* Removes them from the dropdown behavior */
+        flex-direction: row !important;
+        gap: 20px;
+        box-shadow: none !important;
+    }
+}
+
 /* 3. Hero Section (Readability Fix) */
 .hero {
     height: 75vh;
