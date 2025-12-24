@@ -6,7 +6,7 @@ const marketsData = [
         name: 'RWANDAMKET Home Decor',
         description: 'Premium Rwandan craftsmanship, from hand-woven baskets to modern interior art.',
         image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=400&q=80',
-        whatsapp: '25076979388' // Replace with your actual number
+        whatsapp: '250786979388' // Replace with your actual number
     },
     {
         id: 'events-mgmt',
