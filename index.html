@@ -1,19 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Rwandamket - Premium grocery, meal, and lifestyle delivery in Rwanda.">
-    <title>Rwandamket | Your Marketplace in Rwanda</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <nav class="navbar">
+<nav class="navbar">
     <div class="nav-logo">RWANDAMKET</div>
     
     <div class="nav-links" id="navLinks">
@@ -26,43 +11,29 @@
     <button id="getStartedBtn" class="btn-primary">Get Started</button>
 </nav>
 
-    <main>
-        <section id="home" class="hero">
-            <div class="hero-content">
-                <h1>Delivery Designed for <span class="text-green">Rwanda</span></h1>
-                <p>From local decor to event management—we bridge the gap between artisans and your doorstep.</p>
-                <a href="#markets" class="btn-large">Explore Markets</a>
-            </div>
-        </section>
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Delivery Designed for Rwanda</h1>
+            <p>Bridging the gap between local artisans and your doorstep.</p>
+            <a href="#markets" class="btn-large">Explore Markets</a>
+        </div>
+    </section>
 
-        <section id="markets" class="section-container">
-            <h2 class="section-title">Choose a Market</h2>
-            <div id="market-list" class="markets-grid">
-                <div class="loading-spinner">Loading markets...</div>
-            </div>
-        </section>
+    <section id="markets" class="section-container">
+        <h2 class="section-title">Choose a Market</h2>
+        <div id="market-list">
+            <p class="loading-text">Loading markets...</p>
+        </div>
+    </section>
+</main>
 
-        <section id="about" class="section-container bg-light">
-            <div class="about-grid">
-                <div class="about-text">
-                    <h2>Beyond Just Delivery</h2>
-                    <p>Rwandamket isn't just an app; it's a partner for Rwandan entrepreneurs and a convenience hub for busy residents.</p>
-                </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1589308078059-be1415eab4c4?auto=format&fit=crop&w=800&q=80" alt="Market Delivery">
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <p>&copy; 2025 Rwandamket. Built with ❤️ in Kigali.</p>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="config.js"></script>
-    <script src="api.js"></script>
-    <script src="ui.js"></script>
-</body>
-</html>
+<footer class="footer">
+    <div class="footer-content">
+        <h3>RWANDAMKET</h3>
+        <p>Premium delivery services in Kigali.</p>
+        <div class="footer-bottom">
+            &copy; 2025 Rwandamket. Built with ❤️ in Kigali.
+        </div>
+    </div>
+</footer>
