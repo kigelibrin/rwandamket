@@ -1,3 +1,9 @@
+// Add this at the very top of ui.js
+window.onerror = function(message, source, lineno, colno, error) {
+    alert("Error: " + message + "\nLine: " + lineno);
+    return true;
+};
+
 // ui.js - Safety Version
 document.addEventListener('DOMContentLoaded', () => {
     console.log("UI Brain Initialized");
