@@ -1,5 +1,8 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // --- 1. THE BUTTON LOGIC (Should work immediately) ---
+// ui.js - Safety Version
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("UI Brain Initialized");
+
+    // 1. FIX THE BUTTON IMMEDIATELY
     const getStartedBtn = document.getElementById('getStartedBtn');
     const navLinks = document.querySelector('.nav-links');
 
@@ -10,44 +13,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- 2. THE MARKET LOGIC (Runs in the background) ---
-    await displayMarkets();
+    // 2. LOAD MARKETS IN THE BACKGROUND
+    loadMarkets();
 });
 
-async function displayMarkets() {
+async function loadMarkets() {
     const marketList = document.getElementById('market-list');
     if (!marketList) return;
 
     try {
+        // This calls the function in api.js
         const markets = await fetchMarketsFromSupabase();
-        marketList.innerHTML = ''; 
-
+        
         if (!markets || markets.length === 0) {
-            marketList.innerHTML = '<p>No markets found in database.</p>';
+            marketList.innerHTML = '<p style="text-align:center; padding:20px;">No markets found in database. Add a row in Supabase!</p>';
             return;
         }
 
+        marketList.innerHTML = ''; // Remove the "Loading..." text
+        
         markets.forEach(market => {
             const card = document.createElement('div');
             card.className = 'market-card';
             card.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <img src="${market.image_url}" alt="${market.name}" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover;">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${market.image_url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">
                     <div>
-                        <h3 style="color: var(--primary);">${market.name}</h3>
-                        <p style="font-size: 0.85rem; color: #666;">${market.description}</p>
+                        <h4 style="color:var(--primary);">${market.name}</h4>
+                        <p style="font-size:0.8rem; color:#666;">${market.description}</p>
                     </div>
                 </div>
-                <button class="btn-primary" style="padding: 5px 12px; font-size: 0.75rem;">View</button>
             `;
-            card.onclick = () => {
-                const cleanNum = market.whatsapp_number.replace(/\D/g, '');
-                window.open(`https://wa.me/${cleanNum}?text=Inquiry about ${market.name}`, '_blank');
-            };
             marketList.appendChild(card);
         });
-    } catch (e) {
-        console.error("UI Error:", e);
-        marketList.innerHTML = '<p>Error connecting to database.</p>';
+    } catch (error) {
+        console.error("Failed to load markets:", error);
+        marketList.innerHTML = '<p style="color:red; text-align:center;">Error connecting to database.</p>';
     }
 }
