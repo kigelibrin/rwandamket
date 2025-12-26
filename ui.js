@@ -49,10 +49,11 @@ function displayMarkets() {
             <button class="btn-primary" style="padding: 8px 15px; font-size: 0.8rem;">View Items</button>
         `;
         
-        // When clicked, it could open a WhatsApp link or a new section
         card.onclick = () => {
-            window.open(`https://wa.me/${market.whatsapp}?text=I am interested in ${market.name}`, '_blank');
-        };
+    // This line removes any spaces or dashes before sending to WhatsApp
+    const cleanNumber = market.whatsapp_number.replace(/\D/g, ''); 
+    window.open(`https://wa.me/${cleanNumber}?text=Hello, I am interested in ${market.name}`, '_blank');
+};
 
         marketList.appendChild(card);
     });
