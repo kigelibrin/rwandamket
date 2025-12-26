@@ -1,59 +1,40 @@
-// Add this at the very top of ui.js
-window.onerror = function(message, source, lineno, colno, error) {
-    alert("Error: " + message + "\nLine: " + lineno);
-    return true;
-};
+// 1. Alert errors on iPhone
+window.onerror = function(msg) { alert(msg); };
 
-// ui.js - Safety Version
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("UI Brain Initialized");
+    // 2. Button logic first (So it works immediately!)
+    const btn = document.getElementById('getStartedBtn');
+    const links = document.querySelector('.nav-links');
 
-    // 1. FIX THE BUTTON IMMEDIATELY
-    const getStartedBtn = document.getElementById('getStartedBtn');
-    const navLinks = document.querySelector('.nav-links');
-
-    if (getStartedBtn && navLinks) {
-        getStartedBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            getStartedBtn.textContent = navLinks.classList.contains('active') ? 'Close' : 'Get Started';
-        });
+    if (btn && links) {
+        btn.onclick = () => {
+            links.classList.toggle('active');
+            btn.textContent = links.classList.contains('active') ? 'Close' : 'Get Started';
+        };
     }
 
-    // 2. LOAD MARKETS IN THE BACKGROUND
-    loadMarkets();
+    // 3. Load database data
+    if (typeof fetchMarketsFromSupabase === 'function') {
+        renderMarkets();
+    }
 });
 
-async function loadMarkets() {
-    const marketList = document.getElementById('market-list');
-    if (!marketList) return;
-
+async function renderMarkets() {
+    const list = document.getElementById('market-list');
     try {
-        // This calls the function in api.js
-        const markets = await fetchMarketsFromSupabase();
-        
-        if (!markets || markets.length === 0) {
-            marketList.innerHTML = '<p style="text-align:center; padding:20px;">No markets found in database. Add a row in Supabase!</p>';
+        const data = await fetchMarketsFromSupabase();
+        if (!data || data.length === 0) {
+            list.innerHTML = "<p>Add a row in Supabase!</p>";
             return;
         }
-
-        marketList.innerHTML = ''; // Remove the "Loading..." text
-        
-        markets.forEach(market => {
-            const card = document.createElement('div');
-            card.className = 'market-card';
-            card.innerHTML = `
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <img src="${market.image_url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">
-                    <div>
-                        <h4 style="color:var(--primary);">${market.name}</h4>
-                        <p style="font-size:0.8rem; color:#666;">${market.description}</p>
-                    </div>
-                </div>
-            `;
-            marketList.appendChild(card);
+        list.innerHTML = ""; // Clear loading
+        data.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'market-card';
+            div.innerHTML = `<h4>${m.name}</h4><p>${m.description}</p>`;
+            list.appendChild(div);
         });
-    } catch (error) {
-        console.error("Failed to load markets:", error);
-        marketList.innerHTML = '<p style="color:red; text-align:center;">Error connecting to database.</p>';
+    } catch (e) {
+        list.innerHTML = "<p>Database connection failed.</p>";
     }
 }
