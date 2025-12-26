@@ -176,3 +176,13 @@
     color: #81c784 !important; /* A lighter green that shows up better on the dark image */
     font-weight: 700;
 }
+.market-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent; /* Removes the blue box on iPhone */
+}
+
+.market-card:active {
+    transform: scale(0.97); /* Shrinks slightly when pressed */
+    background-color: #f0fdf4; /* Very light green tint */
+}
