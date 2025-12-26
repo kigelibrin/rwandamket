@@ -27,11 +27,34 @@ async function renderMarkets() {
             list.innerHTML = "<p>Add a row in Supabase!</p>";
             return;
         }
-        list.innerHTML = ""; // Clear loading
+        
+        list.innerHTML = ""; // Clear the loading text
+        
         data.forEach(m => {
             const div = document.createElement('div');
             div.className = 'market-card';
-            div.innerHTML = `<h4>${m.name}</h4><p>${m.description}</p>`;
+            
+            // This is the HTML for the card
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px; width:100%;">
+                    <img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
+                    <div style="flex:1;">
+                        <h4 style="color:var(--primary); margin-bottom:4px;">${m.name}</h4>
+                        <p style="font-size:0.8rem; color:#666; line-height:1.3;">${m.description}</p>
+                    </div>
+                </div>
+            `;
+
+            // --- THE CLICK LOGIC ---
+            div.onclick = () => {
+                // Remove any non-numbers from the phone string (like spaces)
+                const cleanNum = m.whatsapp_number.replace(/\D/g, ''); 
+                const message = encodeURIComponent(`Hello! I'm interested in ${m.name}. Could you give me more information?`);
+                
+                // Open WhatsApp
+                window.open(`https://wa.me/${cleanNum}?text=${message}`, '_blank');
+            };
+
             list.appendChild(div);
         });
     } catch (e) {
