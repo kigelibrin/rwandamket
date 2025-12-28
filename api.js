@@ -13,3 +13,21 @@ async function fetchMarketsFromSupabase() {
         return []; // Return empty if there is an error
     }
 }
+
+
+// api.js - Fetching items for a specific market
+async function fetchItemsByMarket(marketId) {
+    try {
+        const { data, error } = await _supabase
+            .from('items')
+            .from('items')
+            .select('*')
+            .eq('market_id', marketId); // Only get items for this market
+
+        if (error) throw error;
+        return data;
+    } catch (err) {
+        console.error("Error fetching items:", err.message);
+        return [];
+    }
+}
