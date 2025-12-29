@@ -45,18 +45,45 @@ async function renderMarkets() {
                 </div>
             `;
 
-            // --- THE CLICK LOGIC ---
-            div.onclick = () => {
-                // Remove any non-numbers from the phone string (like spaces)
-                const cleanNum = m.whatsapp_number.replace(/\D/g, ''); 
-                const message = encodeURIComponent(`Hello! I'm interested in ${m.name}. Could you give me more information?`);
-                
-                // Open WhatsApp
-                window.open(`https://wa.me/${cleanNum}?text=${message}`, '_blank');
-            };
+            // ui.js - Updated Click Logic
+div.onclick = async () => {
+    // 1. Clear the screen or show a loading state
+    list.innerHTML = "<h3>Loading items...</h3>";
+    
+    // 2. Fetch the items for this specific market
+    const items = await fetchItemsByMarket(m.id);
+    
+    // 3. Render the items
+    list.innerHTML = `<button onclick="location.reload()" class="btn-primary" style="margin-bottom:20px;">← Back to Markets</button>`;
+    
+    if (items.length === 0) {
+        list.innerHTML += "<p>No items found in this market yet.</p>";
+        return;
+    }
 
-            list.appendChild(div);
-        });
+    items.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'market-card'; // Reuse the same styling!
+        itemDiv.innerHTML = `
+            <div style="display:flex; align-items:center; gap:15px; width:100%;">
+                <img src="${item.image_url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">
+                <div style="flex:1;">
+                    <h4 style="color:var(--primary);">${item.name}</h4>
+                    <p style="font-weight:bold;">${item.price}</p>
+                </div>
+            </div>
+            <button class="btn-primary" style="padding:5px 10px; font-size:0.7rem;">Order</button>
+        `;
+        
+        itemDiv.onclick = (e) => {
+            e.stopPropagation(); // Stop it from reloading the market
+            const message = encodeURIComponent(`I'd like to order: ${item.name} from ${m.name}`);
+            window.open(`https://wa.me/${m.whatsapp_number.replace(/\D/g, '')}?text=${message}`);
+        };
+        
+        list.appendChild(itemDiv);
+    });
+};
     } catch (e) {
         list.innerHTML = "<p>Database connection failed.</p>";
     }
