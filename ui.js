@@ -27,6 +27,31 @@ if (searchInput) {
         });
     });
 }
+// ui.js - Category Filtering
+const chips = document.querySelectorAll('.filter-chip');
+
+chips.forEach(chip => {
+    chip.onclick = () => {
+        // 1. Update visual "Active" state
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+
+        const selectedCategory = chip.getAttribute('data-category');
+        const cards = document.querySelectorAll('.market-card');
+
+        // 2. Filter the cards
+        cards.forEach(card => {
+            // We'll add a small 'data-cat' attribute to your cards in the next step
+            const cardCategory = card.getAttribute('data-cat');
+            
+            if (selectedCategory === 'all' || cardCategory === selectedCategory) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    };
+});
 
 // --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
@@ -41,6 +66,8 @@ async function renderMarkets() {
         markets.forEach(m => {
             const card = document.createElement('div');
             card.className = 'market-card';
+            // ADD THIS LINE: It links the database category to the HTML card
+card.setAttribute('data-cat', m.category);
             card.innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px;">
                    <img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
