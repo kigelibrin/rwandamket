@@ -241,3 +241,32 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+/* style.css */
+.category-wrapper {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px 15px;
+    -webkit-overflow-scrolling: touch; /* Smooth swipe on iPhone */
+}
+
+.category-scroll::-webkit-scrollbar {
+    display: none; /* Hides the ugly scrollbar */
+}
+
+.filter-chip {
+    display: inline-block;
+    padding: 8px 18px;
+    margin-right: 8px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    cursor: pointer;
+}
+
+.filter-chip.active {
+    background-color: var(--primary);
+    color: white;
+}
