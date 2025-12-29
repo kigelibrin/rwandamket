@@ -16,18 +16,19 @@ async function fetchMarketsFromSupabase() {
 
 
 // api.js - Fetching items for a specific market
+// api.js
 async function fetchItemsByMarket(marketId) {
     try {
+        // We use parseInt to make sure the ID is a number, not text
         const { data, error } = await _supabase
             .from('items')
-            .from('items')
             .select('*')
-            .eq('market_id', marketId); // Only get items for this market
+            .eq('market_id', parseInt(marketId)); 
 
         if (error) throw error;
         return data;
     } catch (err) {
-        console.error("Error fetching items:", err.message);
+        console.error("Error:", err);
         return [];
     }
 }
