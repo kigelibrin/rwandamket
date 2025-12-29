@@ -27,26 +27,35 @@ if (searchInput) {
         });
     });
 }
-// Replace your filtering logic with this "Super Search"
-function applyFilters() {
-    const searchTerm = document.getElementById('marketSearch').value.toLowerCase();
-    const activeCategory = document.querySelector('.filter-chip.active').getAttribute('data-category');
+// 1. Move the filtering into its own function so we can call it anytime
+function filterMarkets() {
+    const activeChip = document.querySelector('.filter-chip.active');
+    if (!activeChip) return;
+
+    const selectedCategory = activeChip.getAttribute('data-category');
     const cards = document.querySelectorAll('.market-card');
 
     cards.forEach(card => {
-        const cardText = card.innerText.toLowerCase();
-        const cardCategory = card.getAttribute('data-cat');
+        // We use .trim() and .toLowerCase() to prevent tiny typos from breaking it
+        const cardCategory = (card.getAttribute('data-cat') || "").trim().toLowerCase();
+        const targetCategory = selectedCategory.trim().toLowerCase();
 
-        const matchesSearch = cardText.includes(searchTerm);
-        const matchesCategory = (activeCategory === 'all' || cardCategory === activeCategory);
-
-        if (matchesSearch && matchesCategory) {
+        if (targetCategory === 'all' || cardCategory === targetCategory) {
             card.style.display = 'flex';
         } else {
             card.style.display = 'none';
         }
     });
 }
+
+// 2. Update your Chip Click logic
+document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.onclick = function() {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        filterMarkets(); // Run the filter immediately
+    };
+});
 
 // --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
