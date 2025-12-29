@@ -12,6 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 });
+// Inside document.addEventListener('DOMContentLoaded', () => { ... })
+
+const searchInput = document.getElementById('marketSearch');
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.market-card');
+        
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            // If the search term is in the card text, show it; otherwise, hide it
+            card.style.display = text.includes(term) ? 'flex' : 'none';
+        });
+    });
+}
 
 // --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
