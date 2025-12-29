@@ -27,31 +27,26 @@ if (searchInput) {
         });
     });
 }
-// ui.js - Category Filtering
-const chips = document.querySelectorAll('.filter-chip');
+// Replace your filtering logic with this "Super Search"
+function applyFilters() {
+    const searchTerm = document.getElementById('marketSearch').value.toLowerCase();
+    const activeCategory = document.querySelector('.filter-chip.active').getAttribute('data-category');
+    const cards = document.querySelectorAll('.market-card');
 
-chips.forEach(chip => {
-    chip.onclick = () => {
-        // 1. Update visual "Active" state
-        chips.forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
+    cards.forEach(card => {
+        const cardText = card.innerText.toLowerCase();
+        const cardCategory = card.getAttribute('data-cat');
 
-        const selectedCategory = chip.getAttribute('data-category');
-        const cards = document.querySelectorAll('.market-card');
+        const matchesSearch = cardText.includes(searchTerm);
+        const matchesCategory = (activeCategory === 'all' || cardCategory === activeCategory);
 
-        // 2. Filter the cards
-        cards.forEach(card => {
-            // We'll add a small 'data-cat' attribute to your cards in the next step
-            const cardCategory = card.getAttribute('data-cat');
-            
-            if (selectedCategory === 'all' || cardCategory === selectedCategory) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    };
-});
+        if (matchesSearch && matchesCategory) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
 
 // --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
