@@ -29,11 +29,7 @@ async function renderMarkets() {
             card.innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px;">
                     // Replace the img tag in your itemCard loop with this:
-<img 
-    src="${item.image_url}" 
-    onerror="this.src='https://via.placeholder.com/150?text=Image+Coming+Soon'" 
-    style="width:70px; height:70px; border-radius:12px; object-fit:cover; background-color:#eee;"
->
+<img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
                     <div>
                         <h4 style="color:var(--primary);">${m.name}</h4>
                         <p style="font-size:0.8rem; color:#666;">${m.description}</p>
@@ -80,7 +76,11 @@ async function renderItems(marketId, marketName, whatsapp) {
             itemCard.className = 'market-card';
             itemCard.innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px; width:100%;">
-                    <img src="${item.image_url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">
+                    <img 
+    src="${item.image_url}" 
+    onerror="this.src='https://via.placeholder.com/150?text=Image+Coming+Soon'" 
+    style="width:70px; height:70px; border-radius:12px; object-fit:cover; background-color:#eee;"
+>
                     <div style="flex:1;">
                         <h4 style="margin:0;">${item.name}</h4>
                         <span class="price-tag">${item.price}</span>
