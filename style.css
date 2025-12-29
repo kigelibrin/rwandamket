@@ -207,3 +207,19 @@
     border-bottom: 1px solid #eee;
     background: white;
 }
+/* style.css */
+.price-tag {
+    background-color: #e8f5e9; /* Very light green */
+    color: #2e7d32; /* Darker green text */
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 5px;
+    border: 1px solid #c8e6c9;
+}
+
+.market-card img {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
