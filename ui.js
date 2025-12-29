@@ -28,7 +28,7 @@ async function renderMarkets() {
             card.className = 'market-card';
             card.innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px;">
-                    // Replace the img tag in your itemCard loop with this:
+                   
 <img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
                     <div>
                         <h4 style="color:var(--primary);">${m.name}</h4>
