@@ -186,3 +186,24 @@
     transform: scale(0.97); /* Shrinks slightly when pressed */
     background-color: #f0fdf4; /* Very light green tint */
 }
+/* Product Price Badge */
+.price-tag {
+    background-color: var(--primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+/* Make the item cards look slightly different from market cards */
+.item-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
