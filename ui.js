@@ -1,90 +1,97 @@
-// 1. Alert errors on iPhone
-window.onerror = function(msg) { alert(msg); };
-
 document.addEventListener('DOMContentLoaded', () => {
-    // 2. Button logic first (So it works immediately!)
+    // 1. Initial Load
+    renderMarkets();
+
+    // 2. Mobile Menu Toggle
     const btn = document.getElementById('getStartedBtn');
     const links = document.querySelector('.nav-links');
-
     if (btn && links) {
         btn.onclick = () => {
             links.classList.toggle('active');
             btn.textContent = links.classList.contains('active') ? 'Close' : 'Get Started';
         };
     }
-
-    // 3. Load database data
-    if (typeof fetchMarketsFromSupabase === 'function') {
-        renderMarkets();
-    }
 });
 
+// --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
     const list = document.getElementById('market-list');
+    list.innerHTML = "<p style='text-align:center;'>Loading Markets...</p>";
+
     try {
-        const data = await fetchMarketsFromSupabase();
-        if (!data || data.length === 0) {
-            list.innerHTML = "<p>Add a row in Supabase!</p>";
-            return;
-        }
-        
-        list.innerHTML = ""; // Clear the loading text
-        
-        data.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'market-card';
-            
-            // This is the HTML for the card
-            div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:15px; width:100%;">
+        const { data: markets, error } = await _supabase.from('markets').select('*');
+        if (error) throw error;
+
+        list.innerHTML = ""; // Clear loading text
+        markets.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'market-card';
+            card.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px;">
                     <img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
-                    <div style="flex:1;">
-                        <h4 style="color:var(--primary); margin-bottom:4px;">${m.name}</h4>
-                        <p style="font-size:0.8rem; color:#666; line-height:1.3;">${m.description}</p>
+                    <div>
+                        <h4 style="color:var(--primary);">${m.name}</h4>
+                        <p style="font-size:0.8rem; color:#666;">${m.description}</p>
                     </div>
                 </div>
             `;
-
-            // ui.js - Updated Click Logic
-div.onclick = async () => {
-    // 1. Clear the screen or show a loading state
-    list.innerHTML = "<h3>Loading items...</h3>";
-    
-    // 2. Fetch the items for this specific market
-    const items = await fetchItemsByMarket(m.id);
-    
-    // 3. Render the items
-    list.innerHTML = `<button onclick="location.reload()" class="btn-primary" style="margin-bottom:20px;">← Back to Markets</button>`;
-    
-    if (items.length === 0) {
-        list.innerHTML += "<p>No items found in this market yet.</p>";
-        return;
-    }
-
-    items.forEach(item => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'market-card'; // Reuse the same styling!
-        itemDiv.innerHTML = `
-            <div style="display:flex; align-items:center; gap:15px; width:100%;">
-                <img src="${item.image_url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">
-                <div style="flex:1;">
-                    <h4 style="color:var(--primary);">${item.name}</h4>
-                    <p style="font-weight:bold;">${item.price}</p>
-                </div>
-            </div>
-            <button class="btn-primary" style="padding:5px 10px; font-size:0.7rem;">Order</button>
-        `;
-        
-        itemDiv.onclick = (e) => {
-            e.stopPropagation(); // Stop it from reloading the market
-            const message = encodeURIComponent(`I'd like to order: ${item.name} from ${m.name}`);
-            window.open(`https://wa.me/${m.whatsapp_number.replace(/\D/g, '')}?text=${message}`);
-        };
-        
-        list.appendChild(itemDiv);
-    });
-};
+            // Click to see items
+            card.onclick = () => renderItems(m.id, m.name, m.whatsapp_number);
+            list.appendChild(card);
+        });
     } catch (e) {
-        list.innerHTML = "<p>Database connection failed.</p>";
+        list.innerHTML = "<p>Error loading markets.</p>";
+    }
+}
+
+// --- FUNCTION 2: RENDER ITEMS FOR A SPECIFIC MARKET ---
+async function renderItems(marketId, marketName, whatsapp) {
+    const list = document.getElementById('market-list');
+    list.innerHTML = "<p style='text-align:center;'>Fetching products...</p>";
+
+    try {
+        const { data: items, error } = await _supabase
+            .from('items')
+            .select('*')
+            .eq('market_id', marketId);
+
+        if (error) throw error;
+
+        // Header with Back Button
+        list.innerHTML = `
+            <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                <button onclick="renderMarkets()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer;">← Back</button>
+                <h3 style="margin:0;">${marketName}</h3>
+            </div>
+        `;
+
+        if (items.length === 0) {
+            list.innerHTML += "<p style='text-align:center; padding:20px;'>Coming soon! No items yet.</p>";
+            return;
+        }
+
+        items.forEach(item => {
+            const itemCard = document.createElement('div');
+            itemCard.className = 'market-card';
+            itemCard.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px; width:100%;">
+                    <img src="${item.image_url}" style="width:60px; height:60px; border-radius:8px; object-fit:cover;">
+                    <div style="flex:1;">
+                        <h4 style="margin:0;">${item.name}</h4>
+                        <span class="price-tag">${item.price}</span>
+                    </div>
+                    <button class="btn-primary" style="padding:8px 12px; font-size:0.7rem;">Order</button>
+                </div>
+            `;
+            
+            itemCard.onclick = () => {
+                const msg = encodeURIComponent(`Hello! I want to order ${item.name} from the ${marketName} category.`);
+                window.open(`https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${msg}`, '_blank');
+            };
+            
+            list.appendChild(itemCard);
+        });
+    } catch (e) {
+        list.innerHTML = "<p>Error loading items.</p>";
     }
 }
