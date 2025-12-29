@@ -28,7 +28,12 @@ async function renderMarkets() {
             card.className = 'market-card';
             card.innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px;">
-                    <img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
+                    // Replace the img tag in your itemCard loop with this:
+<img 
+    src="${item.image_url}" 
+    onerror="this.src='https://via.placeholder.com/150?text=Image+Coming+Soon'" 
+    style="width:70px; height:70px; border-radius:12px; object-fit:cover; background-color:#eee;"
+>
                     <div>
                         <h4 style="color:var(--primary);">${m.name}</h4>
                         <p style="font-size:0.8rem; color:#666;">${m.description}</p>
