@@ -174,3 +174,11 @@ function sendOrder() {
     const message = encodeURIComponent(`Hello! I would like to order:\n\n${itemDetails}\n\n*Total: ${total}*`);
     window.open(`https://wa.me/${currentMarketWhatsApp.replace(/\D/g, '')}?text=${message}`, '_blank');
 }
+// ui.js
+function scrollToMarkets() {
+    const marketSection = document.getElementById('market-list');
+    marketSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+    });
+}
