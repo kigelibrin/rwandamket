@@ -284,4 +284,39 @@ header {
 body {
     padding-top: 0; 
 }
+/* Cart Bar Styling */
+.cart-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 15px;
+    right: 15px;
+    background: #1b5e20; /* Dark Green */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    z-index: 2000;
+    transition: transform 0.3s ease;
+}
 
+.cart-bar.hidden {
+    transform: translateY(150%); /* Hides it below the screen */
+}
+
+.checkout-btn {
+    background: white;
+    color: #1b5e20;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.cart-info {
+    display: flex;
+    flex-direction: column;
+}
