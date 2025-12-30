@@ -58,17 +58,18 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
 
 
 // --- FUNCTION 1: RENDER ALL MARKETS ---
-async function renderMarkets() {
-    const list = document.getElementById('market-list');
+ list = document.getElementById('market-list');
+    list.innerHTML = "<p style='text-align:center;'>Fetching products...</p>";
+
     try {
-        const { data: markets, error } = await _supabase.from('markets').select('*');
+        const { data: items, error } = await _supabase
+            .from('items')
+            .select('*')
+            .eq('market_id', marketId);
+
         if (error) throw error;
 
-        list.innerHTML = ""; 
-        markets.forEach(m => {
-            const card = document.createElement('div');
-            card.className = 'market-card';
-            
+
             // --- THIS IS THE KEY LINE ---
             // It takes the 'Food' or 'Events' from Supabase and sticks it on the HTML
             card.setAttribute('data-cat', m.category); 
