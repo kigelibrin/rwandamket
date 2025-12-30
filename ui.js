@@ -32,18 +32,17 @@ function filterMarkets() {
     const activeChip = document.querySelector('.filter-chip.active');
     if (!activeChip) return;
 
-    const selectedCategory = activeChip.getAttribute('data-category');
+    const selectedCategory = activeChip.getAttribute('data-category').toLowerCase();
     const cards = document.querySelectorAll('.market-card');
 
     cards.forEach(card => {
-        // We use .trim() and .toLowerCase() to prevent tiny typos from breaking it
-        const cardCategory = (card.getAttribute('data-cat') || "").trim().toLowerCase();
-        const targetCategory = selectedCategory.trim().toLowerCase();
+        // Get the category tag we set in renderMarkets
+        const cardCategory = (card.getAttribute('data-cat') || "").toLowerCase();
 
-        if (targetCategory === 'all' || cardCategory === targetCategory) {
-            card.style.display = 'flex';
+        if (selectedCategory === 'all' || cardCategory === selectedCategory) {
+            card.style.display = 'flex'; // Show it
         } else {
-            card.style.display = 'none';
+            card.style.display = 'none'; // Hide it
         }
     });
 }
@@ -62,31 +61,33 @@ alert("Looking for: " + this.getAttribute('data-category'));
 // --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
     const list = document.getElementById('market-list');
-    list.innerHTML = "<p style='text-align:center;'>Loading Markets...</p>";
-
     try {
         const { data: markets, error } = await _supabase.from('markets').select('*');
         if (error) throw error;
 
-        list.innerHTML = ""; // Clear loading text
+        list.innerHTML = ""; 
         markets.forEach(m => {
             const card = document.createElement('div');
             card.className = 'market-card';
-            // ADD THIS LINE: It links the database category to the HTML card
-card.setAttribute('data-cat', m.category);
+            
+            // --- THIS IS THE KEY LINE ---
+            // It takes the 'Food' or 'Events' from Supabase and sticks it on the HTML
+            card.setAttribute('data-cat', m.category); 
+
             card.innerHTML = `
-                <div style="display:flex; align-items:center; gap:15px;">
-                   <img src="${m.image_url}" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
-                    <div>
-                        <h4 style="color:var(--primary);">${m.name}</h4>
-                        <p style="font-size:0.8rem; color:#666;">${m.description}</p>
-                    </div>
-                </div>
+                <img src="${m.image_url}" onerror="this.src='https://via.placeholder.com/150'">
+                <h4>${m.name}</h4>
+                <p>${m.description}</p>
             `;
-            // Click to see items
+            
             card.onclick = () => renderItems(m.id, m.name, m.whatsapp_number);
             list.appendChild(card);
         });
+
+        // --- ADD THIS LINE ---
+        // This ensures if a filter was already clicked, it applies to the new cards
+        filterMarkets(); 
+
     } catch (e) {
         list.innerHTML = "<p>Error loading markets.</p>";
     }
