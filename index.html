@@ -12,13 +12,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <header style="display: flex; justify-content: space-between; align-items: center;">
-    <h1 style="color: var(--primary); font-size: 1.2rem;">RWANDAMKET</h1>
-    <a href="mailto:contact@rwandamket.com" style="font-size: 0.8rem; color: #666;">Contact</a>
+<header>
+    <h1>RWANDAMKET</h1>
+    <button class="btn-primary" onclick="scrollToMarkets()">Get Started</button>
 </header>
-
-    <main>
+  
+  <main>
+   <section id="about" class="section-container bg-light">
+            <div class="about-grid">
+                <div class="about-text">
+                    <h2>Beyond Just Delivery</h2>
+                    <p>Rwandamket isn't just an app; it's a partner for Rwandan entrepreneurs and a convenience hub for busy residents.</p>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1589308078059-be1415eab4c4?auto=format&fit=crop&w=800&q=80" alt="Market Delivery">
+                </div>
+            </div>
+        </section>
+  </main>
         <section id="home" class="hero">
             <div class="hero-content">
                 <h1>Delivery Designed for <span class="text-green">Rwanda</span></h1>
@@ -48,19 +59,6 @@
               
             </div>
         </section>
-
-        <section id="about" class="section-container bg-light">
-            <div class="about-grid">
-                <div class="about-text">
-                    <h2>Beyond Just Delivery</h2>
-                    <p>Rwandamket isn't just an app; it's a partner for Rwandan entrepreneurs and a convenience hub for busy residents.</p>
-                </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1589308078059-be1415eab4c4?auto=format&fit=crop&w=800&q=80" alt="Market Delivery">
-                </div>
-            </div>
-        </section>
-    </main>
 
     <footer class="footer">
         <p>&copy; 2025 Rwandamket. Built with ❤️ in Kigali.</p>
