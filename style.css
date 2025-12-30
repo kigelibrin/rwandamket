@@ -320,3 +320,25 @@ body {
     display: flex;
     flex-direction: column;
 }
+/* style.css */
+.about-hero {
+    padding: 40px 20px;
+    background-color: #f9f9f9; /* Light grey to separate it from the white header */
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.about-hero h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.about-hero p {
+    color: #666;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto;
+    font-size: 1rem;
+}
+
