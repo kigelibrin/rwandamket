@@ -71,6 +71,14 @@
     <footer class="footer">
         <p>&copy; 2025 Rwandamket. Built with ❤️ in Kigali.</p>
     </footer>
+    <div id="cart-bar" class="cart-bar hidden">
+    <div class="cart-info">
+        <span id="cart-count">0 items</span>
+        <strong id="cart-total">0 RWF</strong>
+        <small onclick="clearCart()" style="text-decoration: underline; cursor: pointer; opacity: 0.8;">Clear</small>
+    </div>
+    <button onclick="sendOrder()" class="checkout-btn">Order on WhatsApp</button>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
