@@ -94,18 +94,17 @@ async function renderMarkets() {
 
 // --- FUNCTION 2: RENDER ITEMS FOR A SPECIFIC MARKET ---
 async function renderItems(marketId, marketName, whatsapp) {
-    const list = document.getElementById('market-list');
-    list.innerHTML = "<p style='text-align:center;'>Fetching products...</p>";
-
-    try {
-        const { data: items, error } = await _supabase
-            .from('items')
-            .select('*')
-            .eq('market_id', marketId);
-
-        if (error) throw error;
-
-        // Header with Back Button
+    // Inside your renderItems loop:
+const orderBtn = itemCard.querySelector('.btn-primary');
+orderBtn.onclick = (e) => {
+    e.stopPropagation(); // Prevents clicking the whole card
+    addToCart(item, whatsapp);
+    
+    // Visual feedback: briefly change the button text
+    orderBtn.innerText = "Added! ✅";
+    setTimeout(() => orderBtn.innerText = "Order", 1000);
+};
+     // Header with Back Button
         list.innerHTML = `
             <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px;">
                 <button onclick="renderMarkets()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer;">← Back</button>
@@ -146,4 +145,58 @@ async function renderItems(marketId, marketName, whatsapp) {
     } catch (e) {
         list.innerHTML = "<p>Error loading items.</p>";
     }
+}
+let cart = [];
+let currentMarketWhatsApp = ""; // Stores the WhatsApp of the market you are currently viewing
+
+function addToCart(item, whatsapp) {
+    cart.push(item);
+    currentMarketWhatsApp = whatsapp; // Save the number to send the order to
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const bar = document.getElementById('cart-bar');
+    const countLabel = document.getElementById('cart-count');
+    const totalLabel = document.getElementById('cart-total');
+
+    if (cart.length > 0) {
+        bar.classList.remove('hidden');
+        
+        // Count items
+        countLabel.innerText = `${cart.length} item${cart.length > 1 ? 's' : ''}`;
+        
+        // Calculate Total (Assumes price is a number like "5000")
+        // Note: If your price is text like "5,000 RWF", we need to clean it
+        const total = cart.reduce((sum, item) => {
+            const priceNum = parseInt(item.price.replace(/\D/g, '')) || 0;
+            return sum + priceNum;
+        }, 0);
+        
+        totalLabel.innerText = `${total.toLocaleString()} RWF`;
+    } else {
+        bar.classList.add('hidden');
+    }
+}
+
+function sendOrder() {
+    if (cart.length === 0) return;
+
+    // Create the message list
+    let itemDetails = cart.map(item => `- ${item.name} (${item.price})`).join('\n');
+    const total = document.getElementById('cart-total').innerText;
+    
+    const message = encodeURIComponent(
+        `Hello! I would like to order the following:\n\n${itemDetails}\n\n*Total: ${total}*`
+    );
+
+    window.open(`https://wa.me/${currentMarketWhatsApp.replace(/\D/g, '')}?text=${message}`, '_blank');
+    
+    // Optional: Clear cart after ordering
+    // cart = [];
+    // updateCartUI();
+}
+function clearCart() {
+    cart = [];
+    updateCartUI();
 }
