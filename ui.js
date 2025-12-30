@@ -55,8 +55,7 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
         filterMarkets(); // Run the filter immediately
     };
 });
-// Add this temporarily inside the chip.onclick
-alert("Looking for: " + this.getAttribute('data-category'));
+
 
 // --- FUNCTION 1: RENDER ALL MARKETS ---
 async function renderMarkets() {
