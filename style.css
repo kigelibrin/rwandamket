@@ -270,3 +270,18 @@
     background-color: var(--primary);
     color: white;
 }
+/* Keep the header at the top */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 10px 20px;
+}
+
+/* Make sure the main content doesn't hide under the header */
+body {
+    padding-top: 0; 
+}
+
