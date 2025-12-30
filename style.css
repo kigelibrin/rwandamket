@@ -369,3 +369,37 @@ body {
         text-align: left;
     }
 }
+/* style.css */
+
+.hero {
+    position: relative;
+    height: 60vh; /* Takes up 60% of the screen height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                      url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200');
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 40px;
+}
+
+.hero-content h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    padding: 0 10px;
+}
+
+.text-green {
+    color: #4CAF50; /* A nice Rwanda-green */
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    opacity: 0.9;
+}
