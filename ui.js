@@ -239,3 +239,44 @@ function toggleFAQ(button) {
         icon.innerText = "+";
     }
 }
+
+/* style.css */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 3000; /* Sits on top of everything */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7); /* Dark background overlay */
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.terms-body p {
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #444;
+}
