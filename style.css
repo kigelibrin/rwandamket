@@ -384,3 +384,51 @@ img {
     font-size: 0.9rem;
     color: #444;
 }
+
+/* style.css */
+
+/* Dark Theme Variables */
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.dark-mode header {
+    background: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.dark-mode .bg-light, 
+.dark-mode .market-card, 
+.dark-mode .modal-content,
+.dark-mode .faq-item {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-color: #333;
+}
+
+.dark-mode .logo-text, 
+.dark-mode .about-text h2,
+.dark-mode .faq-question {
+    color: #4CAF50; /* A brighter green for dark mode visibility */
+}
+
+.dark-mode .market-card p,
+.dark-mode .faq-answer {
+    color: #bbb;
+}
+
+.dark-mode #marketSearch {
+    background: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+}
+
+/* Toggle Button Styling */
+.theme-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-right: 10px;
+}
