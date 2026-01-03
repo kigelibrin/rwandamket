@@ -12,13 +12,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-   <header>
+    <header>
     <div class="logo-container">
         <img src="image.png" alt="Rwandamket Logo" class="header-logo">
         <span class="logo-text">RWANDAMKET</span>
     </div>
-    <button class="btn-primary" onclick="scrollToMarkets()">Get Started</button>
+    <div class="header-actions">
+        <button id="theme-toggle" class="theme-btn" onclick="toggleTheme()">🌙</button>
+        <button class="btn-primary" onclick="scrollToMarkets()">Get Started</button>
+    </div>
 </header>
     <main>
         <section id="home" class="hero" style="text-align: center; padding: 40px 20px;">
