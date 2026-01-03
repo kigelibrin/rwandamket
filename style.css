@@ -236,3 +236,38 @@ header .btn-primary {
         padding: 40px;
     }
 }
+/* style.css final touches */
+
+/* Smooth scrolling for the whole page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Prevent horizontal scroll on the whole page */
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Make images load with a fade-in effect */
+img {
+    transition: opacity 0.3s ease;
+    background-color: #f0f0f0; /* Shows a light grey box while loading */
+}
+
+/* Highlight the search bar when focused */
+#marketSearch:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+/* Add this to the bottom of your style.css */
+@media (min-width: 1024px) {
+    header {
+        padding: 20px 10%; /* Adds more space on the sides for wide monitors */
+    }
+    
+    .hero-content h1 {
+        font-size: 3.5rem; /* Makes the headline bigger on big screens */
+    }
+}
