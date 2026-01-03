@@ -291,3 +291,23 @@ img {
     font-size: 1.1rem;
     letter-spacing: 0.5px;
 }
+
+.market-card {
+    display: flex;
+    flex-direction: column; /* Stacks image on top of text */
+    height: auto; /* Allows card to grow with the text */
+    min-height: 250px; 
+    overflow: hidden;
+}
+
+.market-card h4 {
+    margin-top: 10px;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.market-card p {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+}
