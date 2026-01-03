@@ -214,21 +214,28 @@ function sendOrder() {
     window.open(`https://wa.me/${currentMarketWhatsApp.replace(/\D/g, '')}?text=${message}`, '_blank');
 }
 // ui.js
-function scrollToMarkets() {
-    const marketSection = document.getElementById('market-list');
-    marketSection.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-    });
-}
 
 function toggleFAQ(button) {
     const answer = button.nextElementSibling;
-    const isVisible = answer.style.display === "block";
+    const icon = button.querySelector('span');
     
-    // Close all other answers (Optional: makes it cleaner)
-    document.querySelectorAll('.faq-answer').forEach(el => el.style.display = 'none');
-    
-    answer.style.display = isVisible ? "none" : "block";
-    button.querySelector('span').innerText = isVisible ? "+" : "-";
+    // 1. Check if this specific answer is already open
+    const isOpen = answer.style.display === "block";
+
+    // 2. Close ALL other answers first (Professional Accordion Style)
+    document.querySelectorAll('.faq-answer').forEach(el => {
+        el.style.display = 'none';
+    });
+    document.querySelectorAll('.faq-question span').forEach(sp => {
+        sp.innerText = '+';
+    });
+
+    // 3. If it wasn't open, open it now
+    if (!isOpen) {
+        answer.style.display = "block";
+        icon.innerText = "-";
+    } else {
+        answer.style.display = "none";
+        icon.innerText = "+";
+    }
 }
