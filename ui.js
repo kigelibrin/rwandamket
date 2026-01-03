@@ -169,9 +169,24 @@ function clearCart() {
 
 function sendOrder() {
     if (cart.length === 0) return;
+
+    // Generate a unique Order ID
+    const orderId = "RWA-" + Math.floor(1000 + Math.random() * 9000);
+    
+    // Create the message list
     let itemDetails = cart.map(item => `- ${item.name} (${item.price})`).join('\n');
     const total = document.getElementById('cart-total').innerText;
-    const message = encodeURIComponent(`Hello! I would like to order:\n\n${itemDetails}\n\n*Total: ${total}*`);
+    
+    // The "Professional" Message Template
+    const message = encodeURIComponent(
+        `📌 *NEW ORDER: ${orderId}*\n` +
+        `--------------------------\n` +
+        `${itemDetails}\n` +
+        `--------------------------\n` +
+        `💰 *Total: ${total}*\n\n` +
+        `Please confirm my order and let me know the delivery time! Thanks.`
+    );
+
     window.open(`https://wa.me/${currentMarketWhatsApp.replace(/\D/g, '')}?text=${message}`, '_blank');
 }
 // ui.js
