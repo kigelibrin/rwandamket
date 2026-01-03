@@ -240,3 +240,19 @@ function toggleFAQ(button) {
     }
 }
 
+// ui.js
+function openTerms() {
+    document.getElementById('termsModal').style.display = 'flex';
+}
+
+function closeTerms() {
+    document.getElementById('termsModal').style.display = 'none';
+}
+
+// Close modal if user clicks anywhere outside the white box
+window.onclick = function(event) {
+    const modal = document.getElementById('termsModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
