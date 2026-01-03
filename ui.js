@@ -256,3 +256,30 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
 }
+
+// ui.js
+
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('theme-toggle');
+    
+    body.classList.toggle('dark-mode');
+    
+    // Save preference to local storage
+    if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+        btn.innerText = '☀️'; // Switch to sun icon
+    } else {
+        localStorage.setItem('theme', 'light');
+        btn.innerText = '🌙'; // Switch to moon icon
+    }
+}
+
+// Load saved theme on startup
+window.onload = () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-toggle').innerText = '☀️';
+    }
+};
