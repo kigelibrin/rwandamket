@@ -221,3 +221,14 @@ function scrollToMarkets() {
         block: 'start' 
     });
 }
+
+function toggleFAQ(button) {
+    const answer = button.nextElementSibling;
+    const isVisible = answer.style.display === "block";
+    
+    // Close all other answers (Optional: makes it cleaner)
+    document.querySelectorAll('.faq-answer').forEach(el => el.style.display = 'none');
+    
+    answer.style.display = isVisible ? "none" : "block";
+    button.querySelector('span').innerText = isVisible ? "+" : "-";
+}
