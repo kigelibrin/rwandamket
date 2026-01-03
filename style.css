@@ -311,3 +311,29 @@ img {
     color: #666;
     margin-top: 5px;
 }
+
+.faq-item {
+    border-bottom: 1px solid #eee;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.faq-question {
+    width: 100%;
+    padding: 20px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    color: var(--primary);
+}
+
+.faq-answer {
+    padding: 0 20px 20px;
+    display: none; /* Hidden by default */
+    color: #666;
+    font-size: 0.9rem;
+}
