@@ -5,19 +5,43 @@ let currentMarketWhatsApp = "";
 document.addEventListener('DOMContentLoaded', () => {
     renderMarkets(); // Starts the app by showing markets
 
-    // Setup Search Bar
-    const searchInput = document.getElementById('marketSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            const cards = document.querySelectorAll('.market-card');
-            cards.forEach(card => {
-                const text = card.innerText.toLowerCase();
-                card.style.display = text.includes(term) ? 'flex' : 'none';
-            });
-        });
-    }
+   // ui.js inside DOMContentLoaded
+const searchInput = document.getElementById('marketSearch');
+const list = document.getElementById('market-list');
 
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.market-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            if (text.includes(term)) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Handle "No Results" message
+        let noResultsMsg = document.getElementById('no-results');
+        if (visibleCount === 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('p');
+                noResultsMsg.id = 'no-results';
+                noResultsMsg.style.textAlign = 'center';
+                noResultsMsg.style.padding = '40px';
+                noResultsMsg.style.color = '#666';
+                noResultsMsg.innerHTML = `🔍 No markets found for "<strong>${e.target.value}</strong>"<br><small>Try searching for Food, Decor, or Events.</small>`;
+                list.appendChild(noResultsMsg);
+            }
+        } else {
+            if (noResultsMsg) noResultsMsg.remove();
+        }
+    });
+}
     // Setup Category Chips
     document.querySelectorAll('.filter-chip').forEach(chip => {
         chip.onclick = function() {
