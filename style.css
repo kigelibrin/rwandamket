@@ -271,3 +271,23 @@ img {
         font-size: 3.5rem; /* Makes the headline bigger on big screens */
     }
 }
+
+/* style.css */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-logo {
+    height: 40px; /* Adjust this to make it look right on your phone */
+    width: auto;
+    border-radius: 50%; /* Makes your circular logo look clean */
+}
+
+.logo-text {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+}
