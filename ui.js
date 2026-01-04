@@ -308,3 +308,19 @@ async function shareApp() {
         btn.innerText = originalIcon; // Set back to 📤
     }
 }
+
+// Add this separately at the bottom of ui.js
+function scrollToMarkets() {
+    const marketSection = document.getElementById('markets-filter');
+    
+    if (marketSection) {
+        const headerOffset = 90; 
+        const elementPosition = marketSection.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
+    }
+}
