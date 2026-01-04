@@ -453,3 +453,24 @@ body.dark-mode {
 .dark-mode .theme-btn {
     background: #333;
 }
+
+/* style.css */
+
+@media (max-width: 400px) {
+    .logo-text {
+        display: none; /* Hides text on small phones */
+    }
+    
+    .header-logo {
+        height: 35px; /* Slightly smaller logo for small screens */
+    }
+    
+    .header-actions {
+        gap: 5px; /* Even tighter spacing */
+    }
+
+    .btn-primary {
+        padding: 8px 15px; /* Smaller button padding */
+        font-size: 0.8rem;
+    }
+}
