@@ -488,3 +488,15 @@ body.dark-mode {
 html {
     scroll-behavior: smooth;
 }
+
+/* style.css */
+@media (min-width: 1024px) {
+    .cart-bar {
+        width: 350px;      /* Fixed width so it looks like a widget */
+        left: auto;        /* Unlocks it from the left side */
+        right: 40px;       /* Pins it to the bottom right */
+        bottom: 40px;      /* Lifts it slightly off the edge */
+        border-radius: 20px;
+        padding: 20px;
+    }
+}
