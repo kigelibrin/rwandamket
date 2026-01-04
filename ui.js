@@ -283,3 +283,24 @@ window.onload = () => {
         document.getElementById('theme-toggle').innerText = '☀️';
     }
 };
+
+async function shareApp() {
+    const shareData = {
+        title: 'Rwandamket',
+        text: 'Check out Rwandamket for premium chefs, decor, and grocery delivery in Kigali!',
+        url: window.location.href
+    };
+
+    try {
+        if (navigator.share) {
+            // Triggers native iPhone/Android share sheet
+            await navigator.share(shareData);
+        } else {
+            // Fallback for laptops: Copy to clipboard
+            await navigator.clipboard.writeText(window.location.href);
+            alert('Link copied to clipboard! Share it with your friends.');
+        }
+    } catch (err) {
+        console.log('Error sharing:', err);
+    }
+}
