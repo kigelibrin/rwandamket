@@ -285,22 +285,26 @@ window.onload = () => {
 };
 
 async function shareApp() {
-    const shareData = {
-        title: 'Rwandamket',
-        text: 'Check out Rwandamket for premium chefs, decor, and grocery delivery in Kigali!',
-        url: window.location.href
-    };
-
+    const btn = document.querySelector('button[title="Share App"]');
+    const originalIcon = btn.innerText;
+    
     try {
+        btn.innerText = '⌛'; // Quick feedback
+        const shareData = {
+            title: 'Rwandamket',
+            text: 'Check out Rwandamket for premium chefs, decor, and grocery delivery in Kigali!',
+            url: window.location.href
+        };
+
         if (navigator.share) {
-            // Triggers native iPhone/Android share sheet
             await navigator.share(shareData);
         } else {
-            // Fallback for laptops: Copy to clipboard
             await navigator.clipboard.writeText(window.location.href);
-            alert('Link copied to clipboard! Share it with your friends.');
+            alert('Link copied to clipboard!');
         }
     } catch (err) {
-        console.log('Error sharing:', err);
+        console.log('Share cancelled or failed');
+    } finally {
+        btn.innerText = originalIcon; // Set back to 📤
     }
 }
