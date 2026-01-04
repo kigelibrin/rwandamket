@@ -474,3 +474,17 @@ body.dark-mode {
         font-size: 0.8rem;
     }
 }
+
+/* style.css */
+@media (min-width: 1024px) {
+    .cart-bar {
+        width: 400px;    /* Makes the cart a nice small box on laptops */
+        left: auto;      /* Removes the left stretch */
+        right: 30px;     /* Places it neatly in the bottom right corner */
+        bottom: 30px;
+    }
+}
+
+html {
+    scroll-behavior: smooth;
+}
