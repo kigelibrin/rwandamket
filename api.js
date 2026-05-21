@@ -1,34 +1,43 @@
-// api.js - Talking to the real database
+// api.js - Fetching markets with explicit column selection
 async function fetchMarketsFromSupabase() {
     try {
-        // This line asks Supabase for everything in the 'markets' table
+        // Optimization: Replace '*' with the specific columns your market cards actually use
         const { data, error } = await _supabase
             .from('markets')
-            .select('*');
+            .select('id, name, location, image_url'); 
 
         if (error) throw error;
         return data;
     } catch (err) {
         console.error("Error fetching markets:", err.message);
-        return []; // Return empty if there is an error
+        return []; 
     }
 }
 
-
-// api.js - Fetching items for a specific market
-// api.js
+// api.js - Fetching items with robust ID validation
 async function fetchItemsByMarket(marketId) {
+    // 1. Guard clause: Stop early if marketId is missing entirely
+    if (!marketId) {
+        console.warn("fetchItemsByMarket called without a valid marketId");
+        return [];
+    }
+
     try {
-        // We use parseInt to make sure the ID is a number, not text
+        // 2. Safe parsing: If you are strictly using integer IDs
+        const sanitizedId = Number(marketId);
+        if (isNaN(sanitizedId)) {
+            throw new Error(`Invalid marketId format: ${marketId}`);
+        }
+
         const { data, error } = await _supabase
             .from('items')
-            .select('*')
-            .eq('market_id', parseInt(marketId)); 
+            .select('*') // If items table is small, * is okay, but specific columns are always preferred
+            .eq('market_id', sanitizedId); 
 
         if (error) throw error;
         return data;
     } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching items for market:", err.message);
         return [];
     }
 }
