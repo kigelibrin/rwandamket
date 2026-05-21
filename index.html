@@ -1,37 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:image" content="image.png">
-<meta name="twitter:image" content="image.png">
-<link rel="icon" href="image.png" type="image/png">
+    <meta name="twitter:image" content="image.png">
+    <link rel="icon" href="image.png" type="image/png">
     <title>Rwandamket | Your Marketplace in Rwanda</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://images.unsplash.com">
 </head>
 <body>
     <header>
-    <div class="logo-container">
-        <img src="image.png" alt="Rwandamket Logo" class="header-logo">
-        <span class="logo-text">RWANDAMKET</span>
-    </div>
-    <div class="header-actions">
-        <button id="theme-toggle" class="theme-btn" onclick="toggleTheme()">🌙</button>
-        <button class="theme-btn" onclick="shareApp()" title="Share App">📤</button>
-        <button class="btn-primary" onclick="scrollToMarkets()">Get Started</button>
-    </div>
-</header>
+        <div class="logo-container">
+            <img src="image.png" alt="Rwandamket Logo" class="header-logo">
+            <span class="logo-text">RWANDAMKET</span>
+        </div>
+        <div class="header-actions">
+            <button id="theme-toggle" class="theme-btn">🌙</button>
+            <button id="share-btn" class="theme-btn" title="Share App">📤</button>
+            <button id="get-started-btn" class="btn-primary">Get Started</button>
+        </div>
+    </header>
+
+    <!-- FIX: Everything safely contained inside main -->
     <main>
-        <section id="home" class="hero" style="text-align: center; padding: 40px 20px;">
+        <section id="home" class="hero">
             <div class="hero-content">
                 <h1>Delivery Designed for <span class="text-green">Rwanda</span></h1>
                 <p>From local decor to event management—we bridge the gap between artisans and your doorstep.</p>
             </div>
         </section>
         
-
         <section id="about" class="section-container bg-light">
             <div class="about-grid">
                 <div class="about-text">
@@ -43,12 +46,13 @@
                 </div>
             </div>
         </section>
-        <section id="markets-filter" class="section-container">
-            <h2 class="section-title" style="text-align: center; padding: 20px 0;">Choose a Market</h2>
+
+        <!-- FIX: Changed ID to 'markets' to perfectly align with scrollToMarkets UI functions -->
+        <section id="markets" class="section-container">
+            <h2 class="section-title">Choose a Market</h2>
             
-            <div class="search-container" style="padding: 15px;">
-                <input type="text" id="marketSearch" placeholder="Search for food, decor, or chefs..." 
-                       style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ddd; font-size: 1rem; outline: none;">
+            <div class="search-container">
+                <input type="text" id="marketSearch" placeholder="Search for food, decor, or chefs...">
             </div>
 
             <div class="category-wrapper">
@@ -59,87 +63,91 @@
                     <button class="filter-chip" data-category="Events">Events</button>
                 </div>
             </div>
+            
+            <!-- Target container for database items rendering -->
+            <div id="market-list" class="markets-grid"></div>
         </section>
 
-        <div id="market-list" class="markets-grid">
+        <section id="faq" class="section-container">
+            <h2 class="faq-main-title">Common Questions</h2>
+            
+            <div class="faq-item">
+                <button class="faq-question">How do I pay for my order? <span>+</span></button>
+                <div class="faq-answer">
+                    <p>We accept Mobile Money (MoMo) and Cash on Delivery. Payment details are confirmed once you message us on WhatsApp.</p>
+                </div>
             </div>
+
+            <div class="faq-item">
+                <button class="faq-question">How long does delivery take? <span>+</span></button>
+                <div class="faq-answer">
+                    <p>Grocery and menu items typically arrive within 45-60 minutes. For Chefs and Events, please book at least 24 hours in advance.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">How do I book a Private Chef? <span>+</span></button>
+                <div class="faq-answer">
+                    <p>Browse our Chef Market, add your preferred chef to the cart, and checkout. We recommend booking at least 48 hours in advance.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">Are the Home Decor items handmade? <span>+</span></button>
+                <div class="faq-answer">
+                    <p>Yes! We partner directly with Rwandan artisans. Most items are handcrafted, which means every piece is unique.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">What happens after I send the WhatsApp message? <span>+</span></button>
+                <div class="faq-answer">
+                    <p>Our team or the specific vendor will reply to confirm your Order ID, provide a final total including delivery, and share MoMo payment instructions.</p>
+                </div>
+            </div>
+            
+            <p class="terms-notice">
+                By using this site, you agree to our 
+                <span id="open-terms-link">Terms & Conditions</span>.
+            </p>
+        </section>
     </main>
-    <section id="faq" class="section-container">
-    <h2 style="text-align:center; margin-bottom:20px;">Common Questions</h2>
-    
-    <div class="faq-item">
-        <button class="faq-question" onclick="toggleFAQ(this)">How do I pay for my order? <span>+</span></button>
-        <div class="faq-answer">
-            <p>We accept Mobile Money (MoMo) and Cash on Delivery. Payment details are confirmed once you message us on WhatsApp.</p>
-        </div>
-    </div>
 
-    <div class="faq-item">
-        <button class="faq-question" onclick="toggleFAQ(this)">How long does delivery take? <span>+</span></button>
-        <div class="faq-answer">
-            <p>Grocery and menu items typically arrive within 45-60 minutes. For Chefs and Events, please book at least 24 hours in advance.</p>
-        </div>
-    </div>
-        <div class="faq-item">
-    <button class="faq-question" onclick="toggleFAQ(this)">How do I book a Private Chef? <span>+</span></button>
-    <div class="faq-answer">
-        <p>Browse our Chef Market, add your preferred chef to the cart, and checkout. We recommend booking at least 48 hours in advance to ensure availability for your specific date and menu requirements.</p>
-    </div>
-</div>
-
-<div class="faq-item">
-    <button class="faq-question" onclick="toggleFAQ(this)">Are the Home Decor items handmade? <span>+</span></button>
-    <div class="faq-answer">
-        <p>Yes! We partner directly with Rwandan artisans. Most items are handcrafted, which means every piece is unique. Large custom orders may require additional delivery time.</p>
-    </div>
-</div>
-
-<div class="faq-item">
-    <button class="faq-question" onclick="toggleFAQ(this)">What happens after I send the WhatsApp message? <span>+</span></button>
-    <div class="faq-answer">
-        <p>Our team or the specific vendor will reply to confirm your Order ID, provide a final total including delivery, and share MoMo payment instructions. Your order is processed once payment is confirmed.</p>
-    </div>
-</div>
-        <div id="termsModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeTerms()">&times;</span>
-        <h2>Terms & Conditions</h2>
-        <div class="terms-body">
-            <p><strong>1. Orders:</strong> All orders placed via WhatsApp are subject to vendor availability.</p>
-            <p><strong>2. Payment:</strong> Payments are made via MoMo or Cash as confirmed with the vendor. Rwandamket does not store credit card data.</p>
-            <p><strong>3. Delivery:</strong> Delivery times are estimates. For Private Chefs, 48-hour notice is required.</p>
-            <p><strong>4. Refunds:</strong> Please inspect items upon delivery. Perishable goods (food) cannot be returned once accepted.</p>
-        </div>
-        <button class="btn-primary" style="width:100%" onclick="closeTerms()">I Understand</button>
-    </div>
-</div>
-
-<p style="margin-top: 10px;">
-    By using this site, you agree to our 
-    <span onclick="openTerms()" style="text-decoration:underline; cursor:pointer; color:var(--primary);">Terms & Conditions</span>.
-</p>
-</section>
     <footer class="footer">
-    <p>&copy; 2025 Rwandamket. Built with ❤️ in Kigali.</p>
-    <p><a href="https://wa.me/+250786979388?text=Hello, I need help tracking my order." 
-          style="color: var(--primary); font-size: 0.8rem; text-decoration: none;">
-          Need help tracking? Contact Support
-    </a></p>
-</footer>
-  
+        <p>&copy; 2026 Rwandamket. Built with ❤️ in Kigali.</p>
+        <p><a href="https://wa.me/+250786979388?text=Hello,%20I%20need%20help%20tracking%20my%20order." class="support-link">
+            Need help tracking? Contact Support
+        </a></p>
+    </footer>
+
+    <!-- Modals & Global UI Overlays -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <span id="close-modal-btn" class="close-modal">&times;</span>
+            <h2>Terms & Conditions</h2>
+            <div class="terms-body">
+                <p><strong>1. Orders:</strong> All orders placed via WhatsApp are subject to vendor availability.</p>
+                <p><strong>2. Payment:</strong> Payments are made via MoMo or Cash as confirmed with the vendor.</p>
+                <p><strong>3. Delivery:</strong> Delivery times are estimates. For Private Chefs, 48-hour notice is required.</p>
+                <p><strong>4. Refunds:</strong> Please inspect items upon delivery. Perishable goods cannot be returned once accepted.</p>
+            </div>
+            <button id="accept-terms-btn" class="btn-primary" style="width:100%">I Understand</button>
+        </div>
+    </div>
+
     <div id="cart-bar" class="cart-bar hidden">
         <div class="cart-info">
             <span id="cart-count">0 items</span>
             <strong id="cart-total">0 RWF</strong>
-            <small onclick="clearCart()" style="text-decoration: underline; cursor: pointer; opacity: 0.8; display: block;">Clear</small>
+            <small id="clear-cart-btn">Clear</small>
         </div>
-        <button onclick="sendOrder()" class="checkout-btn">Order on WhatsApp</button>
+        <button id="checkout-btn" class="checkout-btn">Order on WhatsApp</button>
     </div>
 
+    <!-- External Scripts Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
     <script src="ui.js"></script>
-    
 </body>
 </html>
