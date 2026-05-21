@@ -1,61 +1,86 @@
-// --- 1. GLOBAL STATE & INITIAL LOAD ---
+// --- 1. GLOBAL STATE & MEMORY RECOVERY ---
 let cart = [];
 let currentMarketWhatsApp = "";
 
+// Unified initialization loop prevents event state collissions
 document.addEventListener('DOMContentLoaded', () => {
-    renderMarkets(); // Starts the app by showing markets
+    // A. Sync Theme State instantly before first content paint
+    initTheme();
 
-   // ui.js inside DOMContentLoaded
-const searchInput = document.getElementById('marketSearch');
-const list = document.getElementById('market-list');
+    // B. Initial Application Data Load
+    renderMarkets();
 
-if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.market-card');
-        let visibleCount = 0;
+    // C. Static Event Listeners Binding (Replacing old HTML inline onclick elements)
+    setupStaticEventListeners();
+});
 
-        cards.forEach(card => {
-            const text = card.innerText.toLowerCase();
-            if (text.includes(term)) {
-                card.style.display = 'flex';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
+/* ==========================================================================
+   2. INITIALIZATION & EVENT LINKING
+   ========================================================================== */
+function setupStaticEventListeners() {
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
-        // Handle "No Results" message
-        let noResultsMsg = document.getElementById('no-results');
-        if (visibleCount === 0) {
-            if (!noResultsMsg) {
-                noResultsMsg = document.createElement('p');
-                noResultsMsg.id = 'no-results';
-                noResultsMsg.style.textAlign = 'center';
-                noResultsMsg.style.padding = '40px';
-                noResultsMsg.style.color = '#666';
-                noResultsMsg.innerHTML = `🔍 No markets found for "<strong>${e.target.value}</strong>"<br><small>Try searching for Food, Decor, or Events.</small>`;
-                list.appendChild(noResultsMsg);
-            }
-        } else {
-            if (noResultsMsg) noResultsMsg.remove();
+    // Share Application Action
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) shareBtn.addEventListener('click', shareApp);
+
+    // Hero Call-to-action Button
+    const getStartedBtn = document.getElementById('get-started-btn');
+    if (getStartedBtn) getStartedBtn.addEventListener('click', scrollToMarkets);
+
+    // Terms Modal Open Link
+    const openTermsLink = document.getElementById('open-terms-link');
+    if (openTermsLink) openTermsLink.addEventListener('click', openTerms);
+
+    // Terms Modal Close Button Hooks
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeTerms);
+    
+    const acceptTermsBtn = document.getElementById('accept-terms-btn');
+    if (acceptTermsBtn) acceptTermsBtn.addEventListener('click', closeTerms);
+
+    // Clear Shopping Cart Hook
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+
+    // Send Checkout Order Action
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) checkoutBtn.addEventListener('click', sendOrder);
+
+    // Global Modal Click-Away Overlay Guard
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById('termsModal');
+        if (event.target === modal) {
+            closeTerms();
         }
     });
-}
-    // Setup Category Chips
+
+    // Dynamic Live-Search Event Handling
+    const searchInput = document.getElementById('marketSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleMarketSearch);
+    }
+
+    // Category Filter Chip Click Routing
     document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.onclick = function() {
+        chip.addEventListener('click', function() {
             document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
             filterMarkets();
-        };
+        });
     });
-});
+}
 
-// --- 2. MARKET RENDERING ---
+/* ==========================================================================
+   3. DATA RENDERING (MARKETS & ITEMS)
+   ========================================================================== */
 async function renderMarkets() {
     const list = document.getElementById('market-list');
-    list.innerHTML = "<p style='text-align:center;'>Loading Markets...</p>";
+    if (!list) return;
+    
+    list.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1/-1;'>Loading Markets...</p>";
 
     try {
         const { data: markets, error } = await _supabase.from('markets').select('*');
@@ -68,27 +93,28 @@ async function renderMarkets() {
             card.setAttribute('data-cat', m.category || "General"); 
 
             card.innerHTML = `
-                <img src="${m.image_url}" onerror="this.src='https://via.placeholder.com/150'">
+                <img src="${m.image_url}" onerror="this.src='https://via.placeholder.com/150'" alt="${m.name}">
                 <h4>${m.name}</h4>
                 <p>${m.description}</p>
             `;
             
-            card.onclick = () => renderItems(m.id, m.name, m.whatsapp_number);
+            card.addEventListener('click', () => renderItems(m.id, m.name, m.whatsapp_number));
             list.appendChild(card);
         });
 
-        filterMarkets(); // Apply current category filter to new cards
+        filterMarkets(); 
 
     } catch (e) {
-        console.error(e);
-        list.innerHTML = "<p>Error loading markets.</p>";
+        console.error("Failed rendering markets:", e);
+        list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Error loading markets.</p>";
     }
 }
 
-// --- 3. ITEM RENDERING ---
 async function renderItems(marketId, marketName, whatsapp) {
     const list = document.getElementById('market-list');
-    list.innerHTML = "<p style='text-align:center;'>Fetching products...</p>";
+    if (!list) return;
+    
+    list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Fetching products...</p>";
 
     try {
         const { data: items, error } = await _supabase
@@ -98,16 +124,19 @@ async function renderItems(marketId, marketName, whatsapp) {
 
         if (error) throw error;
 
-        // Header with Back Button
+        // Clean slate rewrite with precise programmatic grid layout isolation
         list.innerHTML = `
-            <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%;">
-                <button onclick="renderMarkets()" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer;">← Back</button>
+            <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%; grid-column:1/-1;">
+                <button id="back-to-markets-btn" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer;">← Back</button>
                 <h3 style="margin:0;">${marketName}</h3>
             </div>
         `;
 
+        // Bind the back button action natively inside execution stream
+        document.getElementById('back-to-markets-btn').addEventListener('click', renderMarkets);
+
         if (items.length === 0) {
-            list.innerHTML += "<p style='text-align:center; padding:20px;'>Coming soon! No items yet.</p>";
+            list.innerHTML += "<p style='text-align:center; padding:20px; width:100%; grid-column:1/-1;'>Coming soon! No items yet.</p>";
             return;
         }
 
@@ -116,33 +145,67 @@ async function renderItems(marketId, marketName, whatsapp) {
             itemCard.className = 'market-card';
             itemCard.innerHTML = `
                 <div style="display:flex; align-items:center; gap:15px; width:100%;">
-                    <img src="${item.image_url}" onerror="this.src='https://via.placeholder.com/150'" style="width:70px; height:70px; border-radius:12px; object-fit:cover;">
-                    <div style="flex:1;">
+                    <img src="${item.image_url}" onerror="this.src='https://via.placeholder.com/150'" style="width:70px; height:70px; border-radius:12px; object-fit:cover;" alt="${item.name}">
+                    <div style="flex:1; text-align:left;">
                         <h4 style="margin:0; font-size:0.9rem;">${item.name}</h4>
-                        <span class="price-tag">${item.price}</span>
+                        <span class="price-tag">${parseInt(item.price).toLocaleString()} RWF</span>
                     </div>
                     <button class="btn-primary add-to-cart-btn" style="padding:8px 12px; font-size:0.7rem;">Order</button>
                 </div>
             `;
             
-            // Cart Logic
             const orderBtn = itemCard.querySelector('.add-to-cart-btn');
-            orderBtn.onclick = (e) => {
+            orderBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 addToCart(item, whatsapp);
                 orderBtn.innerText = "Added! ✅";
                 setTimeout(() => orderBtn.innerText = "Order", 1000);
-            };
+            });
             
             list.appendChild(itemCard);
         });
     } catch (e) {
-        console.error(e);
-        list.innerHTML = "<p>Error loading items.</p>";
+        console.error("Failed rendering items:", e);
+        list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Error loading items.</p>";
     }
 }
 
-// --- 4. FILTER & CART LOGIC ---
+/* ==========================================================================
+   4. FILTER & TEXT SEARCH ENGINE
+   ========================================================================== */
+function handleMarketSearch(e) {
+    const term = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.market-card');
+    const list = document.getElementById('market-list');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        // Prevent filtering structural title banners and buttons inside items view
+        if (card.querySelector('#back-to-markets-btn') || card.parentElement.id !== 'market-list') return;
+
+        const text = card.innerText.toLowerCase();
+        if (text.includes(term)) {
+            card.style.display = 'flex';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    let noResultsMsg = document.getElementById('no-results');
+    if (visibleCount === 0) {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('p');
+            noResultsMsg.id = 'no-results';
+            noResultsMsg.style.cssText = "text-align:center; padding:40px; color:#666; width:100%; grid-column:1/-1;";
+            noResultsMsg.innerHTML = `🔍 No markets found for "<strong>${e.target.value}</strong>"<br><small>Try checking your spelling or search other categories.</small>`;
+            list.appendChild(noResultsMsg);
+        }
+    } else {
+        if (noResultsMsg) noResultsMsg.remove();
+    }
+}
+
 function filterMarkets() {
     const activeChip = document.querySelector('.filter-chip.active');
     if (!activeChip) return;
@@ -160,6 +223,9 @@ function filterMarkets() {
     });
 }
 
+/* ==========================================================================
+   5. CART TRANSACTION MANAGEMENT
+   ========================================================================== */
 function addToCart(item, whatsapp) {
     cart.push(item);
     currentMarketWhatsApp = whatsapp; 
@@ -194,14 +260,10 @@ function clearCart() {
 function sendOrder() {
     if (cart.length === 0) return;
 
-    // Generate a unique Order ID
     const orderId = "RWA-" + Math.floor(1000 + Math.random() * 9000);
-    
-    // Create the message list
-    let itemDetails = cart.map(item => `- ${item.name} (${item.price})`).join('\n');
+    let itemDetails = cart.map(item => `- ${item.name} (${parseInt(item.price).toLocaleString()} RWF)`).join('\n');
     const total = document.getElementById('cart-total').innerText;
     
-    // The "Professional" Message Template
     const message = encodeURIComponent(
         `📌 *NEW ORDER: ${orderId}*\n` +
         `--------------------------\n` +
@@ -213,24 +275,18 @@ function sendOrder() {
 
     window.open(`https://wa.me/${currentMarketWhatsApp.replace(/\D/g, '')}?text=${message}`, '_blank');
 }
-// ui.js
 
+/* ==========================================================================
+   6. INTERACTIVE UTILITIES (MODALS, THEMES, COMPONENT CONTROLS)
+   ========================================================================== */
 function toggleFAQ(button) {
     const answer = button.nextElementSibling;
     const icon = button.querySelector('span');
-    
-    // 1. Check if this specific answer is already open
     const isOpen = answer.style.display === "block";
 
-    // 2. Close ALL other answers first (Professional Accordion Style)
-    document.querySelectorAll('.faq-answer').forEach(el => {
-        el.style.display = 'none';
-    });
-    document.querySelectorAll('.faq-question span').forEach(sp => {
-        sp.innerText = '+';
-    });
+    document.querySelectorAll('.faq-answer').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.faq-question span').forEach(sp => sp.innerText = '+');
 
-    // 3. If it wasn't open, open it now
     if (!isOpen) {
         answer.style.display = "block";
         icon.innerText = "-";
@@ -240,24 +296,19 @@ function toggleFAQ(button) {
     }
 }
 
-// ui.js
-function openTerms() {
-    document.getElementById('termsModal').style.display = 'flex';
-}
+function openTerms() { document.getElementById('termsModal').style.display = 'flex'; }
+function closeTerms() { document.getElementById('termsModal').style.display = 'none'; }
 
-function closeTerms() {
-    document.getElementById('termsModal').style.display = 'none';
-}
-
-// Close modal if user clicks anywhere outside the white box
-window.onclick = function(event) {
-    const modal = document.getElementById('termsModal');
-    if (event.target == modal) {
-        modal.style.display = "none";
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const body = document.body;
+    const btn = document.getElementById('theme-toggle');
+    
+    if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (btn) btn.innerText = '☀️';
     }
 }
-
-// ui.js
 
 function toggleTheme() {
     const body = document.body;
@@ -265,31 +316,21 @@ function toggleTheme() {
     
     body.classList.toggle('dark-mode');
     
-    // Save preference to local storage
     if (body.classList.contains('dark-mode')) {
         localStorage.setItem('theme', 'dark');
-        btn.innerText = '☀️'; // Switch to sun icon
+        if (btn) btn.innerText = '☀️';
     } else {
         localStorage.setItem('theme', 'light');
-        btn.innerText = '🌙'; // Switch to moon icon
+        if (btn) btn.innerText = '🌙';
     }
 }
 
-// Load saved theme on startup
-window.onload = () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        document.getElementById('theme-toggle').innerText = '☀️';
-    }
-};
-
 async function shareApp() {
-    const btn = document.querySelector('button[title="Share App"]');
+    const btn = document.getElementById('share-btn');
     const originalIcon = btn.innerText;
     
     try {
-        btn.innerText = '⌛'; // Quick feedback
+        btn.innerText = '⌛';
         const shareData = {
             title: 'Rwandamket',
             text: 'Check out Rwandamket for premium chefs, decor, and grocery delivery in Kigali!',
@@ -303,16 +344,14 @@ async function shareApp() {
             alert('Link copied to clipboard!');
         }
     } catch (err) {
-        console.log('Share cancelled or failed');
+        console.log('Share processing paused or exited');
     } finally {
-        btn.innerText = originalIcon; // Set back to 📤
+        btn.innerText = originalIcon;
     }
 }
 
-// Add this separately at the bottom of ui.js
 function scrollToMarkets() {
-    const marketSection = document.getElementById('markets-filter');
-    
+    const marketSection = document.getElementById('markets'); // Syncs with updated HTML ID
     if (marketSection) {
         const headerOffset = 90; 
         const elementPosition = marketSection.getBoundingClientRect().top;
