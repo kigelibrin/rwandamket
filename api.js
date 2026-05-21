@@ -30,14 +30,14 @@ async function fetchItemsByMarket(marketId) {
         }
 
         const { data, error } = await _supabase
-            .from('items')
+            .from('products')
             .select('*') // If items table is small, * is okay, but specific columns are always preferred
             .eq('market_id', sanitizedId); 
 
         if (error) throw error;
         return data;
     } catch (err) {
-        console.error("Error fetching items for market:", err.message);
+        console.error("Error fetching products for market:", err.message);
         return [];
     }
 }
