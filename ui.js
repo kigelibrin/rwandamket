@@ -1,8 +1,10 @@
-// --- 1. GLOBAL STATE & MEMORY RECOVERY ---
+// ==========================================================================
+// 1. GLOBAL STATE & MEMORY RECOVERY
+// ==========================================================================
 let cart = [];
 let currentMarketWhatsApp = "";
 
-// Unified initialization loop prevents event state collissions
+// Unified initialization loop prevents event state collisions
 document.addEventListener('DOMContentLoaded', () => {
     // A. Sync Theme State instantly before first content paint
     initTheme();
@@ -74,7 +76,7 @@ function setupStaticEventListeners() {
 }
 
 /* ==========================================================================
-   3. DATA RENDERING (MARKETS & ITEMS)
+   3. DATA RENDERING (MARKETS & PRODUCTS)
    ========================================================================== */
 async function renderMarkets() {
     const list = document.getElementById('market-list');
@@ -126,7 +128,7 @@ async function renderItems(marketId, marketName, whatsapp) {
 
         // Clean slate rewrite with precise programmatic grid layout isolation
         list.innerHTML = `
-            <div style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%; grid-column:1/-1;">
+            <div id="product-view-header" style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%; grid-column:1/-1;">
                 <button id="back-to-markets-btn" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer;">← Back</button>
                 <h3 style="margin:0;">${marketName}</h3>
             </div>
@@ -157,6 +159,17 @@ async function renderItems(marketId, marketName, whatsapp) {
             const orderBtn = itemCard.querySelector('.add-to-cart-btn');
             orderBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                
+                // Security check guarding against multi-vendor routing splits
+                if (cart.length > 0 && currentMarketWhatsApp !== whatsapp) {
+                    const confirmClear = confirm("You have items from another vendor in your cart. Clear cart to order from this vendor?");
+                    if (confirmClear) {
+                        clearCart();
+                    } else {
+                        return; // Halt item integration
+                    }
+                }
+                
                 addToCart(item, whatsapp);
                 orderBtn.innerText = "Added! ✅";
                 setTimeout(() => orderBtn.innerText = "Order", 1000);
@@ -180,9 +193,6 @@ function handleMarketSearch(e) {
     let visibleCount = 0;
 
     cards.forEach(card => {
-        // Prevent filtering structural title banners and buttons inside items view
-        if (card.querySelector('#back-to-markets-btn') || card.parentElement.id !== 'market-list') return;
-
         const text = card.innerText.toLowerCase();
         if (text.includes(term)) {
             card.style.display = 'flex';
@@ -198,7 +208,7 @@ function handleMarketSearch(e) {
             noResultsMsg = document.createElement('p');
             noResultsMsg.id = 'no-results';
             noResultsMsg.style.cssText = "text-align:center; padding:40px; color:#666; width:100%; grid-column:1/-1;";
-            noResultsMsg.innerHTML = `🔍 No markets found for "<strong>${e.target.value}</strong>"<br><small>Try checking your spelling or search other categories.</small>`;
+            noResultsMsg.innerHTML = `🔍 No results found for "<strong>${e.target.value}</strong>"<br><small>Try checking your spelling or search other categories.</small>`;
             list.appendChild(noResultsMsg);
         }
     } else {
@@ -351,7 +361,7 @@ async function shareApp() {
 }
 
 function scrollToMarkets() {
-    const marketSection = document.getElementById('markets'); // Syncs with updated HTML ID
+    const marketSection = document.getElementById('markets'); 
     if (marketSection) {
         const headerOffset = 90; 
         const elementPosition = marketSection.getBoundingClientRect().top;
