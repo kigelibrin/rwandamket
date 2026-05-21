@@ -74,7 +74,6 @@ function setupStaticEventListeners() {
         });
     });
 }
-
 /* ==========================================================================
    3. DATA RENDERING (MARKETS & PRODUCTS)
    ========================================================================== */
@@ -85,10 +84,16 @@ async function renderMarkets() {
     list.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1/-1;'>Loading Markets...</p>";
 
     try {
-        const { data: markets, error } = await _supabase.from('markets').select('*');
-        if (error) throw error;
-
+        // Connected directly to clean api.js layer
+        const markets = await fetchMarketsFromSupabase();
+        
         list.innerHTML = ""; 
+        
+        if (markets.length === 0) {
+            list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>No markets found.</p>";
+            return;
+        }
+
         markets.forEach(m => {
             const card = document.createElement('div');
             card.className = 'market-card';
@@ -97,7 +102,7 @@ async function renderMarkets() {
             card.innerHTML = `
                 <img src="${m.image_url}" onerror="this.src='https://via.placeholder.com/150'" alt="${m.name}">
                 <h4>${m.name}</h4>
-                <p>${m.description}</p>
+                <p>${m.description || ''}</p>
             `;
             
             card.addEventListener('click', () => renderItems(m.id, m.name, m.whatsapp_number));
@@ -119,12 +124,8 @@ async function renderItems(marketId, marketName, whatsapp) {
     list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Fetching products...</p>";
 
     try {
-        const { data: products, error } = await _supabase
-            .from('products')
-            .select('*')
-            .eq('market_id', marketId);
-
-        if (error) throw error;
+        // Connected directly to clean api.js layer matching Option A (products table)
+        const products = await fetchItemsByMarket(marketId);
 
         // Clean slate rewrite with precise programmatic grid layout isolation
         list.innerHTML = `
@@ -182,7 +183,6 @@ async function renderItems(marketId, marketName, whatsapp) {
         list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Error loading items.</p>";
     }
 }
-
 /* ==========================================================================
    4. FILTER & TEXT SEARCH ENGINE
    ========================================================================== */
