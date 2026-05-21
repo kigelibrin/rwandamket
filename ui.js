@@ -117,8 +117,8 @@ async function renderItems(marketId, marketName, whatsapp) {
     list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Fetching products...</p>";
 
     try {
-        const { data: items, error } = await _supabase
-            .from('items')
+        const { data: products, error } = await _supabase
+            .from('products')
             .select('*')
             .eq('market_id', marketId);
 
@@ -135,12 +135,12 @@ async function renderItems(marketId, marketName, whatsapp) {
         // Bind the back button action natively inside execution stream
         document.getElementById('back-to-markets-btn').addEventListener('click', renderMarkets);
 
-        if (items.length === 0) {
-            list.innerHTML += "<p style='text-align:center; padding:20px; width:100%; grid-column:1/-1;'>Coming soon! No items yet.</p>";
+        if (products.length === 0) {
+            list.innerHTML += "<p style='text-align:center; padding:20px; width:100%; grid-column:1/-1;'>Coming soon! No products yet.</p>";
             return;
         }
 
-        items.forEach(item => {
+        products.forEach(item => {
             const itemCard = document.createElement('div');
             itemCard.className = 'market-card';
             itemCard.innerHTML = `
