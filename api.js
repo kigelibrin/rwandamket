@@ -9,10 +9,10 @@
  */
 async function fetchMarketsFromSupabase() {
     try {
-        // Syncs with Option A database columns + UI necessities
+        // Included momo_number to pass down to dynamic booking UI modals smoothly
         const { data, error } = await _supabase
             .from('markets')
-            .select('id, name, description, category, image_url, whatsapp_number'); 
+            .select('id, name, description, category, image_url, whatsapp_number, momo_number'); 
 
         if (error) throw error;
         return data;
