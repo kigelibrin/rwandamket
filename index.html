@@ -26,7 +26,6 @@
         </div>
     </header>
 
-    <!-- FIX: Everything safely contained inside main -->
     <main>
         <section id="home" class="hero">
             <div class="hero-content">
@@ -47,7 +46,6 @@
             </div>
         </section>
 
-        <!-- FIX: Changed ID to 'markets' to perfectly align with scrollToMarkets UI functions -->
         <section id="markets" class="section-container">
             <h2 class="section-title">Choose a Market</h2>
             
@@ -64,7 +62,6 @@
                 </div>
             </div>
             
-            <!-- Target container for database items rendering -->
             <div id="market-list" class="markets-grid"></div>
         </section>
 
@@ -120,7 +117,6 @@
         </a></p>
     </footer>
 
-    <!-- Modals & Global UI Overlays -->
     <div id="termsModal" class="modal">
         <div class="modal-content">
             <span id="close-modal-btn" class="close-modal">&times;</span>
@@ -135,6 +131,35 @@
         </div>
     </div>
 
+    <div id="paymentModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 style="margin-top: 0; margin-bottom: 5px;">📍 Delivery & Payment</h2>
+            <p style="font-size: 0.85rem; color: #777; margin-bottom: 20px;">Provide your information to finalize the WhatsApp checkout invoice context details.</p>
+            
+            <form id="checkout-form">
+                <div style="margin-bottom: 15px; text-align: left;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Your Name *</label>
+                    <input type="text" id="cust-name" required placeholder="e.g., Keza" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 15px; text-align: left;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Delivery Address / Neighborhood *</label>
+                    <input type="text" id="cust-location" required placeholder="e.g., Kacyiru, KG 566 St" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+                
+                <div style="margin-bottom: 20px; text-align: left;">
+                    <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">MTN / Airtel Mobile Money Number *</label>
+                    <input type="tel" id="cust-momo" required placeholder="e.g., 078XXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="close-payment-btn" class="btn-primary" style="flex: 1; background: #eee; color: #333;">Cancel</button>
+                    <button type="submit" class="btn-primary" style="flex: 2; background: #00A859; color: #fff;">Order on WhatsApp 🚀</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="cart-bar" class="cart-bar hidden">
         <div class="cart-info">
             <span id="cart-count">0 items</span>
@@ -144,7 +169,6 @@
         <button id="checkout-btn" class="checkout-btn">Order on WhatsApp</button>
     </div>
 
-    <!-- External Scripts Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
