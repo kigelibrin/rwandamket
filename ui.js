@@ -3,6 +3,7 @@
 // ==========================================================================
 let cart = [];
 let currentMarketWhatsApp = "";
+let currentMarketMoMo = ""; // Tracks active vendor's MoMo number dynamically
 
 // Unified initialization loop prevents event state collisions
 document.addEventListener('DOMContentLoaded', () => {
@@ -52,6 +53,13 @@ function setupStaticEventListeners() {
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
             if (cart.length === 0) return;
+            
+            // Inject the selected vendor's MoMo number into the modal notice row
+            const displayEl = document.getElementById('merchant-momo-display');
+            if (displayEl) {
+                displayEl.innerText = currentMarketMoMo || "Provided on request";
+            }
+            
             document.getElementById('paymentModal').style.display = 'flex';
         });
     }
@@ -132,7 +140,8 @@ async function renderMarkets() {
                 <p>${m.description || ''}</p>
             `;
             
-            card.addEventListener('click', () => renderItems(m.id, m.name, m.whatsapp_number));
+            // Pass the custom momo_number field value straight out of the database layout here
+            card.addEventListener('click', () => renderItems(m.id, m.name, m.whatsapp_number, m.momo_number));
             list.appendChild(card);
         });
 
@@ -144,7 +153,7 @@ async function renderMarkets() {
     }
 }
 
-async function renderItems(marketId, marketName, whatsapp) {
+async function renderItems(marketId, marketName, whatsapp, marketMomo) {
     const list = document.getElementById('market-list');
     if (!list) return;
     
@@ -198,7 +207,8 @@ async function renderItems(marketId, marketName, whatsapp) {
                     }
                 }
                 
-                addToCart(item, whatsapp);
+                // Track item transaction details coupled with parent market variables
+                addToCart(item, whatsapp, marketMomo);
                 orderBtn.innerText = "Added! ✅";
                 setTimeout(() => orderBtn.innerText = "Order", 1000);
             });
@@ -244,7 +254,6 @@ function handleMarketSearch(e) {
     }
 }
 
-// Fixed selector error: Looking for parent structural view banner exclusion filters
 function filterMarkets() {
     const activeChip = document.querySelector('.filter-chip.active');
     if (!activeChip) return;
@@ -265,9 +274,10 @@ function filterMarkets() {
 /* ==========================================================================
    5. CART TRANSACTION MANAGEMENT
    ========================================================================== */
-function addToCart(item, whatsapp) {
+function addToCart(item, whatsapp, momoNumber) {
     cart.push(item);
     currentMarketWhatsApp = whatsapp; 
+    currentMarketMoMo = momoNumber || "Provided upon confirmation"; 
     updateCartUI();
 }
 
@@ -293,6 +303,8 @@ function updateCartUI() {
 
 function clearCart() {
     cart = [];
+    currentMarketWhatsApp = "";
+    currentMarketMoMo = ""; 
     updateCartUI();
 }
 
