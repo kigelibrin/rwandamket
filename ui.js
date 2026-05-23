@@ -4,16 +4,20 @@
 let cart = [];
 let currentMarketWhatsApp = "";
 let currentMarketMoMo = ""; // Tracks active vendor's MoMo number dynamically
+let userLocationSetting = "remember"; // Tracks location retention preferences ('remember' | 'ask')
 
 // Unified initialization loop prevents event state collisions
 document.addEventListener('DOMContentLoaded', () => {
     // A. Sync Theme State instantly before first content paint
     initTheme();
 
-    // B. Initial Application Data Load
+    // B. Guard Check: Evaluate delivery destination data footprint before browsing
+    checkSavedLocation();
+
+    // C. Initial Application Data Load
     renderMarkets();
 
-    // C. Static Event Listeners Binding (Replacing old HTML inline onclick elements)
+    // D. Static Event Listeners Binding (Replacing old HTML inline onclick elements)
     setupStaticEventListeners();
 });
 
@@ -110,7 +114,77 @@ function setupStaticEventListeners() {
 }
 
 /* ==========================================================================
-   3. DATA RENDERING (MARKETS & PRODUCTS)
+   3. LOCATION SELECTOR COMPONENT LOGIC
+   ========================================================================== */
+function checkSavedLocation() {
+    const savedCity = localStorage.getItem('user_delivery_city');
+    const modal = document.getElementById('locationModal');
+    
+    if (savedCity) {
+        // City validation trace present: bypass prompt
+        if (modal) modal.style.display = 'none';
+        
+        // Auto-seed existing checkout address element rows if present
+        const addressInput = document.getElementById('cust-location');
+        if (addressInput && !addressInput.value) {
+            addressInput.value = `${savedCity}, `;
+        }
+    } else {
+        // No location found: invoke forced layout intercept selection modal
+        if (modal) modal.style.display = 'flex';
+    }
+    
+    // Wire context actions to the custom location structure buttons
+    initLocationListeners();
+}
+
+function initLocationListeners() {
+    const modal = document.getElementById('locationModal');
+    const toggleRemember = document.getElementById('loc-remember');
+    const toggleAsk = document.getElementById('loc-ask');
+    
+    if (!modal) return;
+
+    // Toggle button pill state handlers
+    if (toggleRemember && toggleAsk) {
+        toggleRemember.addEventListener('click', () => {
+            toggleRemember.classList.add('active');
+            toggleAsk.classList.remove('active');
+            userLocationSetting = "remember";
+        });
+        
+        toggleAsk.addEventListener('click', () => {
+            toggleAsk.classList.add('active');
+            toggleRemember.classList.remove('active');
+            userLocationSetting = "ask";
+        });
+    }
+
+    // Location selection card components routing logic
+    document.querySelectorAll('.location-option-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const selectedCity = this.getAttribute('data-city');
+            
+            if (userLocationSetting === "remember") {
+                localStorage.setItem('user_delivery_city', selectedCity);
+            } else {
+                localStorage.removeItem('user_delivery_city'); // Evict data traces
+            }
+            
+            // Forward city text metadata directly to lower checkout order forms
+            const addressInput = document.getElementById('cust-location');
+            if (addressInput) {
+                addressInput.value = `${selectedCity}, `;
+            }
+            
+            // Clean modal view exit dismiss closure animation transition
+            modal.style.display = 'none';
+        });
+    });
+}
+
+/* ==========================================================================
+   4. DATA RENDERING (MARKETS & PRODUCTS)
    ========================================================================== */
 async function renderMarkets() {
     const list = document.getElementById('market-list');
@@ -222,7 +296,7 @@ async function renderItems(marketId, marketName, whatsapp, marketMomo) {
 }
 
 /* ==========================================================================
-   4. FILTER & TEXT SEARCH ENGINE
+   5. FILTER & TEXT SEARCH ENGINE
    ========================================================================== */
 function handleMarketSearch(e) {
     const term = e.target.value.toLowerCase();
@@ -272,7 +346,7 @@ function filterMarkets() {
 }
 
 /* ==========================================================================
-   5. CART TRANSACTION MANAGEMENT
+   6. CART TRANSACTION MANAGEMENT
    ========================================================================== */
 function addToCart(item, whatsapp, momoNumber) {
     cart.push(item);
@@ -346,7 +420,7 @@ function sendOrder() {
 }
 
 /* ==========================================================================
-   6. INTERACTIVE UTILITIES (MODALS, THEMES, COMPONENT CONTROLS)
+   7. INTERACTIVE UTILITIES (MODALS, THEMES, COMPONENT CONTROLS)
    ========================================================================== */
 function toggleFAQ(button) {
     const answer = button.nextElementSibling;
