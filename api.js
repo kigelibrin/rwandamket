@@ -3,16 +3,24 @@
    ========================================================================== */
 
 /**
- * Fetches all available markets from Supabase.
+ * Fetches markets from Supabase, optionally filtered by a specific city/location.
  * Optimized to grab only columns required by the UI layouts.
+ * @param {string|null} selectedCity - Optional city name to filter vendors (e.g., 'Kigali')
  * @returns {Promise<Array>} Array of market objects
  */
-async function fetchMarketsFromSupabase() {
+async function fetchMarketsFromSupabase(selectedCity = null) {
     try {
-        // Included momo_number to pass down to dynamic booking UI modals smoothly
-        const { data, error } = await _supabase
+        // 1. Build the base query layout selective properties
+        let query = _supabase
             .from('markets')
-            .select('id, name, description, category, image_url, whatsapp_number, momo_number'); 
+            .select('id, name, description, category, image_url, whatsapp_number, momo_number, location'); 
+
+        // 2. Dynamic Location Filtering: If a city is active, narrow database return rows instantly
+        if (selectedCity) {
+            query = query.eq('location', selectedCity);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data;
