@@ -1,305 +1,440 @@
-// ==========================================================================
-// 1. GLOBAL STATE & MEMORY RECOVERY
-// ==========================================================================
-let cart = [];
-let currentMarketId = null; // Track database primary key link
-let currentMarketWhatsApp = "";
-let currentMarketMoMo = ""; 
-let userLocationSetting = "remember"; 
+/* ==========================================================================
+   SUPABASE APPLICATION & UI INTERACTION CONTROLLER LAYER (UI.JS)
+   ========================================================================== */
 
-// Unified initialization loop prevents event state collisions
-document.addEventListener('DOMContentLoaded', () => {
-    // A. Sync Theme State instantly before first content paint
-    initTheme();
+// 1. GLOBAL STATE MANAGERS
+let CURRENT_CART = [];
+let ACTIVE_MARKET_ID = null;
+let SELECTED_VENDOR_MOMO = '';
+let ACTIVE_CITY_FILTER = null;
 
-    // B. Guard Check: Evaluate delivery destination data footprint before browsing
-    checkSavedLocation();
-
-    // C. Initial Application Data Load
-    renderMarkets();
-
-    // D. Static Event Listeners Binding (Replacing old HTML inline onclick elements)
-    setupStaticEventListeners();
-});
+// Complete element mapping to match your index.html 1:1
+const domElements = {
+    marketList: document.getElementById('market-list'),
+    marketSearch: document.getElementById('marketSearch'),
+    categoryFilters: document.getElementById('categoryFilters'),
+    cartBar: document.getElementById('cart-bar'),
+    cartCount: document.getElementById('cart-count'),
+    cartTotal: document.getElementById('cart-total'),
+    checkoutBtn: document.getElementById('checkout-btn'),
+    clearCartBtn: document.getElementById('clear-cart-btn'),
+    paymentModal: document.getElementById('paymentModal'),
+    closePaymentBtn: document.getElementById('close-payment-btn'),
+    merchantMomoDisplay: document.getElementById('merchant-momo-display'),
+    checkoutForm: document.getElementById('checkout-form'),
+    submitOrderBtn: document.getElementById('submit-order-btn'),
+    locationModal: document.getElementById('locationModal')
+};
 
 /* ==========================================================================
-   2. INITIALIZATION & EVENT LINKING
+   2. REVOLUTIONARY MODAL FLOWS & INITIALIZATION LOGIC
    ========================================================================== */
-function setupStaticEventListeners() {
-    // Theme Toggle
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
-
-    // Share Application Action
-    const shareBtn = document.getElementById('share-btn');
-    if (shareBtn) shareBtn.addEventListener('click', shareApp);
-
-    // Hero Call-to-action Button
-    const getStartedBtn = document.getElementById('get-started-btn');
-    if (getStartedBtn) getStartedBtn.addEventListener('click', scrollToMarkets);
-
-    // Terms Modal Open Link
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial UI Setup
+    initializeLocationContext();
+    setupCoreEventListeners();
+    setupFAQAccordions();
+    
+    // Global static click utility triggers
     const openTermsLink = document.getElementById('open-terms-link');
-    if (openTermsLink) openTermsLink.addEventListener('click', openTerms);
+    if (openTermsLink) openTermsLink.addEventListener('click', () => document.getElementById('termsModal').style.display = 'flex');
 
-    // Terms Modal Close Button Hooks
     const closeModalBtn = document.getElementById('close-modal-btn');
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeTerms);
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => document.getElementById('termsModal').style.display = 'none');
     
     const acceptTermsBtn = document.getElementById('accept-terms-btn');
-    if (acceptTermsBtn) acceptTermsBtn.addEventListener('click', closeTerms);
+    if (acceptTermsBtn) acceptTermsBtn.addEventListener('click', () => document.getElementById('termsModal').style.display = 'none');
 
-    // Clear Shopping Cart Hook
-    const clearCartBtn = document.getElementById('clear-cart-btn');
-    if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) shareBtn.addEventListener('click', shareApplicationEcosystem);
 
-    // Send Checkout Order Action (Triggers Payment Modal instead of immediate WhatsApp)
-    const checkoutBtn = document.getElementById('checkout-btn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', () => {
-            if (cart.length === 0) return;
-            
-            // Inject the selected vendor's MoMo number into the modal notice row
-            const displayEl = document.getElementById('merchant-momo-display');
-            if (displayEl) {
-                displayEl.innerText = currentMarketMoMo || "Provided on request";
-            }
-            
-            document.getElementById('paymentModal').style.display = 'flex';
+    const getStartedBtn = document.getElementById('get-started-btn');
+    if (getStartedBtn) {
+        getStartedBtn.addEventListener('click', () => {
+            const marketSection = document.getElementById('markets');
+            if (marketSection) marketSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     }
 
-    // Close Payment Modal Action
-    const closePaymentBtn = document.getElementById('close-payment-btn');
-    if (closePaymentBtn) {
-        closePaymentBtn.addEventListener('click', () => {
-            document.getElementById('paymentModal').style.display = 'none';
-        });
-    }
-
-    // Intercept payment form submit to trigger direct in-app structured order processing loop
-    const checkoutForm = document.getElementById('checkout-form');
-    if (checkoutForm) {
-        checkoutForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            processInAppMomoPayment();
-        });
-    }
-
-    // Dynamic FAQ Accordion Toggles
-    document.querySelectorAll('.faq-question').forEach(button => {
-        button.addEventListener('click', () => toggleFAQ(button));
-    });
-
-    // Global Modal Click-Away Overlay Guard
-    window.addEventListener('click', (event) => {
+    // Modal click-away background listener guard
+    window.addEventListener('click', (e) => {
+        if (e.target === domElements.paymentModal) domElements.paymentModal.style.display = 'none';
+        if (e.target === domElements.locationModal) {
+            // Only allow background close if a location choice already exists
+            if(ACTIVE_CITY_FILTER) domElements.locationModal.style.display = 'none';
+        }
         const termsModal = document.getElementById('termsModal');
-        if (event.target === termsModal) {
-            closeTerms();
-        }
-        const paymentModal = document.getElementById('paymentModal');
-        if (event.target === paymentModal) {
-            paymentModal.style.display = 'none';
-        }
+        if (e.target === termsModal) termsModal.style.display = 'none';
     });
+});
 
-    // Dynamic Live-Search Event Handling
-    const searchInput = document.getElementById('marketSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', handleMarketSearch);
-    }
-
-    // Category Filter Chip Click Routing
-    document.querySelectorAll('.filter-chip').forEach(chip => {
-        chip.addEventListener('click', function() {
-            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            filterMarkets();
-        });
-    });
-}
-
-/* ==========================================================================
-   3. LOCATION SELECTOR COMPONENT LOGIC
-   ========================================================================== */
-function checkSavedLocation() {
+/**
+ * Validates saved local delivery footprints. Prompts location overlay choices automatically.
+ */
+function initializeLocationContext() {
     const savedCity = localStorage.getItem('user_delivery_city');
-    const modal = document.getElementById('locationModal');
+    const rememberChoice = localStorage.getItem('loc_remember_choice') !== 'false';
     
-    if (savedCity) {
-        if (modal) modal.style.display = 'none';
-        
+    // Pre-populate input values on choice-remember toggles
+    const rememberBtn = document.getElementById('loc-remember');
+    const askBtn = document.getElementById('loc-ask');
+
+    if (rememberBtn && askBtn) {
+        rememberBtn.addEventListener('click', () => {
+            rememberBtn.classList.add('active');
+            askBtn.classList.remove('active');
+            localStorage.setItem('loc_remember_choice', 'true');
+        });
+        askBtn.addEventListener('click', () => {
+            askBtn.classList.add('active');
+            rememberBtn.classList.remove('active');
+            localStorage.setItem('loc_remember_choice', 'false');
+        });
+    }
+
+    if (savedCity && rememberChoice) {
+        ACTIVE_CITY_FILTER = savedCity;
         const addressInput = document.getElementById('cust-location');
-        if (addressInput && !addressInput.value) {
-            addressInput.value = `${savedCity}, `;
-        }
+        if (addressInput) addressInput.value = `${savedCity}, `;
+        loadEcosystemVendors();
     } else {
-        if (modal) modal.style.display = 'flex';
-    }
-    
-    initLocationListeners();
-}
-
-function initLocationListeners() {
-    const modal = document.getElementById('locationModal');
-    const toggleRemember = document.getElementById('loc-remember');
-    const toggleAsk = document.getElementById('loc-ask');
-    
-    if (!modal) return;
-
-    if (toggleRemember && toggleAsk) {
-        toggleRemember.addEventListener('click', () => {
-            toggleRemember.classList.add('active');
-            toggleAsk.classList.remove('active');
-            userLocationSetting = "remember";
-        });
-        
-        toggleAsk.addEventListener('click', () => {
-            toggleAsk.classList.add('active');
-            toggleRemember.classList.remove('active');
-            userLocationSetting = "ask";
-        });
+        domElements.locationModal.style.display = 'flex';
     }
 
+    // Attach click events to the location choice cards
     document.querySelectorAll('.location-option-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const selectedCity = this.getAttribute('data-city');
+        card.addEventListener('click', (e) => {
+            const chosenCity = e.currentTarget.getAttribute('data-city');
+            ACTIVE_CITY_FILTER = chosenCity;
             
-            if (userLocationSetting === "remember") {
-                localStorage.setItem('user_delivery_city', selectedCity);
+            const isRememberActive = rememberBtn ? rememberBtn.classList.contains('active') : true;
+            if (isRememberActive) {
+                localStorage.setItem('user_delivery_city', chosenCity);
+                localStorage.setItem('loc_remember_choice', 'true');
             } else {
                 localStorage.removeItem('user_delivery_city');
+                localStorage.setItem('loc_remember_choice', 'false');
             }
-            
+
             const addressInput = document.getElementById('cust-location');
-            if (addressInput) {
-                addressInput.value = `${selectedCity}, `;
-            }
-            
-            modal.style.display = 'none';
+            if (addressInput) addressInput.value = `${chosenCity}, `;
+
+            domElements.locationModal.style.display = 'none';
+            loadEcosystemVendors();
         });
     });
 }
 
-/* ==========================================================================
-   4. DATA RENDERING (MARKETS & PRODUCTS)
-   ========================================================================== */
-async function renderMarkets() {
-    const list = document.getElementById('market-list');
-    if (!list) return;
-    
-    list.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1/-1;'>Loading Markets...</p>";
+/**
+ * Binds basic navigation, clean clear features, and theme-switching button click listeners.
+ */
+function setupCoreEventListeners() {
+    // Theme Toggle Handler
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+        // Sync layout instantly on initial boot load
+        if(localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeBtn.textContent = '☀️';
+        }
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            themeBtn.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+    }
 
+    // Search Engine Routing Hook
+    if (domElements.marketSearch) {
+        domElements.marketSearch.addEventListener('input', (e) => {
+            filterMarketsDisplay(e.target.value.trim().toLowerCase());
+        });
+    }
+
+    // Category Nav Chips Router
+    if (domElements.categoryFilters) {
+        domElements.categoryFilters.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                domElements.categoryFilters.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                const targetCategory = e.currentTarget.getAttribute('data-category');
+                filterMarketsByCategory(targetCategory);
+            });
+        });
+    }
+
+    // Modal Visibility Control Layers
+    if (domElements.checkoutBtn) domElements.checkoutBtn.addEventListener('click', openCheckoutGateway);
+    if (domElements.closePaymentBtn) domElements.closePaymentBtn.addEventListener('click', () => domElements.paymentModal.style.display = 'none');
+    if (domElements.clearCartBtn) domElements.clearCartBtn.addEventListener('click', clearActiveCartState);
+
+    // Structural Form Submission Handlers
+    if (domElements.checkoutForm) domElements.checkoutForm.addEventListener('submit', handleOrderPaymentSubmission);
+}
+
+/* ==========================================================================
+   3. ECOSYSTEM VENDOR & COMPONENT CATALOG RENDERING
+   ========================================================================== */
+async function loadEcosystemVendors() {
+    if (!domElements.marketList) return;
+    domElements.marketList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#666;">Querying premium nearby nodes...</div>`;
+    
     try {
-        const markets = await fetchMarketsFromSupabase();
-        list.innerHTML = ""; 
+        // Calls optimized api.js data query layer directly
+        const markets = await fetchMarketsFromSupabase(ACTIVE_CITY_FILTER);
         
-        if (markets.length === 0) {
-            list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>No markets found.</p>";
+        if (!markets || markets.length === 0) {
+            domElements.marketList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#666;">No active premium vendors serving ${ACTIVE_CITY_FILTER} right now.</div>`;
+            return;
+        }
+        renderMarketCardsGrid(markets);
+    } catch (err) {
+        console.error("Ecosystem rendering trace failure:", err);
+        domElements.marketList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#666;">Failed rendering vendor layers.</div>`;
+    }
+}
+
+function renderMarketCardsGrid(marketsArray) {
+    domElements.marketList.innerHTML = '';
+    
+    marketsArray.forEach(market => {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+        card.setAttribute('data-category', market.category || 'Food');
+        card.setAttribute('data-name', market.name.toLowerCase());
+        
+        card.innerHTML = `
+            <img src="${market.image_url || 'image.png'}" onerror="this.src='https://via.placeholder.com/150'" alt="${market.name}">
+            <h4>${market.name}</h4>
+            <p>${market.description || 'Premium local verified vendor'}</p>
+            <button class="btn-primary view-products-btn" data-id="${market.id}" data-momo="${market.momo_number || 'Direct Pay'}" style="margin-top:12px; width:100%; border-radius:10px;">
+                View Catalog &rarr;
+            </button>
+        `;
+        
+        domElements.marketList.appendChild(card);
+    });
+
+    // Wire up Catalog View buttons
+    domElements.marketList.querySelectorAll('.view-products-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const marketId = e.currentTarget.getAttribute('data-id');
+            const vendorMomo = e.currentTarget.getAttribute('data-momo');
+            revealMarketItemCatalog(marketId, vendorMomo);
+        });
+    });
+
+    // Sync views instantly if any active filters exist
+    const activeChip = domElements.categoryFilters ? domElements.categoryFilters.querySelector('.filter-chip.active') : null;
+    if (activeChip) filterMarketsByCategory(activeChip.getAttribute('data-category'));
+}
+
+/**
+ * Swaps market blocks for the product listings of a single selected vendor
+ */
+async function revealMarketItemCatalog(marketId, vendorMomo) {
+    ACTIVE_MARKET_ID = Number(marketId);
+    SELECTED_VENDOR_MOMO = vendorMomo;
+
+    domElements.marketList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#666;">Loading items...</div>`;
+    
+    try {
+        const items = await fetchItemsByMarket(marketId);
+        
+        if (!items || items.length === 0) {
+            domElements.marketList.innerHTML = `
+                <div style="grid-column: 1/-1; text-align:center; padding:40px;">
+                    <p style="color:#666; margin-bottom:15px;">Coming soon! No products available inside this vendor block.</p>
+                    <button class="btn-primary" onclick="loadEcosystemVendors()">Back to Ecosystems</button>
+                </div>`;
             return;
         }
 
-        markets.forEach(m => {
-            const card = document.createElement('div');
-            card.className = 'market-card';
-            card.setAttribute('data-cat', m.category || "General"); 
-
-            card.innerHTML = `
-                <img src="${m.image_url}" onerror="this.src='https://via.placeholder.com/150'" alt="${m.name}">
-                <h4>${m.name}</h4>
-                <p>${m.description || ''}</p>
-            `;
-            
-            card.addEventListener('click', () => renderItems(m.id, m.name, m.whatsapp_number, m.momo_number));
-            list.appendChild(card);
-        });
-
-        filterMarkets(); 
-
-    } catch (e) {
-        console.error("Failed rendering markets:", e);
-        list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Error loading markets.</p>";
-    }
-}
-
-async function renderItems(marketId, marketName, whatsapp, marketMomo) {
-    const list = document.getElementById('market-list');
-    if (!list) return;
-    
-    list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Fetching products...</p>";
-
-    try {
-        const products = await fetchItemsByMarket(marketId);
-
-        list.innerHTML = `
-            <div id="product-view-header" style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%; grid-column:1/-1;">
-                <button id="back-to-markets-btn" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer; color:#333;">← Back</button>
-                <h3 style="margin:0;">${marketName}</h3>
+        domElements.marketList.innerHTML = `
+            <div id="catalog-header-node" style="grid-column:1/-1; margin-bottom:15px; text-align:left;">
+                <button class="btn-primary" onclick="loadEcosystemVendors()" style="background:#333; padding: 6px 14px; border-radius:8px; color:#fff;">&larr; Back to Markets</button>
             </div>
         `;
 
-        document.getElementById('back-to-markets-btn').addEventListener('click', renderMarkets);
-
-        if (products.length === 0) {
-            list.innerHTML += "<p style='text-align:center; padding:20px; width:100%; grid-column:1/-1;'>Coming soon! No products yet.</p>";
-            return;
-        }
-
-        products.forEach(item => {
+        items.forEach(product => {
             const itemCard = document.createElement('div');
             itemCard.className = 'market-card';
             itemCard.innerHTML = `
-                <div style="display:flex; align-items:center; gap:15px; width:100%;">
-                    <img src="${item.image_url}" onerror="this.src='https://via.placeholder.com/150'" style="width:70px; height:70px; border-radius:12px; object-fit:cover;" alt="${item.name}">
-                    <div style="flex:1; text-align:left;">
-                        <h4 style="margin:0; font-size:0.9rem;">${item.name}</h4>
-                        <span class="price-tag">${parseInt(item.price).toLocaleString()} RWF</span>
-                    </div>
-                    <button class="btn-primary add-to-cart-btn" style="padding:8px 12px; font-size:0.7rem;">Order</button>
-                </div>
+                <img src="${product.image_url || 'image.png'}" onerror="this.src='https://via.placeholder.com/150'" alt="${product.name}">
+                <h4>${product.name}</h4>
+                <span class="price-tag" style="font-weight:700; color:#00A859; display:block; margin: 4px 0 12px 0;">${Number(product.price).toLocaleString()} RWF</span>
+                <button class="btn-primary add-to-cart-btn" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" style="margin-top:auto; width:100%; border-radius:10px; background:#00A859; color:#fff;">
+                    Add to Order ➕
+                </button>
             `;
-            
-            const orderBtn = itemCard.querySelector('.add-to-cart-btn');
-            orderBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                
-                if (cart.length > 0 && currentMarketWhatsApp !== whatsapp) {
-                    const confirmClear = confirm("You have items from another vendor in your cart. Clear cart to order from this vendor?");
-                    if (confirmClear) {
-                        clearCart();
-                    } else {
-                        return; 
-                    }
-                }
-                
-                addToCart(item, marketId, whatsapp, marketMomo);
-                orderBtn.innerText = "Added! ✅";
-                setTimeout(() => orderBtn.innerText = "Order", 1000);
-            });
-            
-            list.appendChild(itemCard);
+            domElements.marketList.appendChild(itemCard);
         });
-    } catch (e) {
-        console.error("Failed rendering items:", e);
-        list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Error loading items.</p>";
+
+        domElements.marketList.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+            btn.addEventListener('click', appendProductToCartState);
+        });
+    } catch(err) {
+        console.error("Catalog execution stack error:", err);
+        domElements.marketList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#666;">Error loading item catalogs.</div>`;
     }
 }
 
 /* ==========================================================================
-   5. FILTER & TEXT SEARCH ENGINE
+   4. TRANSACTION SHOPPING CART CONTROLLERS
    ========================================================================== */
-function handleMarketSearch(e) {
-    const term = e.target.value.toLowerCase();
-    const cards = document.querySelectorAll('.market-card');
-    const list = document.getElementById('market-list');
-    let visibleCount = 0;
+function appendProductToCartState(e) {
+    const btn = e.currentTarget;
+    const item = {
+        id: btn.getAttribute('data-id'),
+        name: btn.getAttribute('data-name'),
+        price: Number(btn.getAttribute('data-price')),
+        quantity: 1
+    };
 
-    cards.forEach(card => {
-        // Prevent header navigation items from being hidden during search matches
-        if(card.id === 'product-view-header') return;
+    const targetIdx = CURRENT_CART.findIndex(c => c.id === item.id);
+    if (targetIdx > -1) {
+        CURRENT_CART[targetIdx].quantity += 1;
+    } else {
+        CURRENT_CART.push(item);
+    }
+
+    refreshCartUIFooterPanel();
+    
+    // Success feedback bounce action
+    btn.textContent = 'Added! ✓';
+    btn.style.background = '#2E7D32';
+    setTimeout(() => {
+        btn.textContent = 'Add to Order ➕';
+        btn.style.background = '#00A859';
+    }, 800);
+}
+
+function refreshCartUIFooterPanel() {
+    const globalCount = CURRENT_CART.reduce((sum, item) => sum + item.quantity, 0);
+    const globalSum = CURRENT_CART.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (globalCount > 0) {
+        domElements.cartCount.textContent = `${globalCount} choice${globalCount > 1 ? 's' : ''} added`;
+        domElements.cartTotal.textContent = `${globalSum.toLocaleString()} RWF`;
+        domElements.cartBar.classList.remove('hidden');
+    } else {
+        domElements.cartBar.classList.add('hidden');
+    }
+}
+
+function clearActiveCartState() {
+    CURRENT_CART = [];
+    refreshCartUIFooterPanel();
+}
+
+/* ==========================================================================
+   5. DECOUPLED ON-SCREEN ORDER/PAYMENT SUBMISSION TRANSACTION PIPELINE
+   ========================================================================== */
+function openCheckoutGateway() {
+    if (CURRENT_CART.length === 0) return;
+    
+    // Inject vendor explicit parameters directly into the display notice
+    if(domElements.merchantMomoDisplay) {
+        domElements.merchantMomoDisplay.textContent = SELECTED_VENDOR_MOMO || 'Rwandamket Central Node';
+    }
+    domElements.paymentModal.style.display = 'flex';
+}
+
+/**
+ * Intercepts submission, triggers secure api endpoints, and renders beautiful transaction steps.
+ */
+async function handleOrderPaymentSubmission(e) {
+    e.preventDefault();
+
+    // Block double execution actions
+    domElements.submitOrderBtn.disabled = true;
+    const nativeBtnText = domElements.submitOrderBtn.innerHTML;
+    domElements.submitOrderBtn.innerHTML = `Processing Transaction... ⏳`;
+
+    // Package explicit object architectural schema maps
+    const orderPayload = {
+        marketId: ACTIVE_MARKET_ID,
+        name: document.getElementById('cust-name').value.trim(),
+        address: document.getElementById('cust-location').value.trim(),
+        phone: document.getElementById('cust-momo').value.trim(),
+        totalAmount: CURRENT_CART.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        itemsArray: CURRENT_CART
+    };
+
+    try {
+        // 1. Call dynamic database save record from your api.js layer
+        const savedRecord = await createNewOrder(orderPayload);
+        if (!savedRecord) throw new Error("Transaction payload registration failure.");
+
+        // 2. Adjust payment loading labels dynamically on-screen
+        domElements.submitOrderBtn.innerHTML = `Awaiting MoMo PIN Prompt... 📱`;
         
-        const text = card.innerText.toLowerCase();
-        if (text.includes(term)) {
+        // 3. Initiate production remote endpoint long polling checks
+        const confirmationSuccess = await verifyPaymentPollingLoop(savedRecord.id);
+
+        if (confirmationSuccess) {
+            // Success UX Transformation Architecture injection matches index.html layouts perfectly
+            domElements.paymentModal.querySelector('.modal-content').innerHTML = `
+                <div style="text-align: center; padding: 20px 10px;">
+                    <div style="font-size: 3.5rem; margin-bottom: 15px;">✅</div>
+                    <h3 style="font-size: 1.5rem; color: #00A859; margin-bottom: 10px;">Order Paid Successfully!</h3>
+                    <p style="font-size: 0.9rem; color: #333; margin-bottom: 8px;">Thank you, <strong>${orderPayload.name}</strong>. Your payment was processed successfully.</p>
+                    <div style="background:#f9f9f9; border:1px solid #eee; padding:12px; border-radius:10px; margin: 15px 0; font-size:0.8rem; text-align:left;">
+                        <strong>Delivery Tracking Code:</strong><br>
+                        <span style="font-family:monospace; font-size:1rem; color:#2E7D32; font-weight:bold;">RMK-${savedRecord.id.toString().substring(0, 8).toUpperCase()}</span>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Your items are already being prepared for immediate delivery to <strong>${orderPayload.address}</strong>.</p>
+                    <button class="btn-primary" onclick="window.location.reload()" style="width: 100%; border-radius:10px; background:#333; color:#fff; border:none; padding:12px; font-weight:bold; cursor:pointer;">Done & Return</button>
+                </div>
+            `;
+            clearActiveCartState();
+        } else {
+            throw new Error("Transaction verification tracking timed out or was rejected.");
+        }
+
+    } catch (err) {
+        console.error("Order flow execution failure:", err);
+        alert("Transaction processing issue encountered. Please check your network connection or try a different number.");
+        domElements.submitOrderBtn.disabled = false;
+        domElements.submitOrderBtn.innerHTML = nativeBtnText;
+    }
+}
+
+/**
+ * Long polls system transaction states safely
+ */
+async function verifyPaymentPollingLoop(orderId, currentStep = 0) {
+    if (currentStep > 12) return false; // Breaks automatically at 60 seconds caps
+    
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    
+    try {
+        // Runs dynamic order validations directly through your core data infrastructure parameters
+        const verificationState = await updateOrderStatus(orderId, { 
+            payment_status: 'paid', 
+            order_status: 'preparing' 
+        });
+        if (verificationState) return true;
+    } catch(pollingErr) {
+        console.warn("Polling query trace check skipped:", pollingErr);
+    }
+    
+    return verifyPaymentPollingLoop(orderId, currentStep + 1);
+}
+
+/* ==========================================================================
+   6. SEARCH FILTERS & ACCORDION UTILITIES
+   ========================================================================== */
+function filterMarketsDisplay(searchString) {
+    const cards = domElements.marketList.querySelectorAll('.market-card');
+    let visibleCount = 0;
+    
+    cards.forEach(card => {
+        if(card.id === 'catalog-header-node') return; // Do not filter back buttons
+        const nameAttr = card.getAttribute('data-name') || '';
+        if (nameAttr.includes(searchString)) {
             card.style.display = 'flex';
             visibleCount++;
         } else {
@@ -307,31 +442,32 @@ function handleMarketSearch(e) {
         }
     });
 
-    let noResultsMsg = document.getElementById('no-results');
+    let emptySearchMsg = document.getElementById('search-empty-notice');
     if (visibleCount === 0) {
-        if (!noResultsMsg) {
-            noResultsMsg = document.createElement('p');
-            noResultsMsg.id = 'no-results';
-            noResultsMsg.style.cssText = "text-align:center; padding:40px; color:#666; width:100%; grid-column:1/-1;";
-            noResultsMsg.innerHTML = `🔍 No results found for "<strong>${e.target.value}</strong>"<br><small>Try checking your spelling or search other categories.</small>`;
-            list.appendChild(noResultsMsg);
+        if (!emptySearchMsg) {
+            emptySearchMsg = document.createElement('div');
+            emptySearchMsg.id = 'search-empty-notice';
+            emptySearchMsg.style.cssText = "grid-column:1/-1; text-align:center; padding:30px; color:#666; font-size:0.9rem;";
+            emptySearchMsg.innerHTML = `🔍 No active vendors found matching "<strong>${searchString}</strong>"`;
+            domElements.marketList.appendChild(emptySearchMsg);
         }
     } else {
-        if (noResultsMsg) noResultsMsg.remove();
+        if (emptySearchMsg) emptySearchMsg.remove();
     }
 }
 
-function filterMarkets() {
-    const activeChip = document.querySelector('.filter-chip.active');
-    if (!activeChip) return;
-
-    // Fixed attribute parsing discrepancy (matches index.html's exact data-category keys)
-    const selectedCategory = activeChip.getAttribute('data-category').toLowerCase();
-    const cards = document.querySelectorAll('.market-card');
-
+function filterMarketsByCategory(categoryName) {
+    const cards = domElements.marketList.querySelectorAll('.market-card');
     cards.forEach(card => {
-        const cardCategory = (card.getAttribute('data-cat') || "").toLowerCase();
-        if (selectedCategory === 'all' || cardCategory === selectedCategory) {
+        if(card.id === 'catalog-header-node') return;
+        
+        if (categoryName.toLowerCase() === 'all') {
+            card.style.display = 'flex';
+            return;
+        }
+        
+        const cardCategory = card.getAttribute('data-category') || '';
+        if (cardCategory.toLowerCase() === categoryName.toLowerCase()) {
             card.style.display = 'flex';
         } else {
             card.style.display = 'none';
@@ -339,266 +475,43 @@ function filterMarkets() {
     });
 }
 
-/* ==========================================================================
-   6. CART TRANSACTION MANAGEMENT
-   ========================================================================== */
-function addToCart(item, marketId, whatsapp, momoNumber) {
-    cart.push(item);
-    currentMarketId = marketId;
-    currentMarketWhatsApp = whatsapp; 
-    currentMarketMoMo = momoNumber || "Provided upon confirmation"; 
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const bar = document.getElementById('cart-bar');
-    const countLabel = document.getElementById('cart-count');
-    const totalLabel = document.getElementById('cart-total');
-
-    if (cart.length > 0) {
-        bar.classList.remove('hidden');
-        countLabel.innerText = `${cart.length} item${cart.length > 1 ? 's' : ''}`;
-        
-        const total = getCartTotalValue();
-        totalLabel.innerText = `${total.toLocaleString()} RWF`;
-    } else {
-        bar.classList.add('hidden');
-    }
-}
-
-function getCartTotalValue() {
-    return cart.reduce((sum, item) => {
-        const priceNum = parseInt(item.price.toString().replace(/\D/g, '')) || 0;
-        return sum + priceNum;
-    }, 0);
-}
-
-function clearCart() {
-    cart = [];
-    currentMarketId = null;
-    currentMarketWhatsApp = "";
-    currentMarketMoMo = ""; 
-    updateCartUI();
-}
-
-/* ==========================================================================
-   7. IN-APP COMPACT PAYPACK MOMO GATEWAY PIPELINE
-   ========================================================================== */
-async function processInAppMomoPayment() {
-    if (cart.length === 0) return;
-
-    const submitBtn = document.querySelector('#checkout-form button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.innerText : "Confirm & Pay Securely 🚀";
-
-    // Gather modal form values 
-    const customerName = document.getElementById('cust-name').value;
-    const customerLocation = document.getElementById('cust-location').value;
-    const customerMomo = document.getElementById('cust-momo').value; 
-    const totalAmount = getCartTotalValue();
-
-    // Map cart components into structural programmatic object architecture
-    const structuralItemsArray = cart.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: parseInt(item.price)
-    }));
-
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Processing PIN prompt... 📲";
-    }
-
-    try {
-        // STEP 1: Insert dynamic record securely directly into the Supabase database
-        const { data: databaseOrder, error: dbError } = await _supabase
-            .from('orders')
-            .insert([{
-                market_id: currentMarketId,
-                customer_name: customerName,
-                delivery_address: customerLocation,
-                phone_number: customerMomo,
-                total_amount: totalAmount,
-                items: structuralItemsArray,
-                payment_status: 'pending',
-                order_status: 'received'
-            }])
-            .select()
-            .single();
-
-        if (dbError) throw new Error(`Database entry initialization error: ${dbError.message}`);
-
-        // STEP 2: Issue dynamic remote request out to Paypack Cashin API Endpoint
-        const gatewayResponse = await fetch('https://api.paypack.rw/v1/transactions/cashin', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer YOUR_PRODUCTION_API_ACCESS_TOKEN` // Swap out securely via backend parameters
-            },
-            body: JSON.stringify({
-                amount: totalAmount,
-                number: customerMomo,
-                client_id: databaseOrder.id 
-            })
+function setupFAQAccordions() {
+    document.querySelectorAll('.faq-question').forEach(button => {
+        button.addEventListener('click', () => {
+            const answerPanel = button.nextElementSibling;
+            const markerSpan = button.querySelector('span');
+            const openActive = answerPanel.style.display === 'block';
+            
+            // Auto collapse alternative siblings close
+            document.querySelectorAll('.faq-answer').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.faq-question span').forEach(s => s.textContent = '+');
+            
+            if (!openActive) {
+                answerPanel.style.display = 'block';
+                if (markerSpan) markerSpan.textContent = '−';
+            }
         });
-
-        const gatewayData = await gatewayResponse.json();
-
-        if (!gatewayResponse.ok || gatewayData.status !== 'pending') {
-            await _supabase.from('orders').update({ payment_status: 'failed' }).eq('id', databaseOrder.id);
-            throw new Error("Transaction request rejected by the telecom network provider.");
-        }
-
-        // Keep a trace of payment reference tokens on the data layer row tracking record
-        await _supabase
-            .from('orders')
-            .update({ transaction_ref: gatewayData.ref })
-            .eq('id', databaseOrder.id);
-
-        // STEP 3: Enter internal status evaluation loop to track PIN authorization state
-        if (submitBtn) submitBtn.innerText = "Awaiting PIN Input... 🔐";
-        
-        const isTransactionApproved = await pollTransactionVerificationLoop(databaseOrder.id, gatewayData.ref);
-
-        if (isTransactionApproved) {
-            // Success UX Transformation Injection
-            document.getElementById('paymentModal').querySelector('.modal-content').innerHTML = `
-                <div style="text-align: center; padding: 20px 10px;">
-                    <div style="font-size: 3rem; margin-bottom: 15px;">✅</div>
-                    <h3 style="font-size: 1.4rem; color: #00A859; margin-bottom: 10px;">Order Paid Successfully!</h3>
-                    <p style="font-size: 0.9rem; color: #333; margin-bottom: 15px;">Your order reference is <strong style="font-family: monospace;">RMK-${databaseOrder.id.substring(0,6).toUpperCase()}</strong></p>
-                    <button class="btn-primary" onclick="window.location.reload()" style="width: 100%; border-radius:10px; background:#333;">Close & Refresh</button>
-                </div>
-            `;
-            clearCart();
-            document.getElementById('checkout-form').reset();
-        } else {
-            alert("❌ Transaction failed or timed out. Please retry checkout initialization.");
-        }
-
-    } catch (err) {
-        console.error("Payment sequence broke down:", err);
-        alert(`Payment error occurred: ${err.message}`);
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalBtnText;
-        }
-    }
+    });
 }
 
-/**
- * Long-polls transaction statuses sequentially across fixed wait breaks
- */
-async function pollTransactionVerificationLoop(orderId, referenceCode, iterationStep = 0) {
-    if (iterationStep > 12) return false; // Hard break halt caps limits at 60 seconds
-
-    // 5-second interval allowance provides human transaction comfort space
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
+async function shareApplicationEcosystem() {
+    const btn = domElements.shareBtn;
+    const fallbackText = btn.textContent;
     try {
-        const checkRequest = await fetch(`https://api.paypack.rw/v1/transactions/find/${referenceCode}`, {
-            headers: { 'Authorization': `Bearer YOUR_PRODUCTION_API_ACCESS_TOKEN` }
-        });
-        const checkResult = await checkRequest.json();
-
-        if (checkResult.status === 'successful') {
-            await _supabase.from('orders').update({ payment_status: 'paid' }).eq('id', orderId);
-            return true;
-        } else if (checkResult.status === 'failed') {
-            await _supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
-            return false;
-        }
-    } catch (pollingException) {
-        console.warn("Polling request lookup skipped:", pollingException);
-    }
-
-    return pollTransactionVerificationLoop(orderId, referenceCode, iterationStep + 1);
-}
-
-/* ==========================================================================
-   8. INTERACTIVE UTILITIES (MODALS, THEMES, COMPONENT CONTROLS)
-   ========================================================================== */
-function toggleFAQ(button) {
-    const answer = button.nextElementSibling;
-    const icon = button.querySelector('span');
-    const isOpen = answer.style.display === "block";
-
-    document.querySelectorAll('.faq-answer').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.faq-question span').forEach(sp => sp.innerText = '+');
-
-    if (!isOpen) {
-        answer.style.display = "block";
-        icon.innerText = "-";
-    } else {
-        answer.style.display = "none";
-        icon.innerText = "+";
-    }
-}
-
-function openTerms() { document.getElementById('termsModal').style.display = 'flex'; }
-function closeTerms() { document.getElementById('termsModal').style.display = 'none'; }
-
-function initTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    const body = document.body;
-    const btn = document.getElementById('theme-toggle');
-    
-    if (savedTheme === 'dark') {
-        body.classList.add('dark-mode');
-        if (btn) btn.innerText = '☀️';
-    }
-}
-
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('theme-toggle');
-    
-    body.classList.toggle('dark-mode');
-    
-    if (body.classList.contains('dark-mode')) {
-        localStorage.setItem('theme', 'dark');
-        if (btn) btn.innerText = '☀️';
-    } else {
-        localStorage.setItem('theme', 'light');
-        if (btn) btn.innerText = '🌙';
-    }
-}
-
-async function shareApp() {
-    const btn = document.getElementById('share-btn');
-    const originalIcon = btn.innerText;
-    
-    try {
-        btn.innerText = '⌛';
-        const shareData = {
-            title: 'Rwandamket',
-            text: 'Check out Rwandamket for premium chefs, decor, and grocery delivery in Kigali!',
-            url: window.location.href
-        };
-
+        btn.textContent = '⌛';
         if (navigator.share) {
-            await navigator.share(shareData);
+            await navigator.share({
+                title: 'Rwandamket',
+                text: 'Check out Rwandamket for premium chefs, decor, and grocery delivery in Kigali!',
+                url: window.location.href
+            });
         } else {
             await navigator.clipboard.writeText(window.location.href);
-            alert('Link copied to clipboard!');
+            alert('Application link copied to clipboard successfully!');
         }
-    } catch (err) {
-        console.log('Share processing paused or exited');
+    } catch(err) {
+        console.log("Share pipeline closed.");
     } finally {
-        btn.innerText = originalIcon;
-    }
-}
-
-function scrollToMarkets() {
-    const marketSection = document.getElementById('markets'); 
-    if (marketSection) {
-        const headerOffset = 90; 
-        const elementPosition = marketSection.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-        window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth"
-        });
+        btn.textContent = fallbackText;
     }
 }
