@@ -12,6 +12,11 @@
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     --border-color: #dddddd;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Transaction/Payment Specific Design Tokens */
+    --success: #2e7d32;
+    --pending: #f57c00;
+    --failed: #d32f2f;
 }
 
 /* Dark Theme Variables Override */
@@ -23,6 +28,10 @@ body.dark-mode {
     --border-color: #333333;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     --accent: #4CAF50;        /* Clear high-visibility green for dark screens */
+    
+    --success: #4caf50;
+    --pending: #ffb74d;
+    --failed: #ef5350;
 }
 
 /* ==========================================================================
@@ -131,7 +140,14 @@ body.dark-mode .theme-btn {
     box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
 }
 
-.btn-primary:active {
+.btn-primary:disabled {
+    background-color: var(--text-light) !important;
+    cursor: not-allowed;
+    transform: none !important;
+    opacity: 0.6;
+}
+
+.btn-primary:active:not(:disabled) {
     transform: scale(0.95);
     background-color: var(--primary-dark);
 }
@@ -165,7 +181,7 @@ header .btn-primary {
 
 .text-green { color: var(--accent); }
 .section-container { padding: 40px 20px; }
-.bg-light { background-color: var(--white); } /* Swaps accurately across themes via variables */
+.bg-light { background-color: var(--white); } 
 
 .about-grid {
     display: flex;
@@ -479,6 +495,32 @@ body.dark-mode #paymentModal button[style*="background: #eee"] {
     text-decoration: underline;
     cursor: pointer;
     color: var(--primary);
+}
+
+/* --- STATUS BADGES & LIVE TRANSACTION BADGING --- */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-badge.status-paid {
+    background-color: rgba(46, 125, 50, 0.15);
+    color: var(--success);
+}
+
+.status-badge.status-pending {
+    background-color: rgba(245, 124, 0, 0.15);
+    color: var(--pending);
+}
+
+.status-badge.status-failed {
+    background-color: rgba(211, 47, 47, 0.15);
+    color: var(--failed);
 }
 
 /* ==========================================================================
