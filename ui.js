@@ -86,6 +86,11 @@ function setupStaticEventListeners() {
         });
     }
 
+    // Dynamic FAQ Accordion Toggles
+    document.querySelectorAll('.faq-question').forEach(button => {
+        button.addEventListener('click', () => toggleFAQ(button));
+    });
+
     // Global Modal Click-Away Overlay Guard
     window.addEventListener('click', (event) => {
         const termsModal = document.getElementById('termsModal');
@@ -228,7 +233,7 @@ async function renderItems(marketId, marketName, whatsapp, marketMomo) {
 
         list.innerHTML = `
             <div id="product-view-header" style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%; grid-column:1/-1;">
-                <button id="back-to-markets-btn" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer;">← Back</button>
+                <button id="back-to-markets-btn" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer; color:#333;">← Back</button>
                 <h3 style="margin:0;">${marketName}</h3>
             </div>
         `;
@@ -290,6 +295,9 @@ function handleMarketSearch(e) {
     let visibleCount = 0;
 
     cards.forEach(card => {
+        // Prevent header navigation items from being hidden during search matches
+        if(card.id === 'product-view-header') return;
+        
         const text = card.innerText.toLowerCase();
         if (text.includes(term)) {
             card.style.display = 'flex';
@@ -317,6 +325,7 @@ function filterMarkets() {
     const activeChip = document.querySelector('.filter-chip.active');
     if (!activeChip) return;
 
+    // Fixed attribute parsing discrepancy (matches index.html's exact data-category keys)
     const selectedCategory = activeChip.getAttribute('data-category').toLowerCase();
     const cards = document.querySelectorAll('.market-card');
 
@@ -379,12 +388,12 @@ async function processInAppMomoPayment() {
     if (cart.length === 0) return;
 
     const submitBtn = document.querySelector('#checkout-form button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.innerText : "Order and Pay 🚀";
+    const originalBtnText = submitBtn ? submitBtn.innerText : "Confirm & Pay Securely 🚀";
 
     // Gather modal form values 
     const customerName = document.getElementById('cust-name').value;
     const customerLocation = document.getElementById('cust-location').value;
-    const customerMomo = document.getElementById('cust-momo').value; // e.g. 078XXXXXXX or 072XXXXXXX
+    const customerMomo = document.getElementById('cust-momo').value; 
     const totalAmount = getCartTotalValue();
 
     // Map cart components into structural programmatic object architecture
@@ -423,7 +432,7 @@ async function processInAppMomoPayment() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer YOUR_PRODUCTION_API_ACCESS_TOKEN` // Swap out securely via backend
+                'Authorization': `Bearer YOUR_PRODUCTION_API_ACCESS_TOKEN` // Swap out securely via backend parameters
             },
             body: JSON.stringify({
                 amount: totalAmount,
@@ -446,11 +455,20 @@ async function processInAppMomoPayment() {
             .eq('id', databaseOrder.id);
 
         // STEP 3: Enter internal status evaluation loop to track PIN authorization state
+        if (submitBtn) submitBtn.innerText = "Awaiting PIN Input... 🔐";
+        
         const isTransactionApproved = await pollTransactionVerificationLoop(databaseOrder.id, gatewayData.ref);
 
         if (isTransactionApproved) {
-            alert("✨ Payment Confirmed! Your order has been securely transferred to the merchant dashboard.");
-            document.getElementById('paymentModal').style.display = 'none';
+            // Success UX Transformation Injection
+            document.getElementById('paymentModal').querySelector('.modal-content').innerHTML = `
+                <div style="text-align: center; padding: 20px 10px;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">✅</div>
+                    <h3 style="font-size: 1.4rem; color: #00A859; margin-bottom: 10px;">Order Paid Successfully!</h3>
+                    <p style="font-size: 0.9rem; color: #333; margin-bottom: 15px;">Your order reference is <strong style="font-family: monospace;">RMK-${databaseOrder.id.substring(0,6).toUpperCase()}</strong></p>
+                    <button class="btn-primary" onclick="window.location.reload()" style="width: 100%; border-radius:10px; background:#333;">Close & Refresh</button>
+                </div>
+            `;
             clearCart();
             document.getElementById('checkout-form').reset();
         } else {
