@@ -106,7 +106,7 @@
             <div class="faq-item">
                 <button class="faq-question">How do I pay for my order? <span>+</span></button>
                 <div class="faq-answer">
-                    <p>We accept Mobile Money (MoMo) and Cash on Delivery. Payment details are confirmed once you message us on WhatsApp.</p>
+                    <p>We process payments directly on-screen via integrated Mobile Money (MTN MoMo & AirtelMoney). Simply provide your phone number during checkout to prompt the secure transaction dialog.</p>
                 </div>
             </div>
 
@@ -132,9 +132,9 @@
             </div>
 
             <div class="faq-item">
-                <button class="faq-question">What happens after I send the WhatsApp message? <span>+</span></button>
+                <button class="faq-question">What happens after I authorize my payment? <span>+</span></button>
                 <div class="faq-answer">
-                    <p>Our team or the specific vendor will reply to confirm your Order ID, provide a final total including delivery, and share MoMo payment instructions.</p>
+                    <p>Your order registers instantly within our database system layer. The vendor receives your itemized invoice breakdowns and begins preparing your items for delivery right away.</p>
                 </div>
             </div>
             
@@ -147,7 +147,7 @@
 
     <footer class="footer">
         <p>&copy; 2026 Rwandamket. Built with ❤️ in Kigali.</p>
-        <p><a href="https://wa.me/+250786979388?text=Hello,%20I%20need%20help%20tracking%20my%20order." class="support-link">
+        <p><a href="mailto:support@rwandamket.com" class="support-link">
             Need help tracking? Contact Support
         </a></p>
     </footer>
@@ -157,8 +157,8 @@
             <span id="close-modal-btn" class="close-modal">&times;</span>
             <h2>Terms & Conditions</h2>
             <div class="terms-body">
-                <p><strong>1. Orders:</strong> All orders placed via WhatsApp are subject to vendor availability.</p>
-                <p><strong>2. Payment:</strong> Payments are made via MoMo or Cash as confirmed with the vendor.</p>
+                <p><strong>1. Orders:</strong> All orders placed through our digital portal are subject to automated vendor allocation checks.</p>
+                <p><strong>2. Payment:</strong> Transactions are handled securely using local secure billing infrastructure nodes.</p>
                 <p><strong>3. Delivery:</strong> Delivery times are estimates. For Private Chefs, 48-hour notice is required.</p>
                 <p><strong>4. Refunds:</strong> Please inspect items upon delivery. Perishable goods cannot be returned once accepted.</p>
             </div>
@@ -169,10 +169,10 @@
     <div id="paymentModal" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 400px;">
             <h2 style="margin-top: 0; margin-bottom: 5px;">📍 Delivery & Payment</h2>
-            <p style="font-size: 0.85rem; color: #777; margin-bottom: 15px;">Provide your information to finalize the WhatsApp checkout invoice context details.</p>
+            <p style="font-size: 0.85rem; color: #777; margin-bottom: 15px;">Provide your details to complete your direct system booking securely.</p>
             
             <div id="vendor-momo-notice" style="background: rgba(46, 125, 50, 0.1); border-left: 4px solid var(--primary); padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 20px; text-align: left;">
-                📱 Pay-to Vendor MoMo: <strong id="merchant-momo-display">Loading...</strong>
+                📱 Direct Pay Merchant ID: <strong id="merchant-momo-display">Loading...</strong>
             </div>
             
             <form id="checkout-form">
@@ -183,17 +183,17 @@
                 
                 <div style="margin-bottom: 15px; text-align: left;">
                     <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Delivery Address / Neighborhood *</label>
-                    <input type="text" id="cust-location" required placeholder="e.g., Kacyiru, KG 566 St" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                    <input type="text" id="cust-location" required placeholder="e.g., Gikondo, KK 31 Ave" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
                 </div>
                 
                 <div style="margin-bottom: 20px; text-align: left;">
                     <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">MTN / Airtel Mobile Money Number *</label>
-                    <input type="tel" id="cust-momo" required placeholder="e.g., 078XXXXXXX" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                    <input type="tel" id="cust-momo" required placeholder="e.g., 078XXXXXXX" pattern="^(078|079|072|073)\d{7}$" title="Please enter a valid Rwandan Mobile Money number" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
                 </div>
                 
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" id="close-payment-btn" class="btn-primary" style="flex: 1; background: #eee; color: #333;">Cancel</button>
-                    <button type="submit" class="btn-primary" style="flex: 2; background: #00A859; color: #fff;">Order on WhatsApp 🚀</button>
+                    <button type="button" id="close-payment-btn" class="btn-primary" style="flex: 1; background: #eee; color: #333; box-shadow: none;">Cancel</button>
+                    <button type="submit" id="submit-order-btn" class="btn-primary" style="flex: 2; background: #00A859; color: #fff;">Confirm & Pay Securely 🚀</button>
                 </div>
             </form>
         </div>
@@ -205,7 +205,7 @@
             <strong id="cart-total">0 RWF</strong>
             <small id="clear-cart-btn">Clear</small>
         </div>
-        <button id="checkout-btn" class="checkout-btn">Order on WhatsApp</button>
+        <button id="checkout-btn" class="checkout-btn">Proceed to Payment 💳</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
