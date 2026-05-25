@@ -2,9 +2,10 @@
 // 1. GLOBAL STATE & MEMORY RECOVERY
 // ==========================================================================
 let cart = [];
+let currentMarketId = null; // Track database primary key link
 let currentMarketWhatsApp = "";
-let currentMarketMoMo = ""; // Tracks active vendor's MoMo number dynamically
-let userLocationSetting = "remember"; // Tracks location retention preferences ('remember' | 'ask')
+let currentMarketMoMo = ""; 
+let userLocationSetting = "remember"; 
 
 // Unified initialization loop prevents event state collisions
 document.addEventListener('DOMContentLoaded', () => {
@@ -76,12 +77,12 @@ function setupStaticEventListeners() {
         });
     }
 
-    // Intercept payment form submit to trigger structured order execution
+    // Intercept payment form submit to trigger direct in-app structured order processing loop
     const checkoutForm = document.getElementById('checkout-form');
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            sendOrder();
+            processInAppMomoPayment();
         });
     }
 
@@ -121,20 +122,16 @@ function checkSavedLocation() {
     const modal = document.getElementById('locationModal');
     
     if (savedCity) {
-        // City validation trace present: bypass prompt
         if (modal) modal.style.display = 'none';
         
-        // Auto-seed existing checkout address element rows if present
         const addressInput = document.getElementById('cust-location');
         if (addressInput && !addressInput.value) {
             addressInput.value = `${savedCity}, `;
         }
     } else {
-        // No location found: invoke forced layout intercept selection modal
         if (modal) modal.style.display = 'flex';
     }
     
-    // Wire context actions to the custom location structure buttons
     initLocationListeners();
 }
 
@@ -145,7 +142,6 @@ function initLocationListeners() {
     
     if (!modal) return;
 
-    // Toggle button pill state handlers
     if (toggleRemember && toggleAsk) {
         toggleRemember.addEventListener('click', () => {
             toggleRemember.classList.add('active');
@@ -160,7 +156,6 @@ function initLocationListeners() {
         });
     }
 
-    // Location selection card components routing logic
     document.querySelectorAll('.location-option-card').forEach(card => {
         card.addEventListener('click', function() {
             const selectedCity = this.getAttribute('data-city');
@@ -168,16 +163,14 @@ function initLocationListeners() {
             if (userLocationSetting === "remember") {
                 localStorage.setItem('user_delivery_city', selectedCity);
             } else {
-                localStorage.removeItem('user_delivery_city'); // Evict data traces
+                localStorage.removeItem('user_delivery_city');
             }
             
-            // Forward city text metadata directly to lower checkout order forms
             const addressInput = document.getElementById('cust-location');
             if (addressInput) {
                 addressInput.value = `${selectedCity}, `;
             }
             
-            // Clean modal view exit dismiss closure animation transition
             modal.style.display = 'none';
         });
     });
@@ -193,9 +186,7 @@ async function renderMarkets() {
     list.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1/-1;'>Loading Markets...</p>";
 
     try {
-        // Connected directly to clean api.js layer
         const markets = await fetchMarketsFromSupabase();
-        
         list.innerHTML = ""; 
         
         if (markets.length === 0) {
@@ -214,7 +205,6 @@ async function renderMarkets() {
                 <p>${m.description || ''}</p>
             `;
             
-            // Pass the custom momo_number field value straight out of the database layout here
             card.addEventListener('click', () => renderItems(m.id, m.name, m.whatsapp_number, m.momo_number));
             list.appendChild(card);
         });
@@ -234,10 +224,8 @@ async function renderItems(marketId, marketName, whatsapp, marketMomo) {
     list.innerHTML = "<p style='text-align:center; width:100%; grid-column:1/-1;'>Fetching products...</p>";
 
     try {
-        // Connected directly to clean api.js layer matching Option A (products table)
         const products = await fetchItemsByMarket(marketId);
 
-        // Clean slate rewrite with precise programmatic grid layout isolation
         list.innerHTML = `
             <div id="product-view-header" style="margin-bottom:20px; display:flex; align-items:center; gap:10px; width:100%; grid-column:1/-1;">
                 <button id="back-to-markets-btn" style="background:#eee; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer;">← Back</button>
@@ -245,7 +233,6 @@ async function renderItems(marketId, marketName, whatsapp, marketMomo) {
             </div>
         `;
 
-        // Bind the back button action natively inside execution stream
         document.getElementById('back-to-markets-btn').addEventListener('click', renderMarkets);
 
         if (products.length === 0) {
@@ -271,18 +258,16 @@ async function renderItems(marketId, marketName, whatsapp, marketMomo) {
             orderBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 
-                // Security check guarding against multi-vendor routing splits
                 if (cart.length > 0 && currentMarketWhatsApp !== whatsapp) {
                     const confirmClear = confirm("You have items from another vendor in your cart. Clear cart to order from this vendor?");
                     if (confirmClear) {
                         clearCart();
                     } else {
-                        return; // Halt item integration
+                        return; 
                     }
                 }
                 
-                // Track item transaction details coupled with parent market variables
-                addToCart(item, whatsapp, marketMomo);
+                addToCart(item, marketId, whatsapp, marketMomo);
                 orderBtn.innerText = "Added! ✅";
                 setTimeout(() => orderBtn.innerText = "Order", 1000);
             });
@@ -348,8 +333,9 @@ function filterMarkets() {
 /* ==========================================================================
    6. CART TRANSACTION MANAGEMENT
    ========================================================================== */
-function addToCart(item, whatsapp, momoNumber) {
+function addToCart(item, marketId, whatsapp, momoNumber) {
     cart.push(item);
+    currentMarketId = marketId;
     currentMarketWhatsApp = whatsapp; 
     currentMarketMoMo = momoNumber || "Provided upon confirmation"; 
     updateCartUI();
@@ -364,63 +350,155 @@ function updateCartUI() {
         bar.classList.remove('hidden');
         countLabel.innerText = `${cart.length} item${cart.length > 1 ? 's' : ''}`;
         
-        const total = cart.reduce((sum, item) => {
-            const priceNum = parseInt(item.price.toString().replace(/\D/g, '')) || 0;
-            return sum + priceNum;
-        }, 0);
-        
+        const total = getCartTotalValue();
         totalLabel.innerText = `${total.toLocaleString()} RWF`;
     } else {
         bar.classList.add('hidden');
     }
 }
 
+function getCartTotalValue() {
+    return cart.reduce((sum, item) => {
+        const priceNum = parseInt(item.price.toString().replace(/\D/g, '')) || 0;
+        return sum + priceNum;
+    }, 0);
+}
+
 function clearCart() {
     cart = [];
+    currentMarketId = null;
     currentMarketWhatsApp = "";
     currentMarketMoMo = ""; 
     updateCartUI();
 }
 
-function sendOrder() {
+/* ==========================================================================
+   7. IN-APP COMPACT PAYPACK MOMO GATEWAY PIPELINE
+   ========================================================================== */
+async function processInAppMomoPayment() {
     if (cart.length === 0) return;
 
-    // Gather values filled out inside the modal form fields
+    const submitBtn = document.querySelector('#checkout-form button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : "Order and Pay 🚀";
+
+    // Gather modal form values 
     const customerName = document.getElementById('cust-name').value;
     const customerLocation = document.getElementById('cust-location').value;
-    const customerMomo = document.getElementById('cust-momo').value;
+    const customerMomo = document.getElementById('cust-momo').value; // e.g. 078XXXXXXX or 072XXXXXXX
+    const totalAmount = getCartTotalValue();
 
-    const orderId = "RWA-" + Math.floor(1000 + Math.random() * 9000);
-    let itemDetails = cart.map(item => `- ${item.name} (${parseInt(item.price).toLocaleString()} RWF)`).join('\n');
-    const total = document.getElementById('cart-total').innerText;
-    
-    // Assembles order details along with delivery and payment references
-    const message = encodeURIComponent(
-        `📌 *NEW ORDER: ${orderId}*\n` +
-        `--------------------------\n` +
-        `👤 *Customer:* ${customerName}\n` +
-        `📍 *Delivery To:* ${customerLocation}\n` +
-        `💸 *MoMo Account:* ${customerMomo}\n` +
-        `--------------------------\n` +
-        `🛒 *Items Ordered:*\n` +
-        `${itemDetails}\n` +
-        `--------------------------\n` +
-        `💰 *Total Bill: ${total}*\n\n` +
-        `Please confirm my order and send a MoMo push request. Thanks!`
-    );
+    // Map cart components into structural programmatic object architecture
+    const structuralItemsArray = cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: parseInt(item.price)
+    }));
 
-    // Hide payment display interface context
-    document.getElementById('paymentModal').style.display = 'none';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Processing PIN prompt... 📲";
+    }
 
-    // Clear cart and reset form inputs gracefully
-    clearCart();
-    document.getElementById('checkout-form').reset();
+    try {
+        // STEP 1: Insert dynamic record securely directly into the Supabase database
+        const { data: databaseOrder, error: dbError } = await _supabase
+            .from('orders')
+            .insert([{
+                market_id: currentMarketId,
+                customer_name: customerName,
+                delivery_address: customerLocation,
+                phone_number: customerMomo,
+                total_amount: totalAmount,
+                items: structuralItemsArray,
+                payment_status: 'pending',
+                order_status: 'received'
+            }])
+            .select()
+            .single();
 
-    window.open(`https://wa.me/${currentMarketWhatsApp.replace(/\D/g, '')}?text=${message}`, '_blank');
+        if (dbError) throw new Error(`Database entry initialization error: ${dbError.message}`);
+
+        // STEP 2: Issue dynamic remote request out to Paypack Cashin API Endpoint
+        const gatewayResponse = await fetch('https://api.paypack.rw/v1/transactions/cashin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer YOUR_PRODUCTION_API_ACCESS_TOKEN` // Swap out securely via backend
+            },
+            body: JSON.stringify({
+                amount: totalAmount,
+                number: customerMomo,
+                client_id: databaseOrder.id 
+            })
+        });
+
+        const gatewayData = await gatewayResponse.json();
+
+        if (!gatewayResponse.ok || gatewayData.status !== 'pending') {
+            await _supabase.from('orders').update({ payment_status: 'failed' }).eq('id', databaseOrder.id);
+            throw new Error("Transaction request rejected by the telecom network provider.");
+        }
+
+        // Keep a trace of payment reference tokens on the data layer row tracking record
+        await _supabase
+            .from('orders')
+            .update({ transaction_ref: gatewayData.ref })
+            .eq('id', databaseOrder.id);
+
+        // STEP 3: Enter internal status evaluation loop to track PIN authorization state
+        const isTransactionApproved = await pollTransactionVerificationLoop(databaseOrder.id, gatewayData.ref);
+
+        if (isTransactionApproved) {
+            alert("✨ Payment Confirmed! Your order has been securely transferred to the merchant dashboard.");
+            document.getElementById('paymentModal').style.display = 'none';
+            clearCart();
+            document.getElementById('checkout-form').reset();
+        } else {
+            alert("❌ Transaction failed or timed out. Please retry checkout initialization.");
+        }
+
+    } catch (err) {
+        console.error("Payment sequence broke down:", err);
+        alert(`Payment error occurred: ${err.message}`);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalBtnText;
+        }
+    }
+}
+
+/**
+ * Long-polls transaction statuses sequentially across fixed wait breaks
+ */
+async function pollTransactionVerificationLoop(orderId, referenceCode, iterationStep = 0) {
+    if (iterationStep > 12) return false; // Hard break halt caps limits at 60 seconds
+
+    // 5-second interval allowance provides human transaction comfort space
+    await new Promise(resolve => setTimeout(resolve, 5000));
+
+    try {
+        const checkRequest = await fetch(`https://api.paypack.rw/v1/transactions/find/${referenceCode}`, {
+            headers: { 'Authorization': `Bearer YOUR_PRODUCTION_API_ACCESS_TOKEN` }
+        });
+        const checkResult = await checkRequest.json();
+
+        if (checkResult.status === 'successful') {
+            await _supabase.from('orders').update({ payment_status: 'paid' }).eq('id', orderId);
+            return true;
+        } else if (checkResult.status === 'failed') {
+            await _supabase.from('orders').update({ payment_status: 'failed' }).eq('id', orderId);
+            return false;
+        }
+    } catch (pollingException) {
+        console.warn("Polling request lookup skipped:", pollingException);
+    }
+
+    return pollTransactionVerificationLoop(orderId, referenceCode, iterationStep + 1);
 }
 
 /* ==========================================================================
-   7. INTERACTIVE UTILITIES (MODALS, THEMES, COMPONENT CONTROLS)
+   8. INTERACTIVE UTILITIES (MODALS, THEMES, COMPONENT CONTROLS)
    ========================================================================== */
 function toggleFAQ(button) {
     const answer = button.nextElementSibling;
