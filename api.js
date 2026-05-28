@@ -47,7 +47,7 @@ async function fetchMarketsFromSupabase(selectedCity = null) {
 }
 
 /**
- * Fetches all products tied to a specific market vendor.
+ * Cultivates all products tied to a specific market vendor.
  * Includes defensive format verification constraints.
  * @param {string|number} marketId - ID of the parent market vendor
  * @returns {Promise<Array>} Array of product catalog objects
@@ -61,7 +61,7 @@ async function fetchItemsByMarket(marketId) {
     }
 
     try {
-        // 2. Safe parsing to ensure proper ID compatibility
+        // 2. Safe parsing to ensure proper ID compatibility (markets uses int8)
         const sanitizedId = Number(marketId);
         if (isNaN(sanitizedId)) {
             throw new Error(`Invalid marketId format: ${marketId}`);
@@ -115,14 +115,17 @@ async function createNewOrder({ marketId, name, address, phone, totalAmount, ite
 
 /**
  * Helper utility to securely fetch or update status columns for a specific order entry.
- * Modified to selectively query payment validations cleanly during UI simulation polling loops.
- * @param {string|number} orderId - Unique identification primary key of the target order row
+ * Kept compatible with string-based UUID values since orders.id uses UUID schemas.
+ * @param {string} orderId - Unique identification primary key string (UUID) of the target order row
  * @param {Object} updatesObject - Fallback columns to mutate if testing locally
  * @returns {Promise<boolean>} Status check boolean tracking payment success matching UI expectations
  */
 async function updateOrderStatus(orderId, updatesObject) {
     checkClientInitialization();
     try {
+        // Safe guard clause for checking empty input states
+        if (!orderId) return false;
+
         // First check actual current database status value state
         const { data: currentOrder, error: fetchError } = await supabaseClient
             .from('orders')
@@ -149,3 +152,47 @@ async function updateOrderStatus(orderId, updatesObject) {
         return false;
     }
 }
+
+/* ==========================================================================
+   AUTOMATED ECOSYSTEM DIAGNOSTIC TESTING SUITE (TEMPORARY)
+   ========================================================================== */
+async function debugDatabaseConnection() {
+    console.log("🚀 Diagnostic Check: Testing direct connection to Supabase...");
+    try {
+        if (!supabaseClient) {
+            console.error("❌ Diagnostic Failed: The supabaseClient instance is entirely missing or initialization failed.");
+            return;
+        }
+
+        // Test Query 1: Direct bypass download check on the markets table
+        const { data: rawMarkets, error: marketError } = await supabaseClient
+            .from('markets')
+            .select('*');
+
+        if (marketError) {
+            console.error("❌ Supabase Read Access Error:", marketError.message);
+            return;
+        }
+
+        console.log("✅ Supabase Connection Pipeline: Active and Secure!");
+        console.log(`📊 Raw row records detected inside 'markets' table: ${rawMarkets ? rawMarkets.length : 0}`);
+        console.log("📦 Data contents extracted:", rawMarkets);
+
+        // Check if there's a filtering mismatch
+        const activeCityFilter = localStorage.getItem('user_delivery_city') || "Kigali";
+        const filteredMarkets = rawMarkets.filter(m => m.location === activeCityFilter);
+        
+        console.log(`🔍 Location filter breakdown: Active city tracker is set to [${activeCityFilter}]`);
+        console.log(`🎯 Rows matching [${activeCityFilter}] explicitly: ${filteredMarkets.length}`);
+        
+        if (rawMarkets.length > 0 && filteredMarkets.length === 0) {
+            console.warn("⚠️ Mismatch Alert: You have rows, but NONE of their location columns match exactly string values for: " + activeCityFilter);
+        }
+
+    } catch (err) {
+        console.error("❌ Unexpected execution framework failure:", err.message);
+    }
+}
+
+// Automatically triggers data logs into browser console 2.5 seconds after load completes
+setTimeout(debugDatabaseConnection, 2500);
