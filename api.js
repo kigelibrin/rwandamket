@@ -56,8 +56,8 @@ async function fetchMarketsFromSupabase(selectedCity) {
         // Using ilike with exact value is cleaner and correct.
         const { data, error } = await supabaseClient
             .from('markets')
-            .select('id, name, description, category, image_url, whatsapp_number, momo_number, city')
-            .ilike('city', city);
+            .select('id, name, description, category, image_url, whatsapp_number, momo_number, location')
+            .ilike('location', city);
 
         if (error) {
             console.error("❌ Supabase query error:", error.message);
