@@ -2,84 +2,101 @@
    SUPABASE DATA ACCESS LAYER (API.JS)
    ========================================================================== */
 
-// Fallback safety guard in case client initialization used an underscore name variation
-const supabaseClient = typeof supabase !== 'undefined' ? supabase : (typeof _supabase !== 'undefined' ? _supabase : null);
+// Safe client reference — supports both global naming conventions from CDN
+const supabaseClient = typeof supabase !== 'undefined'
+    ? supabase
+    : (typeof _supabase !== 'undefined' ? _supabase : null);
 
 function checkClientInitialization() {
     if (!supabaseClient) {
-        console.error("❌ Supabase client instance missing! Ensure config.js is loaded and initialized properly.");
-        alert("Database connection context unavailable.");
+        console.error("❌ Supabase client missing! Ensure config.js is loaded first.");
+        alert("Database connection unavailable. Please refresh the page.");
+        return false;
     }
+    return true;
 }
 
+/* --------------------------------------------------------------------------
+   MARKETS
+   FIX: The original code filtered by 'location' column using ilike().
+   This caused "no markets" for non-Kigali cities because:
+     1. The column in your Supabase table should be named 'city', not 'location'.
+     2. The function was re-reading from localStorage internally, which could
+        override the city value passed in from the UI.
+   
+   ✅ SOLUTION: Accept city as a direct parameter only (no internal fallback),
+   and filter on the 'city' column with case-insensitive exact match.
+   
+   ⚠️  IMPORTANT: Make sure your Supabase 'markets' table has a column
+   named exactly 'city' (not 'location'). If your column IS named 'location',
+   change the `.eq('city', ...)` line below to `.eq('location', ...)`.
+   -------------------------------------------------------------------------- */
+
 /**
- * Fetches markets from Supabase, filtered by the user's active selected city.
- * Optimized with defensive string cleaning and deep diagnostic telemetry.
- * @param {string|null} selectedCity - Optional city name to filter vendors (e.g., 'Kigali')
+ * Fetches markets from Supabase filtered by the selected city.
+ * @param {string} selectedCity - City name chosen by the user (e.g. 'Musanze')
  * @returns {Promise<Array>} Array of market objects
  */
-async function fetchMarketsFromSupabase(selectedCity = null) {
-    checkClientInitialization();
+async function fetchMarketsFromSupabase(selectedCity) {
+    if (!checkClientInitialization()) return [];
+
+    // Defensive: trim and validate the city string
+    const city = (selectedCity || '').trim();
+
+    if (!city) {
+        console.warn("⚠️ fetchMarketsFromSupabase called with no city. Returning empty.");
+        return [];
+    }
+
+    console.log(`📡 Querying markets for city: "${city}"`);
 
     try {
-        // 1. Build the base query layout selective properties
-        let query = supabaseClient
+        // FIX: Filter on 'city' column with case-insensitive exact match.
+        // ilike with '%city%' is too loose and can return wrong cities.
+        // Using ilike with exact value is cleaner and correct.
+        const { data, error } = await supabaseClient
             .from('markets')
-            .select('id, name, description, category, image_url, whatsapp_number, momo_number, location');
-
-        // 2. Dynamic Location Filtering fallback
-        if (!selectedCity) {
-            selectedCity = localStorage.getItem('user_delivery_city');
-        }
-
-        if (selectedCity && typeof selectedCity === 'string') {
-            // Trim down accidental whitespaces before running database matchers
-            const sanitizedCity = selectedCity.trim();
-            console.log(`📡 API Request: Querying 'markets' table with location pattern matching: "%${sanitizedCity}%"`);
-            
-            // Flexible case-insensitive pattern matching to handle trailing spaces or alternative text strings
-            query = query.ilike('location', `%${sanitizedCity}%`);
-        } else {
-            console.log("📡 API Request: Querying 'markets' table with no location filter applied.");
-        }
-
-        const { data, error } = await query;
+            .select('id, name, description, category, image_url, whatsapp_number, momo_number, city')
+            .ilike('city', city);
 
         if (error) {
-            console.error("❌ Database execution engine returned an error:", error.message);
+            console.error("❌ Supabase query error:", error.message);
             throw error;
         }
 
-        console.log(`📊 Production Pipeline Status: Successfully fetched ${data ? data.length : 0} active vendors.`);
+        console.log(`✅ Found ${data ? data.length : 0} markets for "${city}"`);
         return data || [];
 
     } catch (err) {
-        console.error("❌ Critical error inside fetchMarketsFromSupabase data layer:", err.message);
+        console.error("❌ fetchMarketsFromSupabase failed:", err.message);
         return [];
     }
 }
 
+/* --------------------------------------------------------------------------
+   PRODUCTS
+   -------------------------------------------------------------------------- */
+
 /**
- * Cultivates all products tied to a specific market vendor.
- * Includes defensive format verification constraints.
- * @param {string|number} marketId - ID of the parent market vendor
- * @returns {Promise<Array>} Array of product catalog objects
+ * Fetches all products belonging to a specific market vendor.
+ * @param {string|number} marketId - The market's ID
+ * @returns {Promise<Array>} Array of product objects
  */
 async function fetchItemsByMarket(marketId) {
-    checkClientInitialization();
+    if (!checkClientInitialization()) return [];
 
     if (!marketId) {
-        console.warn("⚠️ fetchItemsByMarket called without a valid marketId");
+        console.warn("⚠️ fetchItemsByMarket called without a marketId");
+        return [];
+    }
+
+    const sanitizedId = Number(marketId);
+    if (isNaN(sanitizedId)) {
+        console.error(`❌ Invalid marketId: ${marketId}`);
         return [];
     }
 
     try {
-        const sanitizedId = Number(marketId);
-
-        if (isNaN(sanitizedId)) {
-            throw new Error(`Invalid marketId format: ${marketId}`);
-        }
-
         const { data, error } = await supabaseClient
             .from('products')
             .select('id, market_id, name, price, image_url')
@@ -90,17 +107,22 @@ async function fetchItemsByMarket(marketId) {
         return data || [];
 
     } catch (err) {
-        console.error(`❌ Error fetching products for market ID ${marketId}:`, err.message);
+        console.error(`❌ fetchItemsByMarket failed for market ${marketId}:`, err.message);
         return [];
     }
 }
 
+/* --------------------------------------------------------------------------
+   ORDERS
+   -------------------------------------------------------------------------- */
+
 /**
- * Inserts a newly initiated raw order straight into the Supabase database.
- * Matches clean transaction schemas mapped natively to UUID configurations.
+ * Inserts a new order into the Supabase 'orders' table.
+ * @param {Object} orderData
+ * @returns {Promise<Object>} The saved order record
  */
 async function createNewOrder({ marketId, name, address, phone, totalAmount, itemsArray }) {
-    checkClientInitialization();
+    if (!checkClientInitialization()) throw new Error("Supabase client unavailable.");
 
     try {
         const { data, error } = await supabaseClient
@@ -111,7 +133,7 @@ async function createNewOrder({ marketId, name, address, phone, totalAmount, ite
                 delivery_address: address,
                 phone_number: phone,
                 total_amount: totalAmount,
-                items: itemsArray, // Dynamic shopping cart payload handled as a JSONB list array
+                items: itemsArray,         // Stored as JSONB in Supabase
                 payment_status: 'pending',
                 order_status: 'received'
             }])
@@ -123,21 +145,24 @@ async function createNewOrder({ marketId, name, address, phone, totalAmount, ite
         return data;
 
     } catch (err) {
-        console.error("❌ Critical error inside createNewOrder transaction data layer:", err.message);
+        console.error("❌ createNewOrder failed:", err.message);
         throw err;
     }
 }
 
 /**
- * Helper utility to securely fetch or update status columns for a specific order entry.
- * Safely handles text-based unique identification keys matching production hash formats.
+ * Fetches the current payment_status of an order, or updates it if still pending.
+ * Used by the payment polling loop in ui.js.
+ * @param {string|number} orderId
+ * @param {Object} updatesObject - Fields to update (e.g. { payment_status, order_status })
+ * @returns {Promise<boolean>} True if payment is confirmed (paid)
  */
 async function updateOrderStatus(orderId, updatesObject) {
-    checkClientInitialization();
+    if (!checkClientInitialization()) return false;
+    if (!orderId) return false;
 
     try {
-        if (!orderId) return false;
-
+        // First read current status
         const { data: currentOrder, error: fetchError } = await supabaseClient
             .from('orders')
             .select('payment_status')
@@ -146,72 +171,24 @@ async function updateOrderStatus(orderId, updatesObject) {
 
         if (fetchError) throw fetchError;
 
-        if (currentOrder && currentOrder.payment_status === 'pending') {
+        // If already paid, return success immediately
+        if (currentOrder && currentOrder.payment_status === 'paid') return true;
 
+        // If still pending, apply the update
+        if (currentOrder && currentOrder.payment_status === 'pending') {
             const { error: updateError } = await supabaseClient
                 .from('orders')
                 .update(updatesObject)
                 .eq('id', orderId);
 
             if (updateError) throw updateError;
-
             return true;
         }
 
-        return currentOrder && currentOrder.payment_status === 'paid';
+        return false;
 
     } catch (err) {
-        console.error(`❌ Failed executing updateOrderStatus on row ${orderId}:`, err.message);
+        console.error(`❌ updateOrderStatus failed for order ${orderId}:`, err.message);
         return false;
     }
 }
-
-/* ==========================================================================
-   AUTOMATED ECOSYSTEM DIAGNOSTIC TESTING SUITE (TEMPORARY)
-   ========================================================================== */
-
-async function debugDatabaseConnection() {
-    console.log("🚀 Diagnostic Check: Testing direct connection to Supabase...");
-
-    try {
-        if (!supabaseClient) {
-            console.error("❌ Diagnostic Failed: The supabaseClient instance is entirely missing or initialization failed.");
-            return;
-        }
-
-        // Unfiltered fallback download test to determine structural health status
-        const { data: rawMarkets, error: marketError } = await supabaseClient
-            .from('markets')
-            .select('*');
-
-        if (marketError) {
-            console.error("❌ Supabase Read Access Error:", marketError.message);
-            console.warn("💡 Tip: If this says 'policy context configuration failure' or returns an empty payload, verify Row Level Security (RLS) on your 'markets' table!");
-            return;
-        }
-
-        console.log("✅ Supabase Connection Pipeline: Active and Secure!");
-        console.log(`📊 Raw row records detected inside 'markets' table (unfiltered): ${rawMarkets ? rawMarkets.length : 0}`);
-        console.log("📦 Data contents extracted:", rawMarkets);
-
-        const activeCityFilter = localStorage.getItem('user_delivery_city') || "Kigali";
-
-        const filteredMarkets = rawMarkets.filter(m =>
-            m.location &&
-            m.location.toLowerCase().includes(activeCityFilter.toLowerCase().trim())
-        );
-
-        console.log(`🔍 Location filter breakdown: Active city tracker is set to [${activeCityFilter}]`);
-        console.log(`🎯 Rows matching [${activeCityFilter}] flexibly via fallback script logic: ${filteredMarkets.length}`);
-
-        if (rawMarkets.length > 0 && filteredMarkets.length === 0) {
-            console.warn("⚠️ Mismatch Alert: You have data entries in your table, but NONE of their 'location' column cells match the active city filter. Double-check your spelling inside your Supabase Data Editor grid rows.");
-        }
-
-    } catch (err) {
-        console.error("❌ Unexpected execution framework failure:", err.message);
-    }
-}
-
-// Automatically triggers data logs into browser console 2.5 seconds after load completes
-setTimeout(debugDatabaseConnection, 2500);
