@@ -1,6 +1,5 @@
-// config.js - Keep this file out of your main logic tracking
+// config.js
 const supabaseUrl = 'https://bulxwiknhwafvfzodheb.supabase.co';
-const supabaseKey = 'sb_publishable_G5SGumxFBV1Ju2kFFYupXA_NNLyhL83';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bHh3aWtuaHdhZnZmem9kaGViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3Nzc1ODUsImV4cCI6MjA4MjM1MzU4NX0.WcEwx0wUkfOr2DgaztIXqdKfnYfK6ERsumGuLblF_kI';
 
-// Expose the client globally for ui.js to read securely
 window._supabase = supabase.createClient(supabaseUrl, supabaseKey);
