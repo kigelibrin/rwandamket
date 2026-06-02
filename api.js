@@ -3,7 +3,7 @@
    ========================================================================== */
 
 // Safe client reference — supports both global naming conventions from CDN
-const supabaseClient = typeof supabase !== 'undefined'
+const supabaseClient = window._supabase;
     ? supabase
     : (typeof _supabase !== 'undefined' ? _supabase : null);
 
