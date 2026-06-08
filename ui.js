@@ -2,14 +2,15 @@
    UI INTERACTION CONTROLLER (UI.JS)
    ========================================================================== */
 
+const SUPABASE_FUNCTIONS_URL = 'https://bulxwiknhwafvfzodheb.supabase.co/functions/v1';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1bHh3aWtuaHdhZnZmem9kaGViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3Nzc1ODUsImV4cCI6MjA4MjM1MzU4NX0.WcEwx0wUkfOr2DgaztIXqdKfnYfK6ERsumGuLblF_kI';
+
 // 1. GLOBAL STATE
 let CURRENT_CART = [];
 let ACTIVE_MARKET_ID = null;
 let SELECTED_VENDOR_MOMO = '';
 let ACTIVE_CITY_FILTER = null;
 
-// Central DOM reference map
-// FIX: Added 'shareBtn' which was missing in the original, causing silent crash
 const domElements = {
     marketList:          document.getElementById('market-list'),
     marketSearch:        document.getElementById('marketSearch'),
@@ -25,7 +26,7 @@ const domElements = {
     checkoutForm:        document.getElementById('checkout-form'),
     submitOrderBtn:      document.getElementById('submit-order-btn'),
     locationModal:       document.getElementById('locationModal'),
-    shareBtn:            document.getElementById('share-btn')  // FIX: was missing
+    shareBtn:            document.getElementById('share-btn')
 };
 
 /* ==========================================================================
@@ -39,20 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupStaticModalListeners() {
-    // Terms modal
-    const openTermsLink = document.getElementById('open-terms-link');
-    const termsModal    = document.getElementById('termsModal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
+    const termsModal     = document.getElementById('termsModal');
+    const openTermsLink  = document.getElementById('open-terms-link');
+    const closeModalBtn  = document.getElementById('close-modal-btn');
     const acceptTermsBtn = document.getElementById('accept-terms-btn');
 
-    if (openTermsLink) openTermsLink.addEventListener('click', () => termsModal.style.display = 'flex');
-    if (closeModalBtn) closeModalBtn.addEventListener('click', () => termsModal.style.display = 'none');
+    if (openTermsLink)  openTermsLink.addEventListener('click',  () => termsModal.style.display = 'flex');
+    if (closeModalBtn)  closeModalBtn.addEventListener('click',  () => termsModal.style.display = 'none');
     if (acceptTermsBtn) acceptTermsBtn.addEventListener('click', () => termsModal.style.display = 'none');
-
-    // Share button — FIX: now uses domElements.shareBtn correctly
     if (domElements.shareBtn) domElements.shareBtn.addEventListener('click', shareApp);
 
-    // Get Started scroll
     const getStartedBtn = document.getElementById('get-started-btn');
     if (getStartedBtn) {
         getStartedBtn.addEventListener('click', () => {
@@ -60,7 +57,6 @@ function setupStaticModalListeners() {
         });
     }
 
-    // Click-outside-to-close for modals
     window.addEventListener('click', (e) => {
         if (e.target === domElements.paymentModal) domElements.paymentModal.style.display = 'none';
         if (e.target === domElements.locationModal && ACTIVE_CITY_FILTER) {
@@ -73,32 +69,22 @@ function setupStaticModalListeners() {
 /* ==========================================================================
    3. LOCATION CONTEXT
    ========================================================================== */
-
-/**
- * FIX: The original had a race condition where city was read from localStorage
- * inside api.js, potentially overriding what was passed in. Now city is managed
- * entirely here in the UI layer and passed cleanly to api.js.
- */
 function initializeLocationContext() {
     const savedCity      = localStorage.getItem('user_delivery_city');
     const shouldRemember = localStorage.getItem('loc_remember_choice') !== 'false';
+    const rememberBtn    = document.getElementById('loc-remember');
+    const askBtn         = document.getElementById('loc-ask');
 
-    const rememberBtn = document.getElementById('loc-remember');
-    const askBtn      = document.getElementById('loc-ask');
-
-    // Sync toggle button active state to saved preference
     if (rememberBtn && askBtn) {
         if (!shouldRemember) {
             askBtn.classList.add('active');
             rememberBtn.classList.remove('active');
         }
-
         rememberBtn.addEventListener('click', () => {
             rememberBtn.classList.add('active');
             askBtn.classList.remove('active');
             localStorage.setItem('loc_remember_choice', 'true');
         });
-
         askBtn.addEventListener('click', () => {
             askBtn.classList.add('active');
             rememberBtn.classList.remove('active');
@@ -106,7 +92,6 @@ function initializeLocationContext() {
         });
     }
 
-    // If we have a saved city and user wants to remember it, skip the modal
     if (savedCity && shouldRemember) {
         ACTIVE_CITY_FILTER = savedCity;
         prefillDeliveryAddress(savedCity);
@@ -115,13 +100,10 @@ function initializeLocationContext() {
         domElements.locationModal.style.display = 'flex';
     }
 
-    // Wire city selection cards
     document.querySelectorAll('.location-option-card').forEach(card => {
         card.addEventListener('click', () => {
-            const chosenCity = card.getAttribute('data-city');
-
-            // FIX: 'rememberBtn' check was inverted in original — now reads correctly
-            const isRemembering = rememberBtn ? rememberBtn.classList.contains('active') : true;
+            const chosenCity     = card.getAttribute('data-city');
+            const isRemembering  = rememberBtn ? rememberBtn.classList.contains('active') : true;
 
             if (isRemembering) {
                 localStorage.setItem('user_delivery_city', chosenCity);
@@ -148,7 +130,6 @@ function prefillDeliveryAddress(city) {
    4. CORE EVENT LISTENERS
    ========================================================================== */
 function setupCoreEventListeners() {
-    // Theme toggle
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {
         if (localStorage.getItem('theme') === 'dark') {
@@ -163,14 +144,12 @@ function setupCoreEventListeners() {
         });
     }
 
-    // Search
     if (domElements.marketSearch) {
         domElements.marketSearch.addEventListener('input', (e) => {
             filterMarketsDisplay(e.target.value.trim().toLowerCase());
         });
     }
 
-    // Category filter chips
     if (domElements.categoryFilters) {
         domElements.categoryFilters.querySelectorAll('.filter-chip').forEach(chip => {
             chip.addEventListener('click', () => {
@@ -181,13 +160,10 @@ function setupCoreEventListeners() {
         });
     }
 
-    // Cart controls
-    if (domElements.checkoutBtn)    domElements.checkoutBtn.addEventListener('click', openCheckoutGateway);
+    if (domElements.checkoutBtn)     domElements.checkoutBtn.addEventListener('click', openCheckoutGateway);
     if (domElements.closePaymentBtn) domElements.closePaymentBtn.addEventListener('click', () => domElements.paymentModal.style.display = 'none');
-    if (domElements.clearCartBtn)   domElements.clearCartBtn.addEventListener('click', clearActiveCartState);
-
-    // Checkout form
-    if (domElements.checkoutForm) domElements.checkoutForm.addEventListener('submit', handleOrderPaymentSubmission);
+    if (domElements.clearCartBtn)    domElements.clearCartBtn.addEventListener('click', clearActiveCartState);
+    if (domElements.checkoutForm)    domElements.checkoutForm.addEventListener('submit', handleOrderPaymentSubmission);
 }
 
 /* ==========================================================================
@@ -195,30 +171,19 @@ function setupCoreEventListeners() {
    ========================================================================== */
 async function loadEcosystemVendors() {
     if (!domElements.marketList) return;
-
-    domElements.marketList.innerHTML = `
-        <div class="state-message">
-            <span class="loading-spinner"></span> Loading markets near ${ACTIVE_CITY_FILTER}...
-        </div>`;
+    domElements.marketList.innerHTML = `<div class="state-message"><span class="loading-spinner"></span> Loading markets near ${ACTIVE_CITY_FILTER}...</div>`;
 
     try {
-        // FIX: Pass ACTIVE_CITY_FILTER directly — api.js no longer has its own
-        // localStorage fallback that could override this value
         const markets = await fetchMarketsFromSupabase(ACTIVE_CITY_FILTER);
-
         if (!markets || markets.length === 0) {
             domElements.marketList.innerHTML = `
                 <div class="state-message">
                     <p>No active markets serving <strong>${ACTIVE_CITY_FILTER}</strong> right now.</p>
-                    <button class="btn-primary" onclick="domElements.locationModal.style.display='flex'" style="margin-top:12px;">
-                        Change City
-                    </button>
+                    <button class="btn-primary" onclick="domElements.locationModal.style.display='flex'" style="margin-top:12px;">Change City</button>
                 </div>`;
             return;
         }
-
         renderMarketCardsGrid(markets);
-
     } catch (err) {
         console.error("loadEcosystemVendors error:", err);
         domElements.marketList.innerHTML = `<div class="state-message">Failed to load vendors. Please refresh.</div>`;
@@ -227,48 +192,38 @@ async function loadEcosystemVendors() {
 
 function renderMarketCardsGrid(marketsArray) {
     domElements.marketList.innerHTML = '';
-
     marketsArray.forEach(market => {
         const card = document.createElement('div');
         card.className = 'market-card';
         card.setAttribute('data-category', market.category || 'Food');
         card.setAttribute('data-name', (market.name || '').toLowerCase());
-
         card.innerHTML = `
             <img src="${market.image_url || 'image.png'}" alt="${market.name}" onerror="this.src='image.png'">
             <h4>${market.name}</h4>
             <p>${market.description || 'Premium local verified vendor'}</p>
-            <button class="btn-primary view-products-btn"
-                data-id="${market.id}"
-                data-momo="${market.momo_number || 'Direct Pay'}">
+            <button class="btn-primary view-products-btn" data-id="${market.id}" data-momo="${market.momo_number || 'Direct Pay'}">
                 View Catalog &rarr;
-            </button>
-        `;
-
+            </button>`;
         domElements.marketList.appendChild(card);
     });
 
-    // Wire catalog view buttons
     domElements.marketList.querySelectorAll('.view-products-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             revealMarketItemCatalog(btn.getAttribute('data-id'), btn.getAttribute('data-momo'));
         });
     });
 
-    // Re-apply any active category filter
     const activeChip = domElements.categoryFilters?.querySelector('.filter-chip.active');
     if (activeChip) filterMarketsByCategory(activeChip.getAttribute('data-category'));
 }
 
 async function revealMarketItemCatalog(marketId, vendorMomo) {
-    ACTIVE_MARKET_ID    = Number(marketId);
+    ACTIVE_MARKET_ID     = Number(marketId);
     SELECTED_VENDOR_MOMO = vendorMomo;
-
     domElements.marketList.innerHTML = `<div class="state-message"><span class="loading-spinner"></span> Loading products...</div>`;
 
     try {
         const items = await fetchItemsByMarket(marketId);
-
         if (!items || items.length === 0) {
             domElements.marketList.innerHTML = `
                 <div class="state-message">
@@ -295,15 +250,13 @@ async function revealMarketItemCatalog(marketId, vendorMomo) {
                     data-name="${product.name}"
                     data-price="${product.price}">
                     Add to Order ➕
-                </button>
-            `;
+                </button>`;
             domElements.marketList.appendChild(card);
         });
 
         domElements.marketList.querySelectorAll('.add-to-cart-btn').forEach(btn => {
             btn.addEventListener('click', appendProductToCartState);
         });
-
     } catch (err) {
         console.error("revealMarketItemCatalog error:", err);
         domElements.marketList.innerHTML = `<div class="state-message">Error loading products. Please try again.</div>`;
@@ -330,7 +283,6 @@ function appendProductToCartState(e) {
     }
 
     refreshCartUIFooterPanel();
-
     btn.textContent = 'Added! ✓';
     btn.style.background = '#2E7D32';
     setTimeout(() => {
@@ -358,7 +310,7 @@ function clearActiveCartState() {
 }
 
 /* ==========================================================================
-   7. CHECKOUT & PAYMENT
+   7. REAL PAYMENT FLOW (replaces fake polling loop)
    ========================================================================== */
 function openCheckoutGateway() {
     if (CURRENT_CART.length === 0) return;
@@ -373,7 +325,7 @@ async function handleOrderPaymentSubmission(e) {
 
     domElements.submitOrderBtn.disabled = true;
     const originalBtnHTML = domElements.submitOrderBtn.innerHTML;
-    domElements.submitOrderBtn.innerHTML = 'Processing... ⏳';
+    domElements.submitOrderBtn.innerHTML = 'Saving order... ⏳';
 
     const orderPayload = {
         marketId:    ACTIVE_MARKET_ID,
@@ -385,20 +337,48 @@ async function handleOrderPaymentSubmission(e) {
     };
 
     try {
+        // Step 1: Save order to Supabase
         const savedRecord = await createNewOrder(orderPayload);
         if (!savedRecord) throw new Error("Order could not be saved.");
 
-        domElements.submitOrderBtn.innerHTML = 'Awaiting MoMo PIN... 📱';
+        // Step 2: Call real MTN MoMo Edge Function
+        domElements.submitOrderBtn.innerHTML = 'Sending MoMo prompt... 📱';
 
-        const confirmed = await verifyPaymentPollingLoop(savedRecord.id);
+        const payRes = await fetch(`${SUPABASE_FUNCTIONS_URL}/initiate-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${ANON_KEY}`
+            },
+            body: JSON.stringify({
+                orderId: savedRecord.id,
+                amount:  orderPayload.totalAmount,
+                phone:   orderPayload.phone
+            })
+        });
+        const payData = await payRes.json();
+
+        if (!payData.accepted) {
+            throw new Error(`MoMo request failed with status ${payData.status}`);
+        }
+
+        // Step 3: Poll check-payment until confirmed or timeout
+        domElements.submitOrderBtn.innerHTML = 'Waiting for your PIN... 📱';
+        const confirmed = await pollPaymentStatus(savedRecord.id);
 
         if (confirmed) {
+            // Step 4: Update order status in Supabase
+            await updateOrderStatus(savedRecord.id, {
+                payment_status: 'paid',
+                order_status:   'preparing'
+            });
+
             const trackingCode = `RMK-${savedRecord.id.toString().substring(0, 8).toUpperCase()}`;
             domElements.paymentModal.querySelector('.modal-content').innerHTML = `
                 <div class="payment-success">
                     <div class="success-icon">✅</div>
                     <h3>Order Paid Successfully!</h3>
-                    <p>Thank you, <strong>${orderPayload.name}</strong>. Your payment was processed.</p>
+                    <p>Thank you, <strong>${orderPayload.name}</strong>. Your payment was confirmed.</p>
                     <div class="tracking-code-box">
                         <strong>Delivery Tracking Code:</strong><br>
                         <span class="tracking-code">${trackingCode}</span>
@@ -410,37 +390,44 @@ async function handleOrderPaymentSubmission(e) {
                 </div>`;
             clearActiveCartState();
         } else {
-            throw new Error("Payment verification timed out.");
+            throw new Error("Payment was not completed in time. Please try again.");
         }
 
     } catch (err) {
-        console.error("Order submission error:", err);
-        alert("Payment issue encountered. Please check your connection and try again.");
+        console.error("Payment error:", err);
+        alert(`Payment issue: ${err.message}`);
         domElements.submitOrderBtn.disabled = false;
         domElements.submitOrderBtn.innerHTML = originalBtnHTML;
     }
 }
 
 /**
- * Polls Supabase every 5 seconds to check if payment status changed to 'paid'.
- * Gives up after 12 attempts (60 seconds).
+ * Polls check-payment Edge Function every 5 seconds, up to 12 times (60 seconds).
+ * Returns true if payment confirmed, false if timed out.
  */
-async function verifyPaymentPollingLoop(orderId, attempt = 0) {
+async function pollPaymentStatus(orderId, attempt = 0) {
     if (attempt >= 12) return false;
 
     await new Promise(resolve => setTimeout(resolve, 5000));
 
     try {
-        const isPaid = await updateOrderStatus(orderId, {
-            payment_status: 'paid',
-            order_status:   'preparing'
+        const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/check-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${ANON_KEY}`
+            },
+            body: JSON.stringify({ orderId })
         });
-        if (isPaid) return true;
+        const data = await res.json();
+        console.log(`Payment poll attempt ${attempt + 1}:`, data.status);
+
+        if (data.paid) return true;
     } catch (err) {
-        console.warn(`Polling attempt ${attempt + 1} failed:`, err);
+        console.warn(`Poll attempt ${attempt + 1} failed:`, err);
     }
 
-    return verifyPaymentPollingLoop(orderId, attempt + 1);
+    return pollPaymentStatus(orderId, attempt + 1);
 }
 
 /* ==========================================================================
@@ -451,14 +438,12 @@ function filterMarketsDisplay(searchString) {
     let visible = 0;
 
     cards.forEach(card => {
-        // FIX: Back-button row uses class 'catalog-back-row', not a market-card — no extra guard needed
         const name = (card.getAttribute('data-name') || '').toLowerCase();
         const show = name.includes(searchString);
         card.style.display = show ? 'flex' : 'none';
         if (show) visible++;
     });
 
-    // Show/hide empty state message
     let emptyMsg = document.getElementById('search-empty-notice');
     if (visible === 0 && searchString) {
         if (!emptyMsg) {
@@ -477,10 +462,7 @@ function filterMarketsDisplay(searchString) {
 function filterMarketsByCategory(category) {
     const cards = domElements.marketList.querySelectorAll('.market-card');
     cards.forEach(card => {
-        if (category.toLowerCase() === 'all') {
-            card.style.display = 'flex';
-            return;
-        }
+        if (category.toLowerCase() === 'all') { card.style.display = 'flex'; return; }
         const cardCat = (card.getAttribute('data-category') || '').toLowerCase();
         card.style.display = cardCat === category.toLowerCase() ? 'flex' : 'none';
     });
@@ -489,15 +471,13 @@ function filterMarketsByCategory(category) {
 function setupFAQAccordions() {
     document.querySelectorAll('.faq-question').forEach(btn => {
         btn.addEventListener('click', () => {
-            const answer  = btn.nextElementSibling;
-            const marker  = btn.querySelector('span');
-            const isOpen  = answer.style.display === 'block';
+            const answer = btn.nextElementSibling;
+            const marker = btn.querySelector('span');
+            const isOpen = answer.style.display === 'block';
 
-            // Collapse all
             document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
             document.querySelectorAll('.faq-question span').forEach(s => s.textContent = '+');
 
-            // Toggle clicked one open if it was closed
             if (!isOpen) {
                 answer.style.display = 'block';
                 if (marker) marker.textContent = '−';
@@ -510,14 +490,10 @@ function setupFAQAccordions() {
    9. SHARE
    ========================================================================== */
 async function shareApp() {
-    // FIX: Original referenced domElements.shareBtn inside the function which
-    // didn't exist in domElements — now properly resolved
     const btn = domElements.shareBtn;
     if (!btn) return;
-
     const original = btn.textContent;
     btn.textContent = '⌛';
-
     try {
         if (navigator.share) {
             await navigator.share({
@@ -530,7 +506,7 @@ async function shareApp() {
             alert('Link copied to clipboard!');
         }
     } catch (err) {
-        // User cancelled share — no action needed
+        // User cancelled
     } finally {
         btn.textContent = original;
     }
