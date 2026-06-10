@@ -384,9 +384,14 @@ async function handleOrderPaymentSubmission(e) {
                         <span class="tracking-code">${trackingCode}</span>
                     </div>
                     <p class="delivery-info">Your items are being prepared for delivery to <strong>${orderPayload.address}</strong>.</p>
-                    <button class="btn-primary" onclick="window.location.reload()" style="width:100%; margin-top:10px;">
-                        Done &amp; Return
-                    </button>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="btn-primary" onclick="window.location.href='track.html?code=${trackingCode}'" style="flex:2; background:#00A859;">
+                            📦 Track Order
+                        </button>
+                        <button class="btn-primary" onclick="window.location.reload()" style="flex:1; background:#333;">
+                            Done
+                        </button>
+                    </div>
                 </div>`;
             clearActiveCartState();
         } else {
