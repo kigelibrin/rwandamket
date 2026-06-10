@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwandamket | Vendor Login</title>
+    <link rel="icon" href="image.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #00A859;
+            --primary-dark: #007A40;
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2a2e42;
+            --text: #f0f0f0;
+            --text-muted: #8a8fa8;
+            --error: #ff4d4d;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0,168,89,0.06) 0%, transparent 60%),
+                              radial-gradient(ellipse at 80% 20%, rgba(0,168,89,0.04) 0%, transparent 50%);
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .brand img {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .brand-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary);
+        }
+
+        .brand-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 32px;
+        }
+
+        .login-card h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        input::placeholder { color: var(--text-muted); }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-login:hover { background: var(--primary-dark); }
+        .btn-login:active { transform: scale(0.98); }
+        .btn-login:disabled { background: #444; cursor: not-allowed; }
+
+        .error-msg {
+            background: rgba(255,77,77,0.1);
+            border: 1px solid rgba(255,77,77,0.3);
+            color: var(--error);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 18px;
+            display: none;
+        }
+
+        .divider {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link a:hover { color: var(--primary); }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1s steps(3, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 100% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="brand">
+        <img src="image.png" alt="Rwandamket">
+        <div class="brand-name">RWANDAMKET</div>
+        <div class="brand-sub">Vendor Portal</div>
+    </div>
+
+    <div class="login-card">
+        <h1>Welcome back 👋</h1>
+        <p>Sign in to manage your orders, track sales, and update your market.</p>
+
+        <div class="error-msg" id="error-msg"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-login" id="login-btn">Sign In →</button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Rwandamket Marketplace</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    const loginForm = document.getElementById('login-form');
+    const loginBtn  = document.getElementById('login-btn');
+    const errorMsg  = document.getElementById('error-msg');
+
+    function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.style.display = 'block';
+    }
+
+    function hideError() {
+        errorMsg.style.display = 'none';
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        loginBtn.disabled   = true;
+        loginBtn.innerHTML  = 'Signing in<span class="loading-dots"></span>';
+
+        try {
+            const { data, error } = await window._supabase.auth.signInWithPassword({ email, password });
+
+            if (error) throw error;
+
+            // Check if this user has a vendor profile
+            const { data: vendor, error: vendorError } = await window._supabase
+                .from('vendor_profiles')
+                .select('id, business_name')
+                .eq('user_id', data.user.id)
+                .single();
+
+            if (vendorError || !vendor) {
+                await window._supabase.auth.signOut();
+                throw new Error("No vendor profile found for this account. Contact support.");
+            }
+
+            // Save vendor info and redirect
+            localStorage.setItem('vendor_id', vendor.id);
+            localStorage.setItem('vendor_name', vendor.business_name);
+            window.location.href = 'dashboard.html';
+
+        } catch (err) {
+            showError(err.message || 'Login failed. Please check your credentials.');
+            loginBtn.disabled  = false;
+            loginBtn.innerHTML = 'Sign In →';
+        }
+    });
+
+    // If already logged in, redirect straight to dashboard
+    window._supabase?.auth.getSession().then(({ data: { session } }) => {
+        if (session) window.location.href = 'dashboard.html';
+    });
+</script>
+</body>
+</html>
