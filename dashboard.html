@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rwandamket | Vendor Dashboard</title>
+    <!-- Prevent browser caching so back button always re-checks auth -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" href="image.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -624,9 +628,16 @@ let REALTIME_CHANNEL = null;
 
 // ── BOOT ──
 async function init() {
-    // Auth guard
-    const { data: { session } } = await window._supabase.auth.getSession();
-    if (!session) { window.location.href = 'vendor-login.html'; return; }
+    // Auth guard — force fresh check, ignore cached session
+    const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
+    if (sessionError || !session) {
+        // Clear everything and redirect
+        await window._supabase.auth.signOut();
+        localStorage.removeItem('vendor_id');
+        localStorage.removeItem('vendor_name');
+        window.location.replace('vendor-login.html');
+        return;
+    }
 
     // Load vendor profile
     const { data: vendor } = await window._supabase
@@ -856,7 +867,9 @@ async function handleLogout() {
     await window._supabase.auth.signOut();
     localStorage.removeItem('vendor_id');
     localStorage.removeItem('vendor_name');
-    window.location.href = 'vendor-login.html';
+    // Use replace() so dashboard is removed from browser history
+    // This prevents back button from returning to dashboard after logout
+    window.location.replace('vendor-login.html');
 }
 
 // ── TOAST ──
