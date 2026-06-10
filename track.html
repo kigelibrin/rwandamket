@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwandamket | Track Your Order</title>
+    <link rel="icon" href="image.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #00A859;
+            --primary-dark: #007A40;
+            --primary-light: rgba(0,168,89,0.1);
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2a2e42;
+            --text: #f0f0f0;
+            --text-muted: #8a8fa8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 16px;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0,168,89,0.06) 0%, transparent 60%);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 560px;
+            margin: 0 auto 32px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand img { width: 36px; height: 36px; border-radius: 8px; }
+
+        .brand-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 1.5px;
+        }
+
+        .back-link {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: var(--primary); }
+
+        .wrapper {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .page-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .search-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .track-input {
+            flex: 1;
+            padding: 13px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: border-color 0.2s;
+        }
+
+        .track-input:focus { border-color: var(--primary); }
+        .track-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--text-muted); }
+
+        .btn-track {
+            padding: 13px 20px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-track:hover { background: var(--primary-dark); }
+        .btn-track:disabled { background: #444; cursor: not-allowed; }
+
+        /* ── RESULT CARD ── */
+        .result-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            display: none;
+        }
+
+        .result-card.visible { display: block; }
+
+        .result-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+
+        .tracking-code {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .order-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .payment-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            background: var(--primary-light);
+            color: var(--primary);
+            white-space: nowrap;
+        }
+
+        /* ── TIMELINE ── */
+        .timeline {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .timeline-step {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .step-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 32px;
+            flex-shrink: 0;
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+            background: var(--surface2);
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .step-dot.done {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .step-dot.active {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0,168,89,0.15);
+        }
+
+        .step-line {
+            width: 2px;
+            flex: 1;
+            min-height: 24px;
+            background: var(--border);
+            margin: 2px 0;
+            transition: background 0.3s;
+        }
+
+        .step-line.done { background: var(--primary); }
+
+        .step-right {
+            padding: 4px 0 24px;
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .step-title.done, .step-title.active { color: var(--text); }
+
+        .step-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        .step-time {
+            font-size: 0.72rem;
+            color: var(--primary);
+            margin-top: 3px;
+        }
+
+        /* ── ORDER SUMMARY ── */
+        .order-summary {
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 4px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row:last-child { border-bottom: none; }
+
+        .summary-label { color: var(--text-muted); }
+        .summary-value { font-weight: 600; }
+        .summary-total { color: var(--primary); font-size: 0.9rem; }
+
+        /* ── ITEMS LIST ── */
+        .items-list {
+            margin: 14px 0;
+        }
+
+        .items-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .item-row:last-child { border-bottom: none; }
+        .item-qty { color: var(--text-muted); }
+
+        /* ── ERROR ── */
+        .error-box {
+            background: rgba(255,77,77,0.08);
+            border: 1px solid rgba(255,77,77,0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 0.85rem;
+            color: #ff6b6b;
+            display: none;
+        }
+
+        .error-box.visible { display: block; }
+
+        /* ── LIVE INDICATOR ── */
+        .live-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.72rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .live-dot::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .btn-back-home {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+
+        .btn-back-home:hover { color: var(--primary); border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <a class="brand" href="index.html">
+        <img src="image.png" alt="Rwandamket">
+        <span class="brand-name">RWANDAMKET</span>
+    </a>
+    <a class="back-link" href="index.html">← Back to marketplace</a>
+</header>
+
+<div class="wrapper">
+    <h1 class="page-title">Track Your Order 📦</h1>
+    <p class="page-sub">Enter your delivery tracking code to see real-time status updates.</p>
+
+    <div class="search-box">
+        <div class="search-row">
+            <input
+                type="text"
+                class="track-input"
+                id="track-input"
+                placeholder="e.g. RMK-2D427CEF"
+                maxlength="12"
+            >
+            <button class="btn-track" id="track-btn" onclick="trackOrder()">Track →</button>
+        </div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="result-card" id="result-card">
+
+        <div class="result-header">
+            <div>
+                <div class="tracking-code" id="res-code"></div>
+                <div class="order-meta" id="res-meta"></div>
+            </div>
+            <div>
+                <div class="payment-badge">✅ Paid</div>
+                <div class="live-dot" style="margin-top:6px;">Live tracking</div>
+            </div>
+        </div>
+
+        <!-- TIMELINE -->
+        <div class="timeline" id="timeline"></div>
+
+        <!-- ORDER ITEMS -->
+        <div class="items-list">
+            <div class="items-title">Items ordered</div>
+            <div id="items-container"></div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="order-summary">
+            <div class="summary-row">
+                <span class="summary-label">Deliver to</span>
+                <span class="summary-value" id="res-address"></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Customer</span>
+                <span class="summary-value" id="res-name"></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Total paid</span>
+                <span class="summary-value summary-total" id="res-total"></span>
+            </div>
+        </div>
+
+        <a class="btn-back-home" href="index.html">← Back to Rwandamket</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+
+const STEPS = [
+    { key: 'received',   icon: '🛒', title: 'Order Received',   desc: 'Your order has been placed and payment confirmed.' },
+    { key: 'preparing',  icon: '👨‍🍳', title: 'Being Prepared',   desc: 'The vendor is preparing your items.' },
+    { key: 'dispatched', icon: '🚴', title: 'On the Way',        desc: 'Your order is out for delivery.' },
+    { key: 'delivered',  icon: '✅', title: 'Delivered',         desc: 'Your order has been delivered. Enjoy!' },
+];
+
+const STATUS_ORDER = ['received', 'preparing', 'dispatched', 'delivered'];
+
+let CURRENT_ORDER_ID  = null;
+let REALTIME_CHANNEL  = null;
+
+// Auto-track if code is in URL ?code=RMK-XXXXXX
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get('code');
+    if (code) {
+        document.getElementById('track-input').value = code.toUpperCase();
+        trackOrder();
+    }
+});
+
+async function trackOrder() {
+    const raw   = document.getElementById('track-input').value.trim().toUpperCase();
+    const input = raw.replace('RMK-', '');
+
+    hideError();
+    hideResult();
+
+    if (!input || input.length < 6) {
+        showError('Please enter a valid tracking code (e.g. RMK-2D427CEF)');
+        return;
+    }
+
+    const btn       = document.getElementById('track-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Searching...';
+
+    try {
+        // Search orders where id starts with the tracking code prefix
+        const { data: orders, error } = await window._supabase
+            .from('orders')
+            .select('*')
+            .ilike('id::text', `${input.toLowerCase()}%`)
+            .limit(1);
+
+        if (error) throw error;
+
+        if (!orders || orders.length === 0) {
+            showError(`No order found for tracking code "${raw}". Please check and try again.`);
+            return;
+        }
+
+        const order = orders[0];
+        CURRENT_ORDER_ID = order.id;
+        renderResult(order);
+        subscribeToUpdates(order.id);
+
+    } catch (err) {
+        showError('Failed to find order. Please try again.');
+        console.error(err);
+    } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Track →';
+    }
+}
+
+function renderResult(order) {
+    const trackCode = `RMK-${order.id.toString().substring(0,8).toUpperCase()}`;
+    const orderDate = new Date(order.created_at).toLocaleString('en-RW', {
+        dateStyle: 'medium', timeStyle: 'short'
+    });
+
+    document.getElementById('res-code').textContent   = trackCode;
+    document.getElementById('res-meta').textContent   = `Placed on ${orderDate}`;
+    document.getElementById('res-address').textContent = order.delivery_address || '—';
+    document.getElementById('res-name').textContent   = order.customer_name || '—';
+    document.getElementById('res-total').textContent  = `${Number(order.total_amount).toLocaleString()} RWF`;
+
+    // Render items
+    const items = order.items || [];
+    document.getElementById('items-container').innerHTML = items.length
+        ? items.map(i => `
+            <div class="item-row">
+                <span>${i.name}</span>
+                <span class="item-qty">× ${i.quantity} — ${Number(i.price * i.quantity).toLocaleString()} RWF</span>
+            </div>`).join('')
+        : '<div class="item-row"><span style="color:var(--text-muted)">No item details available</span></div>';
+
+    // Render timeline
+    renderTimeline(order.order_status);
+
+    document.getElementById('result-card').classList.add('visible');
+}
+
+function renderTimeline(currentStatus) {
+    const currentIdx = STATUS_ORDER.indexOf(currentStatus);
+    const container  = document.getElementById('timeline');
+
+    container.innerHTML = STEPS.map((step, i) => {
+        const isDone   = i < currentIdx;
+        const isActive = i === currentIdx;
+        const isLast   = i === STEPS.length - 1;
+
+        const dotClass  = isDone ? 'done' : isActive ? 'active' : '';
+        const lineClass = isDone ? 'done' : '';
+        const titleClass = (isDone || isActive) ? (isDone ? 'done' : 'active') : '';
+
+        return `
+            <div class="timeline-step">
+                <div class="step-left">
+                    <div class="step-dot ${dotClass}">${isDone ? '✓' : step.icon}</div>
+                    ${!isLast ? `<div class="step-line ${lineClass}"></div>` : ''}
+                </div>
+                <div class="step-right">
+                    <div class="step-title ${titleClass}">${step.title}</div>
+                    <div class="step-desc">${isActive ? `<strong>${step.desc}</strong>` : step.desc}</div>
+                    ${isActive ? `<div class="step-time">● Current status</div>` : ''}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function subscribeToUpdates(orderId) {
+    // Unsubscribe from previous if any
+    if (REALTIME_CHANNEL) {
+        window._supabase.removeChannel(REALTIME_CHANNEL);
+    }
+
+    REALTIME_CHANNEL = window._supabase
+        .channel(`order-${orderId}`)
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `id=eq.${orderId}`
+        }, (payload) => {
+            renderResult(payload.new);
+        })
+        .subscribe();
+}
+
+function showError(msg) {
+    const box     = document.getElementById('error-box');
+    box.textContent = msg;
+    box.classList.add('visible');
+}
+
+function hideError() {
+    document.getElementById('error-box').classList.remove('visible');
+}
+
+function hideResult() {
+    document.getElementById('result-card').classList.remove('visible');
+    if (REALTIME_CHANNEL) {
+        window._supabase.removeChannel(REALTIME_CHANNEL);
+        REALTIME_CHANNEL = null;
+    }
+}
+
+// Allow Enter key to trigger search
+document.getElementById('track-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') trackOrder();
+});
+</script>
+</body>
+</html>
