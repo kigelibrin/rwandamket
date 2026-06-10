@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,6 @@
     <meta name="twitter:image" content="image.png">
     <link rel="icon" href="image.png" type="image/png">
     <title>Rwandamket | Your Marketplace in Rwanda</title>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -15,20 +14,19 @@
 </head>
 <body>
 
+    <!-- ======================== LOCATION MODAL ======================== -->
     <div id="locationModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 30px 24px;">
-            <div style="font-size: 2.5rem; margin-bottom: 10px;">📍</div>
-            <h2 style="margin-top: 0; margin-bottom: 8px; font-weight: 700;">Where should we deliver?</h2>
-            <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px; line-height: 1.4;">
-                Select your city to view available local markets, artisans, and tailored delivery rates near you.
-            </p>
+        <div class="modal-content location-modal-content">
+            <div class="location-modal-icon">📍</div>
+            <h2 class="location-modal-title">Where should we deliver?</h2>
+            <p class="location-modal-sub">Select your city to view available local markets, artisans, and tailored delivery rates near you.</p>
 
-            <div style="background: #f5f5f5; padding: 4px; border-radius: 30px; display: flex; margin-bottom: 24px; border: 1px solid #eee;">
-                <button id="loc-remember" class="loc-toggle-btn active" style="flex: 1; border: none; padding: 10px; border-radius: 25px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;">Remember choice</button>
-                <button id="loc-ask" class="loc-toggle-btn" style="flex: 1; border: none; padding: 10px; border-radius: 25px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; background: transparent; color: #666;">Always ask</button>
+            <div class="loc-toggle-group">
+                <button id="loc-remember" class="loc-toggle-btn active">Remember choice</button>
+                <button id="loc-ask" class="loc-toggle-btn">Always ask</button>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
+            <div class="location-options-list">
                 <button class="location-option-card" data-city="Kigali">
                     <span class="loc-city">Kigali</span>
                     <span class="loc-arrow">→</span>
@@ -49,26 +47,33 @@
         </div>
     </div>
 
+    <!-- ======================== HEADER ======================== -->
     <header>
         <div class="logo-container">
             <img src="image.png" alt="Rwandamket Logo" class="header-logo">
             <span class="logo-text">RWANDAMKET</span>
         </div>
         <div class="header-actions">
-            <button id="theme-toggle" class="theme-btn">🌙</button>
+            <button id="theme-toggle" class="theme-btn" title="Toggle theme">🌙</button>
             <button id="share-btn" class="theme-btn" title="Share App">📤</button>
+            <a href="track.html" class="theme-btn" title="Track your order" style="text-decoration:none;">📦</a>
+            <a href="vendor-login.html" class="theme-btn" title="Vendor login" style="text-decoration:none;">🏪</a>
             <button id="get-started-btn" class="btn-primary">Get Started</button>
         </div>
     </header>
 
+    <!-- ======================== MAIN ======================== -->
     <main>
+
+        <!-- Hero -->
         <section id="home" class="hero">
             <div class="hero-content">
                 <h1>Delivery Designed for <span class="text-green">Rwanda</span></h1>
                 <p>From local decor to event management—we bridge the gap between artisans and your doorstep.</p>
             </div>
         </section>
-        
+
+        <!-- About -->
         <section id="about" class="section-container bg-light">
             <div class="about-grid">
                 <div class="about-text">
@@ -81,9 +86,10 @@
             </div>
         </section>
 
+        <!-- Markets -->
         <section id="markets" class="section-container">
             <h2 class="section-title">Choose a Market</h2>
-            
+
             <div class="search-container">
                 <input type="text" id="marketSearch" placeholder="Search for food, decor, or chefs...">
             </div>
@@ -96,69 +102,67 @@
                     <button class="filter-chip" data-category="Events">Events</button>
                 </div>
             </div>
-            
+
             <div id="market-list" class="markets-grid"></div>
         </section>
 
+        <!-- FAQ -->
         <section id="faq" class="section-container">
             <h2 class="faq-main-title">Common Questions</h2>
-            
+
             <div class="faq-item">
                 <button class="faq-question">How do I pay for my order? <span>+</span></button>
                 <div class="faq-answer">
                     <p>We process payments directly on-screen via integrated Mobile Money (MTN MoMo & AirtelMoney). Simply provide your phone number during checkout to prompt the secure transaction dialog.</p>
                 </div>
             </div>
-
             <div class="faq-item">
                 <button class="faq-question">How long does delivery take? <span>+</span></button>
                 <div class="faq-answer">
                     <p>Grocery and menu items typically arrive within 45-60 minutes. For Chefs and Events, please book at least 24 hours in advance.</p>
                 </div>
             </div>
-
             <div class="faq-item">
                 <button class="faq-question">How do I book a Private Chef? <span>+</span></button>
                 <div class="faq-answer">
                     <p>Browse our Chef Market, add your preferred chef to the cart, and checkout. We recommend booking at least 48 hours in advance.</p>
                 </div>
             </div>
-
             <div class="faq-item">
                 <button class="faq-question">Are the Home Decor items handmade? <span>+</span></button>
                 <div class="faq-answer">
                     <p>Yes! We partner directly with Rwandan artisans. Most items are handcrafted, which means every piece is unique.</p>
                 </div>
             </div>
-
             <div class="faq-item">
                 <button class="faq-question">What happens after I authorize my payment? <span>+</span></button>
                 <div class="faq-answer">
-                    <p>Your order registers instantly within our database system layer. The vendor receives your itemized invoice breakdowns and begins preparing your items for delivery right away.</p>
+                    <p>Your order registers instantly within our database. The vendor receives your itemized invoice and begins preparing your items for delivery right away.</p>
                 </div>
             </div>
-            
+
             <p class="terms-notice">
-                By using this site, you agree to our 
-                <span id="open-terms-link">Terms & Conditions</span>.
+                By using this site, you agree to our
+                <span id="open-terms-link">Terms &amp; Conditions</span>.
             </p>
         </section>
     </main>
 
+    <!-- ======================== FOOTER ======================== -->
     <footer class="footer">
         <p>&copy; 2026 Rwandamket. Built with ❤️ in Kigali.</p>
-        <p><a href="mailto:support@rwandamket.com" class="support-link">
-            Need help tracking? Contact Support
-        </a></p>
+        <p><a href="mailto:support@rwandamket.com" class="support-link">Need help tracking? Contact Support</a></p>
     </footer>
 
-    <div id="termsModal" class="modal">
+    <!-- ======================== TERMS MODAL ======================== -->
+    <!-- FIX: Added display:none so it doesn't flash on load -->
+    <div id="termsModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span id="close-modal-btn" class="close-modal">&times;</span>
-            <h2>Terms & Conditions</h2>
+            <h2>Terms &amp; Conditions</h2>
             <div class="terms-body">
                 <p><strong>1. Orders:</strong> All orders placed through our digital portal are subject to automated vendor allocation checks.</p>
-                <p><strong>2. Payment:</strong> Transactions are handled securely using local secure billing infrastructure nodes.</p>
+                <p><strong>2. Payment:</strong> Transactions are handled securely using local Mobile Money infrastructure.</p>
                 <p><strong>3. Delivery:</strong> Delivery times are estimates. For Private Chefs, 48-hour notice is required.</p>
                 <p><strong>4. Refunds:</strong> Please inspect items upon delivery. Perishable goods cannot be returned once accepted.</p>
             </div>
@@ -166,48 +170,52 @@
         </div>
     </div>
 
+    <!-- ======================== PAYMENT MODAL ======================== -->
     <div id="paymentModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 400px;">
-            <h2 style="margin-top: 0; margin-bottom: 5px;">📍 Delivery & Payment</h2>
-            <p style="font-size: 0.85rem; color: #777; margin-bottom: 15px;">Provide your details to complete your direct system booking securely.</p>
-            
-            <div id="vendor-momo-notice" style="background: rgba(46, 125, 50, 0.1); border-left: 4px solid var(--primary); padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 20px; text-align: left;">
+        <div class="modal-content payment-modal-content">
+            <h2 class="payment-modal-title">📍 Delivery &amp; Payment</h2>
+            <p class="payment-modal-sub">Provide your details to complete your booking securely.</p>
+
+            <div class="vendor-momo-notice">
                 📱 Direct Pay Merchant ID: <strong id="merchant-momo-display">Loading...</strong>
             </div>
-            
+
             <form id="checkout-form">
-                <div style="margin-bottom: 15px; text-align: left;">
-                    <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Your Name *</label>
-                    <input type="text" id="cust-name" required placeholder="e.g., Keza" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                <div class="form-group">
+                    <label for="cust-name">Your Name *</label>
+                    <input type="text" id="cust-name" required placeholder="e.g., Keza">
                 </div>
-                
-                <div style="margin-bottom: 15px; text-align: left;">
-                    <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">Delivery Address / Neighborhood *</label>
-                    <input type="text" id="cust-location" required placeholder="e.g., Gikondo, KK 31 Ave" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                <div class="form-group">
+                    <label for="cust-location">Delivery Address / Neighborhood *</label>
+                    <input type="text" id="cust-location" required placeholder="e.g., Gikondo, KK 31 Ave">
                 </div>
-                
-                <div style="margin-bottom: 20px; text-align: left;">
-                    <label style="display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">MTN / Airtel Mobile Money Number *</label>
-                    <input type="tel" id="cust-momo" required placeholder="e.g., 078XXXXXXX" pattern="^(078|079|072|073)\d{7}$" title="Please enter a valid Rwandan Mobile Money number" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 0.9rem; box-sizing: border-box;">
+                <div class="form-group">
+                    <label for="cust-momo">MTN / Airtel Mobile Money Number *</label>
+                    <input type="tel" id="cust-momo" required placeholder="e.g., 078XXXXXXX"
+                        pattern="^(078|079|072|073)\d{7}$"
+                        title="Please enter a valid Rwandan Mobile Money number">
                 </div>
-                
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" id="close-payment-btn" class="btn-primary" style="flex: 1; background: #eee; color: #333; box-shadow: none;">Cancel</button>
-                    <button type="submit" id="submit-order-btn" class="btn-primary" style="flex: 2; background: #00A859; color: #fff;">Confirm & Pay Securely 🚀</button>
+                <div class="form-row">
+                    <!-- FIX: Changed to type="button" to prevent accidental form submission -->
+                    <button type="button" id="close-payment-btn" class="btn-secondary">Cancel</button>
+                    <button type="submit" id="submit-order-btn" class="btn-primary btn-pay">Confirm &amp; Pay Securely 🚀</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- ======================== CART BAR ======================== -->
     <div id="cart-bar" class="cart-bar hidden">
         <div class="cart-info">
             <span id="cart-count">0 items</span>
             <strong id="cart-total">0 RWF</strong>
-            <small id="clear-cart-btn">Clear</small>
+            <!-- FIX: Changed <small> to <button> for proper semantics & mobile click reliability -->
+            <button id="clear-cart-btn" class="clear-cart-btn">Clear</button>
         </div>
         <button id="checkout-btn" class="checkout-btn">Proceed to Payment 💳</button>
     </div>
 
+    <!-- ======================== SCRIPTS ======================== -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
