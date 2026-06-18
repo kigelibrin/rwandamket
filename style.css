@@ -2,7 +2,7 @@
    1. VARIABLES & DESIGN SYSTEM
    ========================================================================== */
 :root {
-    --primary: #2E7D32;       /* Deep Eco-Green */
+    --primary: #2E7D32;
     --primary-dark: #1b5e20;
     --accent: #4CAF50;
     --text-dark: #333333;
@@ -12,14 +12,11 @@
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     --border-color: #dddddd;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Transaction/Payment Specific Design Tokens */
     --success: #2e7d32;
     --pending: #f57c00;
     --failed: #d32f2f;
 }
 
-/* Dark Theme Variables Override */
 body.dark-mode {
     --white: #1e1e1e;
     --bg-light: #121212;
@@ -27,42 +24,22 @@ body.dark-mode {
     --text-light: #bbbbbb;
     --border-color: #333333;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    --accent: #4CAF50;        /* Clear high-visibility green for dark screens */
-    
+    --accent: #4CAF50;
     --success: #4caf50;
     --pending: #ffb74d;
     --failed: #ef5350;
 }
 
 /* ==========================================================================
-   2. CORE RESETS & GLOBAL STYLES
+   2. CORE RESETS
    ========================================================================== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    background-color: var(--bg-light);
-    color: var(--text-dark);
-    line-height: 1.6;
-    overflow-x: hidden;
-    width: 100%;
-}
-
-img {
-    transition: opacity 0.3s ease;
-    background-color: rgba(0, 0, 0, 0.05);
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+html { scroll-behavior: smooth; }
+body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; overflow-x: hidden; width: 100%; }
+img { transition: opacity 0.3s ease; background-color: rgba(0,0,0,0.05); }
 
 /* ==========================================================================
-   3. HEADER & LOGO ACTIONS
+   3. HEADER
    ========================================================================== */
 header {
     display: flex;
@@ -77,34 +54,12 @@ header {
     transition: var(--transition);
 }
 
-.logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.logo-container { display: flex; align-items: center; gap: 10px; }
+.header-logo { height: 40px; width: auto; border-radius: 50%; }
+.logo-text { font-weight: 700; color: var(--primary); font-size: 1.1rem; letter-spacing: 0.5px; }
+body.dark-mode .logo-text { color: var(--accent); }
 
-.header-logo {
-    height: 40px;
-    width: auto;
-    border-radius: 50%;
-}
-
-.logo-text {
-    font-weight: 700;
-    color: var(--primary);
-    font-size: 1.1rem;
-    letter-spacing: 0.5px;
-}
-
-body.dark-mode .logo-text {
-    color: var(--accent);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+.header-actions { display: flex; align-items: center; gap: 8px; }
 
 .theme-btn {
     background: #f0f0f0;
@@ -115,17 +70,17 @@ body.dark-mode .logo-text {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
 }
 
-body.dark-mode .theme-btn {
-    background: #333333;
-}
+body.dark-mode .theme-btn { background: #333333; }
 
 /* ==========================================================================
-   4. BUTTONS & ANIMATIONS
+   4. BUTTONS
    ========================================================================== */
 .btn-primary {
     background-color: var(--primary);
@@ -137,20 +92,11 @@ body.dark-mode .theme-btn {
     font-size: 0.9rem;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+    box-shadow: 0 4px 10px rgba(46,125,50,0.2);
 }
 
-.btn-primary:disabled {
-    background-color: var(--text-light) !important;
-    cursor: not-allowed;
-    transform: none !important;
-    opacity: 0.6;
-}
-
-.btn-primary:active:not(:disabled) {
-    transform: scale(0.95);
-    background-color: var(--primary-dark);
-}
+.btn-primary:disabled { background-color: var(--text-light) !important; cursor: not-allowed; opacity: 0.6; }
+.btn-primary:active:not(:disabled) { transform: scale(0.95); background-color: var(--primary-dark); }
 
 @keyframes pulse {
     0% { transform: scale(1); }
@@ -158,12 +104,39 @@ body.dark-mode .theme-btn {
     100% { transform: scale(1); }
 }
 
-header .btn-primary {
-    animation: pulse 2s infinite ease-in-out;
+header .btn-primary { animation: pulse 2s infinite ease-in-out; }
+
+/* Secondary button */
+.btn-secondary {
+    background: #eeeeee;
+    color: #333;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+body.dark-mode .btn-secondary { background: #333; color: #fff; }
+
+/* Clear cart button */
+.clear-cart-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    display: block;
+    margin-top: 2px;
 }
 
 /* ==========================================================================
-   5. HERO & MAIN STRUCTURE
+   5. HERO & SECTIONS
    ========================================================================== */
 .hero {
     position: relative;
@@ -173,7 +146,7 @@ header .btn-primary {
     justify-content: center;
     text-align: center;
     color: #ffffff;
-    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
                       url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200');
     background-size: cover;
     background-position: center;
@@ -181,7 +154,7 @@ header .btn-primary {
 
 .text-green { color: var(--accent); }
 .section-container { padding: 40px 20px; }
-.bg-light { background-color: var(--white); } 
+.bg-light { background-color: var(--white); }
 
 .about-grid {
     display: flex;
@@ -192,30 +165,14 @@ header .btn-primary {
     margin: 0 auto;
 }
 
-.about-text h2 {
-    font-size: 1.8rem;
-    color: var(--primary);
-    margin-bottom: 15px;
-}
-
-body.dark-mode .about-text h2 {
-    color: var(--accent);
-}
-
-.about-image img {
-    width: 100%;
-    max-width: 450px;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-}
+.about-text h2 { font-size: 1.8rem; color: var(--primary); margin-bottom: 15px; }
+body.dark-mode .about-text h2 { color: var(--accent); }
+.about-image img { width: 100%; max-width: 450px; border-radius: 20px; box-shadow: var(--shadow); }
 
 /* ==========================================================================
-   6. SEARCH AND FILTERS
+   6. SEARCH & FILTERS
    ========================================================================== */
-.search-container {
-    max-width: 600px;
-    margin: 0 auto 20px;
-}
+.search-container { max-width: 600px; margin: 0 auto 20px; }
 
 #marketSearch {
     width: 100%;
@@ -229,24 +186,10 @@ body.dark-mode .about-text h2 {
     transition: var(--transition);
 }
 
-#marketSearch:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
-}
+#marketSearch:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
 
-.category-wrapper {
-    overflow-x: auto;
-    padding: 10px 0;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-}
-
-.category-scroll {
-    display: flex;
-    gap: 10px;
-    padding: 0 20px;
-    justify-content: center;
-}
+.category-wrapper { overflow-x: auto; padding: 10px 0; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+.category-scroll { display: flex; gap: 10px; padding: 0 20px; justify-content: center; }
 
 .filter-chip {
     padding: 8px 18px;
@@ -259,14 +202,10 @@ body.dark-mode .about-text h2 {
     transition: var(--transition);
 }
 
-.filter-chip.active {
-    background: var(--primary);
-    color: #ffffff;
-    border-color: var(--primary);
-}
+.filter-chip.active { background: var(--primary); color: #ffffff; border-color: var(--primary); }
 
 /* ==========================================================================
-   7. PRODUCT & MARKET LISTINGS
+   7. MARKET & PRODUCT CARDS
    ========================================================================== */
 .markets-grid {
     display: grid;
@@ -289,51 +228,182 @@ body.dark-mode .about-text h2 {
     border: 1px solid var(--border-color);
 }
 
-.market-card:hover {
-    transform: translateY(-4px);
-}
+.market-card:hover { transform: translateY(-4px); }
+.market-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-bottom: 10px; }
+.market-card h4 { margin-top: 10px; font-size: 1rem; line-height: 1.3; }
+.market-card p { font-size: 0.8rem; color: var(--text-light); margin-top: 5px; flex-grow: 1; }
 
-.market-card img {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
+.price-tag { display: block; color: var(--primary); font-weight: bold; margin: 5px 0; }
+body.dark-mode .price-tag { color: var(--accent); }
 
-.market-card h4 {
-    margin-top: 10px;
-    font-size: 1rem;
-    line-height: 1.3;
-}
-
-.market-card p {
-    font-size: 0.8rem;
+/* State message (loading / empty) */
+.state-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
     color: var(--text-light);
-    margin-top: 5px;
-    flex-grow: 1;
-}
-
-.price-tag {
-    display: block;
-    color: var(--primary);
-    font-weight: bold;
-    margin: 5px 0;
-}
-
-body.dark-mode .price-tag {
-    color: var(--accent);
+    font-size: 0.9rem;
 }
 
 /* ==========================================================================
-   8. ACCORDIONS (FAQ) & MODALS
+   8. LOCATION MODAL
    ========================================================================== */
-.faq-item {
-    border-bottom: 1px solid var(--border-color);
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 10px 0;
+.location-modal-content {
+    text-align: center;
+    max-width: 420px;
+    padding: 30px 24px;
 }
+
+.location-modal-icon { font-size: 2.5rem; margin-bottom: 10px; }
+.location-modal-title { margin: 0 0 8px; font-weight: 700; font-size: 1.4rem; }
+.location-modal-sub { font-size: 0.9rem; color: var(--text-light); margin-bottom: 24px; line-height: 1.4; }
+
+/* ── TOGGLE GROUP — the pill container ── */
+.loc-toggle-group {
+    background: #f0f0f0;
+    padding: 4px;
+    border-radius: 30px;
+    display: flex;
+    margin-bottom: 24px;
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .loc-toggle-group {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+/* ── TOGGLE BUTTONS ── */
+.loc-toggle-btn {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+    color: #666666;
+    font-family: 'Inter', sans-serif;
+}
+
+body.dark-mode .loc-toggle-btn { color: #bbbbbb; }
+
+.loc-toggle-btn.active {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(46,125,50,0.3);
+}
+
+/* ── LOCATION OPTION CARDS ── */
+.location-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.location-option-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 14px 20px;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-dark);
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+}
+
+.location-option-card:hover {
+    border-color: var(--primary);
+    background: rgba(46,125,50,0.04);
+    transform: translateX(4px);
+}
+
+.location-option-card .loc-arrow { color: var(--primary); font-weight: bold; }
+
+body.dark-mode .location-option-card:hover { border-color: var(--accent); background: rgba(76,175,80,0.08); }
+body.dark-mode .location-option-card .loc-arrow { color: var(--accent); }
+
+/* ==========================================================================
+   9. PAYMENT MODAL & FORMS
+   ========================================================================== */
+.payment-modal-content { max-width: 400px; }
+.payment-modal-title { margin: 0 0 5px; font-size: 1.2rem; font-weight: 700; }
+.payment-modal-sub { font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px; }
+
+.vendor-momo-notice {
+    background: rgba(46,125,50,0.1);
+    border-left: 4px solid var(--primary);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group { margin-bottom: 15px; text-align: left; }
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--text-dark);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+    outline: none;
+    transition: var(--transition);
+}
+
+.form-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(46,125,50,0.15); }
+
+.form-row { display: flex; gap: 10px; }
+.btn-pay { flex: 2; background: #00A859; color: #fff; }
+
+/* Payment success */
+.payment-success { text-align: center; padding: 20px 10px; }
+.success-icon { font-size: 3.5rem; margin-bottom: 15px; }
+.payment-success h3 { font-size: 1.5rem; color: #00A859; margin-bottom: 10px; }
+.payment-success p { font-size: 0.9rem; color: var(--text-dark); margin-bottom: 8px; }
+
+.tracking-code-box {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-size: 0.8rem;
+    text-align: left;
+}
+
+.tracking-code { font-family: monospace; font-size: 1rem; color: #2E7D32; font-weight: bold; }
+.delivery-info { font-size: 0.8rem; color: var(--text-light); margin-bottom: 20px; }
+
+/* ==========================================================================
+   10. FAQ & TERMS
+   ========================================================================== */
+.faq-main-title { text-align: center; font-size: 1.8rem; margin-bottom: 20px; color: var(--primary); }
+body.dark-mode .faq-main-title { color: var(--accent); }
+
+.faq-item { border-bottom: 1px solid var(--border-color); max-width: 600px; margin: 0 auto; padding: 10px 0; }
 
 .faq-question {
     width: 100%;
@@ -349,6 +419,7 @@ body.dark-mode .price-tag {
     font-weight: 600;
     text-align: left;
     color: var(--text-dark);
+    font-family: 'Inter', sans-serif;
 }
 
 .faq-answer {
@@ -365,15 +436,20 @@ body.dark-mode .price-tag {
     to { opacity: 1; transform: translateY(0); }
 }
 
+.terms-notice { text-align: center; margin-top: 25px; font-size: 0.85rem; color: var(--text-light); }
+.terms-notice span { text-decoration: underline; cursor: pointer; color: var(--primary); }
+.terms-body p { margin-bottom: 15px; font-size: 0.9rem; color: var(--text-dark); }
+
+/* ==========================================================================
+   11. MODALS (SHARED)
+   ========================================================================== */
 .modal {
     display: none;
     position: fixed;
     z-index: 3000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
     backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
@@ -392,139 +468,16 @@ body.dark-mode .price-tag {
     border: 1px solid var(--border-color);
 }
 
-/* --- LOCATION SELECTOR OVERLAY MODAL SPECIFIC STYLES --- */
-#locationModal .loc-toggle-btn {
-    background: transparent;
-    color: #666666;
-}
+.close-modal { position: absolute; right: 20px; top: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: var(--text-light); }
 
-#locationModal .loc-toggle-btn.active {
-    background: var(--primary) !important;
-    color: #ffffff !important;
-}
-
-body.dark-mode #locationModal div[style*="background: #f5f5f5"] {
-    background: #2a2a2a !important;
-    border-color: #333333 !important;
-}
-
-body.dark-mode #locationModal .loc-toggle-btn {
-    color: #bbbbbb;
-}
-
-.location-option-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 14px 20px;
-    background: var(--white);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--text-dark);
-    transition: var(--transition);
-}
-
-.location-option-card:hover {
-    border-color: var(--primary);
-    background: rgba(46, 125, 50, 0.04);
-    transform: translateX(4px);
-}
-
-.location-option-card .loc-arrow {
-    color: var(--primary);
-    font-weight: bold;
-    transition: var(--transition);
-}
-
-body.dark-mode .location-option-card:hover {
-    border-color: var(--accent);
-    background: rgba(76, 175, 80, 0.08);
-}
-
-body.dark-mode .location-option-card .loc-arrow {
-    color: var(--accent);
-}
-
-/* --- FORM THEME ISOLATION OVERRIDES --- */
-#paymentModal input {
-    background-color: var(--white);
-    color: var(--text-dark);
-    border: 1px solid var(--border-color);
-    transition: var(--transition);
-}
-
-#paymentModal input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
-    outline: none;
-}
-
-body.dark-mode #paymentModal button[style*="background: #eee"] {
-    background: #333333 !important;
-    color: #ffffff !important;
-}
-
-.close-modal {
-    position: absolute;
-    right: 20px;
-    top: 15px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    color: var(--text-light);
-}
-
-.terms-body p {
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-    color: var(--text-dark);
-}
-
-.terms-notice {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 0.85rem;
-    color: var(--text-light);
-}
-
-.terms-notice span {
-    text-decoration: underline;
-    cursor: pointer;
-    color: var(--primary);
-}
-
-/* --- STATUS BADGES & LIVE TRANSACTION BADGING --- */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.status-badge.status-paid {
-    background-color: rgba(46, 125, 50, 0.15);
-    color: var(--success);
-}
-
-.status-badge.status-pending {
-    background-color: rgba(245, 124, 0, 0.15);
-    color: var(--pending);
-}
-
-.status-badge.status-failed {
-    background-color: rgba(211, 47, 47, 0.15);
-    color: var(--failed);
-}
+/* Status badges */
+.status-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+.status-badge.status-paid { background: rgba(46,125,50,0.15); color: var(--success); }
+.status-badge.status-pending { background: rgba(245,124,0,0.15); color: var(--pending); }
+.status-badge.status-failed { background: rgba(211,47,47,0.15); color: var(--failed); }
 
 /* ==========================================================================
-   9. CART PANEL & FOOTER
+   12. CART & FOOTER
    ========================================================================== */
 .cart-bar {
     position: fixed;
@@ -543,17 +496,7 @@ body.dark-mode #paymentModal button[style*="background: #eee"] {
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.cart-bar.hidden {
-    transform: translateY(150%);
-}
-
-.cart-info small {
-    text-decoration: underline;
-    cursor: pointer;
-    opacity: 0.8;
-    display: block;
-    margin-top: 2px;
-}
+.cart-bar.hidden { transform: translateY(150%); }
 
 .checkout-btn {
     background: #ffffff;
@@ -566,28 +509,21 @@ body.dark-mode #paymentModal button[style*="background: #eee"] {
     transition: var(--transition);
 }
 
-.checkout-btn:hover {
-    background: #f0f0f0;
-}
+.checkout-btn:hover { background: #f0f0f0; }
 
 .footer {
     text-align: center;
     padding: 40px 20px 100px;
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(0,0,0,0.03);
     font-size: 0.9rem;
     color: var(--text-light);
     border-top: 1px solid var(--border-color);
 }
 
-.support-link {
-    color: var(--primary);
-    font-size: 0.85rem;
-    text-decoration: none;
-    font-weight: 600;
-}
+.support-link { color: var(--primary); font-size: 0.85rem; text-decoration: none; font-weight: 600; }
 
 /* ==========================================================================
-   10. RESPONSIVE BREAKPOINTS (MEDIA QUERIES)
+   13. RESPONSIVE
    ========================================================================== */
 @media (max-width: 400px) {
     .logo-text { display: none; }
@@ -595,31 +531,16 @@ body.dark-mode #paymentModal button[style*="background: #eee"] {
     .header-actions { gap: 5px; }
     .btn-primary { padding: 8px 15px; font-size: 0.8rem; }
     .category-scroll { justify-content: flex-start; }
+    .theme-btn { width: 30px; height: 30px; font-size: 0.9rem; }
 }
 
 @media (min-width: 768px) {
-    .about-grid {
-        flex-direction: row;
-        text-align: left;
-        align-items: center;
-    }
-    .markets-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 25px;
-        padding: 40px;
-    }
+    .about-grid { flex-direction: row; text-align: left; align-items: center; }
+    .markets-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; padding: 40px; }
 }
 
 @media (min-width: 1024px) {
     header { padding: 20px 10%; }
     .hero-content h1 { font-size: 3.5rem; }
-    
-    .cart-bar {
-        width: 350px;
-        left: auto;
-        right: 40px;
-        bottom: 40px;
-        border-radius: 20px;
-        padding: 20px;
-    }
+    .cart-bar { width: 350px; left: auto; right: 40px; bottom: 40px; border-radius: 20px; padding: 20px; }
 }
