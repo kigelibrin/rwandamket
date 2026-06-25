@@ -553,6 +553,24 @@
             </div>
         </div>
 
+        <!-- WALLET -->
+        <div class="stats-grid" style="margin-bottom:28px;">
+            <div class="stat-card" style="border-color: rgba(0,168,89,0.3);">
+                <div class="stat-label">💰 Available Wallet</div>
+                <div class="stat-value" id="stat-wallet" style="color: var(--primary);">—</div>
+                <div class="stat-sub">RWF ready to withdraw</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(245,158,11,0.3);">
+                <div class="stat-label">⏳ In Escrow</div>
+                <div class="stat-value" id="stat-escrow" style="color: #fbbf24;">—</div>
+                <div class="stat-sub">held until delivery confirmed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Commission Rate</div>
+                <div class="stat-value" style="color: var(--text-muted); font-size:1.3rem;">8%</div>
+                <div class="stat-sub">Rwandamket platform fee</div>
+            </div>
+        </div>
         <!-- ORDERS PANEL -->
         <div class="panel active" id="panel-orders">
             <div class="section-header">
@@ -642,7 +660,7 @@ async function init() {
     // Load vendor profile
     const { data: vendor } = await window._supabase
         .from('vendor_profiles')
-        .select('id, business_name')
+        .select('id, business_name, wallet_balance, escrow_balance')
         .eq('user_id', session.user.id)
         .single();
 
@@ -650,6 +668,7 @@ async function init() {
 
     VENDOR_ID = vendor.id;
     document.getElementById('sidebar-vendor-name').textContent = vendor.business_name;
+    renderWallet(vendor.wallet_balance, vendor.escrow_balance);
 
     // Get market linked to this vendor
     const { data: market } = await window._supabase
@@ -662,6 +681,21 @@ async function init() {
 
     await loadOrders();
     subscribeToNewOrders();
+}
+
+function renderWallet(walletBalance, escrowBalance) {
+    document.getElementById('stat-wallet').textContent = Number(walletBalance || 0).toLocaleString();
+    document.getElementById('stat-escrow').textContent = Number(escrowBalance || 0).toLocaleString();
+}
+
+async function refreshWallet() {
+    const { data: vendor } = await window._supabase
+        .from('vendor_profiles')
+        .select('wallet_balance, escrow_balance')
+        .eq('id', VENDOR_ID)
+        .single();
+
+    if (vendor) renderWallet(vendor.wallet_balance, vendor.escrow_balance);
 }
 
 // ── LOAD ORDERS ──
@@ -700,7 +734,7 @@ function updateStats(orders, today) {
     const todayOrders = orders.filter(o => new Date(o.created_at) >= today);
     const pending     = orders.filter(o => ['received','preparing','dispatched'].includes(o.order_status));
     const delivered   = todayOrders.filter(o => o.order_status === 'delivered');
-    const revenue     = todayOrders.reduce((s, o) => s + (o.total_amount || 0), 0);
+    const revenue     = todayOrders.reduce((s, o) => s + (o.seller_payout || o.total_amount * 0.92 || 0), 0);
 
     document.getElementById('stat-today').textContent    = todayOrders.length;
     document.getElementById('stat-revenue').textContent  = revenue.toLocaleString();
@@ -751,7 +785,7 @@ function renderHistory(orders) {
 
 function renderAnalytics(orders) {
     const total     = orders.length;
-    const revenue   = orders.filter(o => o.payment_status === 'paid').reduce((s, o) => s + (o.total_amount || 0), 0);
+    const revenue   = orders.filter(o => o.payment_status === 'paid').reduce((s, o) => s + (o.seller_payout || o.total_amount * 0.92 || 0), 0);
     const delivered = orders.filter(o => o.order_status === 'delivered').length;
     const cancelled = orders.filter(o => o.order_status === 'cancelled').length;
 
@@ -857,6 +891,19 @@ function subscribeToNewOrders() {
             filter: `market_id=eq.${MARKET_ID}`
         }, (payload) => {
             showToast('🔔 New order received!', 'success');
+            loadOrders();
+        })
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'orders',
+            filter: `market_id=eq.${MARKET_ID}`
+        }, (payload) => {
+            // Refresh wallet when escrow status changes (e.g. buyer confirmed delivery)
+            if (payload.new.escrow_status === 'released' && payload.old.escrow_status === 'holding') {
+                showToast('💰 Payment released to your wallet!', 'success');
+                refreshWallet();
+            }
             loadOrders();
         })
         .subscribe();
