@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwandamket | Driver Dashboard</title>
+    <link rel="icon" href="image.png" type="image/png">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #00A859;
+            --primary-dark: #007A40;
+            --primary-light: rgba(0,168,89,0.1);
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2a2e42;
+            --text: #f0f0f0;
+            --text-muted: #8a8fa8;
+            --warning: #f59e0b;
+            --error: #ff4d4d;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
+            background: var(--surface); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 24px 0; z-index: 100;
+        }
+
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid var(--border); }
+        .sidebar-brand img { width: 36px; height: 36px; border-radius: 8px; }
+        .sidebar-brand-text { font-size: 0.85rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
+        .sidebar-brand-sub { font-size: 0.7rem; color: var(--text-muted); }
+
+        .nav-section { padding: 16px 12px 0; flex: 1; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+            cursor: pointer; font-size: 0.875rem; color: var(--text-muted); transition: all 0.15s;
+            margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif;
+        }
+
+        .nav-item:hover { background: var(--surface2); color: var(--text); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+        .badge {
+            margin-left: auto; background: var(--primary); color: #fff; font-size: 0.65rem; font-weight: 700;
+            padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center;
+        }
+
+        .sidebar-bottom { padding: 16px 12px; border-top: 1px solid var(--border); }
+
+        .vendor-info {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+            background: var(--surface2); margin-bottom: 8px;
+        }
+
+        .vendor-avatar {
+            width: 34px; height: 34px; border-radius: 8px; background: var(--primary-light);
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+        }
+
+        .vendor-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vendor-role { font-size: 0.7rem; color: var(--text-muted); }
+
+        .btn-logout {
+            width: 100%; padding: 9px; background: transparent; border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-muted); font-size: 0.8rem; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: all 0.15s;
+        }
+
+        .btn-logout:hover { border-color: var(--error); color: var(--error); }
+
+        .main { margin-left: 240px; min-height: 100vh; }
+
+        .topbar {
+            background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 28px;
+            display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
+        }
+
+        .topbar h1 { font-size: 1.1rem; font-weight: 700; }
+
+        .refresh-btn {
+            padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text-muted); font-size: 0.8rem; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s;
+        }
+
+        .refresh-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+        .content { padding: 28px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--text); line-height: 1; }
+        .stat-sub { font-size: 0.75rem; color: var(--primary); margin-top: 6px; }
+
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+        .section-title { font-size: 1rem; font-weight: 700; }
+
+        .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .filter-tab {
+            padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            border: 1px solid var(--border); background: transparent; color: var(--text-muted);
+            font-family: 'Inter', sans-serif; transition: all 0.15s;
+        }
+
+        .filter-tab:hover { color: var(--text); border-color: var(--text-muted); }
+        .filter-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .trip-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .trip-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+            transition: border-color 0.2s;
+        }
+
+        .trip-card:hover { border-color: var(--primary); }
+        .trip-card.pending { border-left: 3px solid var(--warning); }
+        .trip-card.quoted { border-left: 3px solid #3b82f6; }
+        .trip-card.accepted, .trip-card.in_progress { border-left: 3px solid var(--primary); }
+
+        .trip-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 12px; }
+        .trip-code { font-size: 0.7rem; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
+        .trip-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: capitalize; }
+        .status-pending { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .status-quoted { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .status-accepted, .status-driver_assigned { background: rgba(0,168,89,0.15); color: #00A859; }
+        .status-in_progress { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .status-completed { background: rgba(0,168,89,0.15); color: #00A859; }
+        .status-cancelled { background: rgba(255,77,77,0.15); color: #ff4d4d; }
+
+        .trip-route { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .trip-route .arrow { color: var(--text-muted); }
+
+        .trip-meta { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; line-height: 1.5; }
+        .trip-meta strong { color: var(--text); }
+
+        .trip-passenger { font-size: 0.85rem; font-weight: 600; margin-top: 10px; margin-bottom: 2px; }
+        .trip-phone { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; }
+
+        .quote-form { display: flex; gap: 8px; margin-top: 12px; }
+
+        .quote-input {
+            flex: 1; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-size: 0.85rem; font-family: 'Inter', sans-serif; outline: none;
+        }
+
+        .quote-input:focus { border-color: var(--primary); }
+
+        .trip-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+        .btn-action {
+            padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; border: none; transition: all 0.15s;
+        }
+
+        .btn-quote { background: var(--primary); color: #fff; }
+        .btn-progress { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .btn-complete { background: var(--primary-light); color: var(--primary); }
+        .btn-cancel { background: rgba(255,77,77,0.1); color: #ff4d4d; }
+
+        .btn-action:hover { filter: brightness(1.2); }
+        .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 1rem; color: var(--text); margin-bottom: 8px; }
+        .empty-state p { font-size: 0.85rem; }
+
+        .loading-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
+
+        .toast {
+            position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 14px 20px; font-size: 0.85rem; z-index: 999;
+            transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 300px;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-left: 3px solid var(--primary); }
+        .toast.error { border-left: 3px solid var(--error); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 8px; }
+            .sidebar-brand { border-bottom: none; padding: 8px; }
+            .nav-section { display: flex; flex-wrap: wrap; gap: 4px; padding: 0; }
+            .nav-item { padding: 8px 12px; font-size: 0.8rem; width: auto; }
+            .sidebar-bottom { width: 100%; display: flex; gap: 8px; align-items: center; }
+            .vendor-info { flex: 1; margin-bottom: 0; }
+            .main { margin-left: 0; }
+            .content { padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .quote-form { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <img src="image.png" alt="Rwandamket">
+        <div>
+            <div class="sidebar-brand-text">RWANDAMKET</div>
+            <div class="sidebar-brand-sub">Driver Dashboard</div>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <button class="nav-item active" onclick="showPanel('requests')">
+            <span class="icon">🚗</span> Ride Requests
+            <span class="badge" id="pending-badge" style="display:none">0</span>
+        </button>
+        <button class="nav-item" onclick="showPanel('trips')">
+            <span class="icon">🧭</span> My Trips
+        </button>
+        <button class="nav-item" onclick="showPanel('drivers')">
+            <span class="icon">👤</span> My Drivers
+        </button>
+        <button class="nav-item" onclick="showPanel('earnings')">
+            <span class="icon">💰</span> Earnings
+        </button>
+    </div>
+
+    <div class="sidebar-bottom">
+        <div class="vendor-info">
+            <div class="vendor-avatar">🚗</div>
+            <div>
+                <div class="vendor-name" id="sidebar-driver-name">Loading...</div>
+                <div class="vendor-role">Company</div>
+            </div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">Sign out</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h1 id="topbar-title">Ride Requests</h1>
+        <button class="refresh-btn" onclick="loadRequests()">↻ Refresh</button>
+    </div>
+
+    <div class="content">
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Pending Requests</div>
+                <div class="stat-value" id="stat-pending">—</div>
+                <div class="stat-sub">awaiting your quote</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Trips</div>
+                <div class="stat-value" id="stat-active">—</div>
+                <div class="stat-sub">accepted or in progress</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(0,168,89,0.3);">
+                <div class="stat-label">💰 Wallet</div>
+                <div class="stat-value" id="stat-wallet" style="color: var(--primary);">—</div>
+                <div class="stat-sub">RWF available</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(245,158,11,0.3);">
+                <div class="stat-label">⏳ In Escrow</div>
+                <div class="stat-value" id="stat-escrow" style="color: #fbbf24;">—</div>
+                <div class="stat-sub">held until trip confirmed</div>
+            </div>
+        </div>
+
+        <!-- REQUESTS PANEL -->
+        <div class="panel active" id="panel-requests">
+            <div class="section-header">
+                <div class="section-title">Pending Ride Requests</div>
+            </div>
+            <div class="trip-list" id="requests-list">
+                <div class="loading-state">Loading requests...</div>
+            </div>
+        </div>
+
+        <!-- MY TRIPS PANEL -->
+        <div class="panel" id="panel-trips">
+            <div class="section-header">
+                <div class="section-title">My Trips</div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterTrips('all', this)">All</button>
+                    <button class="filter-tab" onclick="filterTrips('accepted', this)">Accepted</button>
+                    <button class="filter-tab" onclick="filterTrips('in_progress', this)">In Progress</button>
+                    <button class="filter-tab" onclick="filterTrips('completed', this)">Completed</button>
+                </div>
+            </div>
+            <div class="trip-list" id="trips-list">
+                <div class="loading-state">Loading trips...</div>
+            </div>
+        </div>
+
+        <!-- DRIVERS PANEL -->
+        <div class="panel" id="panel-drivers">
+            <div class="section-header">
+                <div class="section-title">My Drivers</div>
+                <button class="btn-action btn-quote" onclick="showAddDriverForm()">➕ Add Driver</button>
+            </div>
+
+            <div id="add-driver-form" style="display:none;" class="trip-card">
+                <div class="quote-form" style="flex-direction:column; gap:10px;">
+                    <input type="text" class="quote-input" id="new-driver-name" placeholder="Full name">
+                    <input type="tel" class="quote-input" id="new-driver-phone" placeholder="Phone number">
+                    <select class="quote-input" id="new-driver-vehicle">
+                        <option value="sedan">Sedan</option>
+                        <option value="suv">SUV</option>
+                        <option value="van">Van</option>
+                        <option value="minibus">Minibus</option>
+                    </select>
+                    <input type="text" class="quote-input" id="new-driver-plate" placeholder="Vehicle plate number">
+                    <input type="number" class="quote-input" id="new-driver-seats" placeholder="Number of seats" value="4">
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-action btn-quote" onclick="addDriver()">Save Driver</button>
+                        <button class="btn-action btn-cancel" onclick="hideAddDriverForm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trip-list" id="drivers-list">
+                <div class="loading-state">Loading drivers...</div>
+            </div>
+        </div>
+
+        <!-- EARNINGS PANEL -->
+        <div class="panel" id="panel-earnings">
+            <div class="section-header"><div class="section-title">Earnings Summary</div></div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Trips</div>
+                    <div class="stat-value" id="ana-total">—</div>
+                    <div class="stat-sub">all time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Earned</div>
+                    <div class="stat-value" id="ana-earned">—</div>
+                    <div class="stat-sub">RWF after commission</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Completed</div>
+                    <div class="stat-value" id="ana-completed">—</div>
+                    <div class="stat-sub">finished trips</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Commission Rate</div>
+                    <div class="stat-value" style="color: var(--text-muted); font-size:1.3rem;">8%</div>
+                    <div class="stat-sub">Rwandamket platform fee</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+let DRIVER_ID = null;
+let ALL_REQUESTS = [];
+let ALL_DRIVERS = [];
+let ACTIVE_FILTER = 'all';
+let REALTIME_CHANNEL = null;
+
+async function init() {
+    const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
+    if (sessionError || !session) {
+        await window._supabase.auth.signOut();
+        window.location.replace('vendor-login.html');
+        return;
+    }
+
+    const { data: vendor } = await window._supabase
+        .from('vendor_profiles')
+        .select('id, business_name, service_type, wallet_balance, escrow_balance')
+        .eq('user_id', session.user.id)
+        .single();
+
+    if (!vendor || vendor.service_type !== 'transport') {
+        window.location.replace('dashboard.html');
+        return;
+    }
+
+    DRIVER_ID = vendor.id;
+    document.getElementById('sidebar-driver-name').textContent = vendor.business_name;
+    renderWallet(vendor.wallet_balance, vendor.escrow_balance);
+
+    await loadRequests();
+    await loadDrivers();
+    subscribeToRequests();
+}
+
+function renderWallet(wallet, escrow) {
+    document.getElementById('stat-wallet').textContent = Number(wallet || 0).toLocaleString();
+    document.getElementById('stat-escrow').textContent = Number(escrow || 0).toLocaleString();
+}
+
+async function refreshWallet() {
+    const { data: vendor } = await window._supabase
+        .from('vendor_profiles')
+        .select('wallet_balance, escrow_balance')
+        .eq('id', DRIVER_ID)
+        .single();
+    if (vendor) renderWallet(vendor.wallet_balance, vendor.escrow_balance);
+}
+
+async function loadRequests() {
+    const { data: requests, error } = await window._supabase
+        .from('transport_requests')
+        .select('*')
+        .or(`driver_id.is.null,driver_id.eq.${DRIVER_ID}`)
+        .order('created_at', { ascending: false });
+
+    if (error) { showToast('Failed to load requests', 'error'); return; }
+
+    ALL_REQUESTS = requests || [];
+    updateStats(ALL_REQUESTS);
+    renderPendingRequests(ALL_REQUESTS);
+    renderMyTrips(ALL_REQUESTS, ACTIVE_FILTER);
+    renderEarnings(ALL_REQUESTS);
+}
+
+function updateStats(requests) {
+    const pending = requests.filter(function(r) { return r.status === 'pending' && !r.driver_id; });
+    const active  = requests.filter(function(r) { return r.driver_id === DRIVER_ID && ['accepted','driver_assigned','in_progress'].includes(r.status); });
+
+    document.getElementById('stat-pending').textContent = pending.length;
+    document.getElementById('stat-active').textContent  = active.length;
+
+    const badge = document.getElementById('pending-badge');
+    if (pending.length > 0) {
+        badge.textContent = pending.length;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function renderPendingRequests(requests) {
+    const pending = requests.filter(function(r) { return r.status === 'pending' && !r.driver_id; });
+    const container = document.getElementById('requests-list');
+
+    if (pending.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🚗</div><h3>No pending requests</h3><p>New ride requests will appear here automatically.</p></div>';
+        return;
+    }
+
+    container.innerHTML = pending.map(function(req) { return requestCardHTML(req); }).join('');
+}
+
+function renderMyTrips(requests, filter) {
+    const myTrips = requests.filter(function(r) { return r.driver_id === DRIVER_ID; });
+    const filtered = filter === 'all' ? myTrips : myTrips.filter(function(r) { return r.status === filter; });
+    const container = document.getElementById('trips-list');
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🧭</div><h3>No trips yet</h3><p>Accepted trips will appear here.</p></div>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(function(req) { return tripCardHTML(req); }).join('');
+}
+
+function renderEarnings(requests) {
+    const myTrips = requests.filter(function(r) { return r.driver_id === DRIVER_ID; });
+    const completed = myTrips.filter(function(r) { return r.status === 'completed'; });
+    const earned = myTrips.filter(function(r) { return r.payment_status === 'paid'; })
+        .reduce(function(s, r) { return s + (r.driver_payout || 0); }, 0);
+
+    document.getElementById('ana-total').textContent = myTrips.length;
+    document.getElementById('ana-earned').textContent = earned.toLocaleString();
+    document.getElementById('ana-completed').textContent = completed.length;
+}
+
+function requestCardHTML(req) {
+    const time = new Date(req.pickup_datetime).toLocaleString('en-RW', { dateStyle: 'short', timeStyle: 'short' });
+
+    return '' +
+        '<div class="trip-card pending" id="req-' + req.id + '">' +
+            '<div class="trip-top">' +
+                '<div>' +
+                    '<div class="trip-code">' + req.tracking_code + '</div>' +
+                    '<div class="trip-time">Pickup: ' + time + '</div>' +
+                '</div>' +
+                '<span class="status-badge status-pending">🟡 Pending Quote</span>' +
+            '</div>' +
+            '<div class="trip-route">' + req.pickup_location + ' <span class="arrow">→</span> ' + req.dropoff_location + '</div>' +
+            '<div class="trip-meta">👥 ' + req.passenger_count + ' passenger' + (req.passenger_count > 1 ? 's' : '') + (req.flight_number ? ' · ✈️ ' + req.flight_number : '') + '</div>' +
+            (req.notes ? '<div class="trip-meta">📝 ' + req.notes + '</div>' : '') +
+            '<div class="trip-passenger">' + req.passenger_name + '</div>' +
+            '<div class="trip-phone">📞 ' + req.passenger_phone + '</div>' +
+            '<div class="quote-form" style="flex-direction:column;">' +
+                '<select class="quote-input" id="assign-driver-' + req.id + '">' +
+                    driverOptionsHTML() +
+                '</select>' +
+                '<div style="display:flex; gap:8px;">' +
+                    '<input type="number" class="quote-input" id="quote-' + req.id + '" placeholder="Enter price in RWF">' +
+                    '<button class="btn-action btn-quote" onclick="sendQuote(\'' + req.id + '\')">Send Quote</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+}
+
+function tripCardHTML(req) {
+    const time = new Date(req.pickup_datetime).toLocaleString('en-RW', { dateStyle: 'short', timeStyle: 'short' });
+    const assignedDriver = ALL_DRIVERS.find(function(d) { return d.id === req.assigned_driver_id; });
+
+    let actions = '';
+    if (req.status !== 'completed' && req.status !== 'cancelled') {
+        actions = '<div class="trip-actions">';
+        if (req.status === 'accepted' || req.status === 'driver_assigned') {
+            actions += '<button class="btn-action btn-progress" onclick="updateTripStatus(\'' + req.id + '\', \'in_progress\')">🚗 Start Trip</button>';
+        }
+        if (req.status === 'in_progress') {
+            actions += '<button class="btn-action btn-complete" onclick="updateTripStatus(\'' + req.id + '\', \'completed\')">✅ Complete Trip</button>';
+        }
+        actions += '<button class="btn-action btn-cancel" onclick="updateTripStatus(\'' + req.id + '\', \'cancelled\')">✕ Cancel</button>';
+        actions += '</div>';
+    }
+
+    return '' +
+        '<div class="trip-card ' + req.status + '" id="trip-' + req.id + '">' +
+            '<div class="trip-top">' +
+                '<div>' +
+                    '<div class="trip-code">' + req.tracking_code + '</div>' +
+                    '<div class="trip-time">Pickup: ' + time + '</div>' +
+                '</div>' +
+                '<span class="status-badge status-' + req.status + '">' + statusIcon(req.status) + ' ' + req.status.replace('_',' ') + '</span>' +
+            '</div>' +
+            '<div class="trip-route">' + req.pickup_location + ' <span class="arrow">→</span> ' + req.dropoff_location + '</div>' +
+            '<div class="trip-meta">👥 ' + req.passenger_count + ' passenger' + (req.passenger_count > 1 ? 's' : '') + '</div>' +
+            '<div class="trip-meta">💰 Quoted: <strong>' + Number(req.quoted_price || 0).toLocaleString() + ' RWF</strong> ' + (req.payment_status === 'paid' ? '· ✅ Paid' : '· ⏳ Awaiting payment') + '</div>' +
+            (assignedDriver
+                ? '<div class="trip-meta">🚗 Driver: <strong>' + assignedDriver.full_name + '</strong> · ' + (assignedDriver.vehicle_plate || 'no plate') + '</div>'
+                : '<div class="trip-meta">⚠️ No driver assigned yet</div>') +
+            '<div class="trip-passenger">' + req.passenger_name + '</div>' +
+            '<div class="trip-phone">📞 ' + req.passenger_phone + '</div>' +
+            actions +
+        '</div>';
+}
+
+function statusIcon(status) {
+    const icons = { quoted: '🔵', accepted: '🟢', driver_assigned: '🟢', in_progress: '🟣', completed: '✅', cancelled: '🔴' };
+    return icons[status] || '⚪';
+}
+
+async function sendQuote(requestId) {
+    const input = document.getElementById('quote-' + requestId);
+    const price = Number(input.value);
+    const driverSelect = document.getElementById('assign-driver-' + requestId);
+    const assignedDriverId = driverSelect.value || null;
+
+    if (!price || price <= 0) {
+        showToast('Please enter a valid price', 'error');
+        return;
+    }
+
+    const { error } = await window._supabase
+        .from('transport_requests')
+        .update({
+            quoted_price: price,
+            total_amount: price,
+            driver_id: DRIVER_ID,
+            assigned_driver_id: assignedDriverId,
+            status: 'quoted'
+        })
+        .eq('id', requestId)
+        .is('driver_id', null);
+
+    if (error) {
+        showToast('Failed to send quote — request may already be claimed', 'error');
+        await loadRequests();
+        return;
+    }
+
+    showToast('Quote sent! Waiting for passenger to accept.', 'success');
+    await loadRequests();
+}
+
+async function updateTripStatus(requestId, newStatus) {
+    const { error } = await window._supabase
+        .from('transport_requests')
+        .update({ status: newStatus })
+        .eq('id', requestId);
+
+    if (error) {
+        showToast('Failed to update trip', 'error');
+        return;
+    }
+
+    showToast('Trip marked as ' + newStatus.replace('_',' ') + ' ✓', 'success');
+    await loadRequests();
+}
+
+function filterTrips(filter, btn) {
+    ACTIVE_FILTER = filter;
+    document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    renderMyTrips(ALL_REQUESTS, filter);
+}
+
+async function loadDrivers() {
+    const { data, error } = await window._supabase
+        .from('drivers')
+        .select('*')
+        .eq('company_id', DRIVER_ID)
+        .order('created_at', { ascending: false });
+
+    if (error) { showToast('Failed to load drivers', 'error'); return; }
+
+    ALL_DRIVERS = data || [];
+    renderDriversList(ALL_DRIVERS);
+}
+
+function renderDriversList(drivers) {
+    const container = document.getElementById('drivers-list');
+    if (!drivers || drivers.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><h3>No drivers added yet</h3><p>Add your fleet drivers so you can assign them to trips.</p></div>';
+        return;
+    }
+
+    container.innerHTML = drivers.map(function(d) {
+        return '' +
+            '<div class="trip-card ' + (d.is_active ? 'accepted' : '') + '">' +
+                '<div class="trip-top">' +
+                    '<div>' +
+                        '<div class="trip-passenger" style="margin-top:0;">' + d.full_name + '</div>' +
+                        '<div class="trip-phone">📞 ' + d.phone + '</div>' +
+                    '</div>' +
+                    '<span class="status-badge ' + (d.is_active ? 'status-accepted' : 'status-cancelled') + '">' + (d.is_active ? '🟢 Active' : '🔴 Inactive') + '</span>' +
+                '</div>' +
+                '<div class="trip-meta">🚗 ' + (d.vehicle_type || '—') + ' · Plate: <strong>' + (d.vehicle_plate || '—') + '</strong> · ' + (d.vehicle_seats || '—') + ' seats</div>' +
+                '<div class="trip-meta">' + (d.license_verified ? '✅ License verified' : '⚠️ License not yet verified') + '</div>' +
+                '<div class="trip-actions">' +
+                    '<button class="btn-action ' + (d.is_active ? 'btn-cancel' : 'btn-quote') + '" onclick="toggleDriverActive(\'' + d.id + '\', ' + (!d.is_active) + ')">' +
+                        (d.is_active ? 'Deactivate' : 'Activate') +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+    }).join('');
+}
+
+function showAddDriverForm() { document.getElementById('add-driver-form').style.display = 'block'; }
+function hideAddDriverForm() { document.getElementById('add-driver-form').style.display = 'none'; }
+
+async function addDriver() {
+    const name  = document.getElementById('new-driver-name').value.trim();
+    const phone = document.getElementById('new-driver-phone').value.trim();
+    const vehicleType  = document.getElementById('new-driver-vehicle').value;
+    const plate = document.getElementById('new-driver-plate').value.trim();
+    const seats = Number(document.getElementById('new-driver-seats').value) || 4;
+
+    if (!name || !phone) {
+        showToast('Please enter at least name and phone', 'error');
+        return;
+    }
+
+    const { error } = await window._supabase
+        .from('drivers')
+        .insert([{
+            company_id: DRIVER_ID,
+            full_name: name,
+            phone: phone,
+            vehicle_type: vehicleType,
+            vehicle_plate: plate,
+            vehicle_seats: seats
+        }]);
+
+    if (error) {
+        showToast('Failed to add driver', 'error');
+        return;
+    }
+
+    showToast('Driver added! ✓', 'success');
+    document.getElementById('new-driver-name').value = '';
+    document.getElementById('new-driver-phone').value = '';
+    document.getElementById('new-driver-plate').value = '';
+    hideAddDriverForm();
+    await loadDrivers();
+}
+
+async function toggleDriverActive(driverId, newState) {
+    const { error } = await window._supabase
+        .from('drivers')
+        .update({ is_active: newState })
+        .eq('id', driverId);
+
+    if (error) { showToast('Failed to update driver', 'error'); return; }
+    await loadDrivers();
+}
+
+function driverOptionsHTML() {
+    const active = ALL_DRIVERS.filter(function(d) { return d.is_active; });
+    if (active.length === 0) {
+        return '<option value="">No drivers added yet</option>';
+    }
+    let html = '<option value="">Assign a driver (optional)</option>';
+    active.forEach(function(d) {
+        html += '<option value="' + d.id + '">' + d.full_name + ' — ' + (d.vehicle_plate || 'no plate') + '</option>';
+    });
+    return html;
+}
+
+function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.getElementById('panel-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+
+    const titles = { requests: 'Ride Requests', trips: 'My Trips', drivers: 'My Drivers', earnings: 'Earnings Summary' };
+    document.getElementById('topbar-title').textContent = titles[name] || 'Dashboard';
+}
+
+function subscribeToRequests() {
+    REALTIME_CHANNEL = window._supabase
+        .channel('transport-channel')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transport_requests' }, function() {
+            showToast('🔔 New ride request!', 'success');
+            loadRequests();
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'transport_requests' }, function(payload) {
+            if (payload.new.escrow_status === 'released' && payload.old.escrow_status === 'holding' && payload.new.driver_id === DRIVER_ID) {
+                showToast('💰 Trip payment released to your wallet!', 'success');
+                refreshWallet();
+            }
+            loadRequests();
+        })
+        .subscribe();
+}
+
+async function handleLogout() {
+    await window._supabase.auth.signOut();
+    window.location.replace('vendor-login.html');
+}
+
+function showToast(message, type) {
+    type = type || 'success';
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(function() { toast.classList.remove('show'); }, 3500);
+}
+
+init();
+</script>
+</body>
+</html>
