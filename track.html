@@ -258,6 +258,57 @@
             margin-top: 3px;
         }
 
+        /* ── CONFIRM DELIVERY BUTTON ── */
+        .confirm-delivery-box {
+            background: var(--primary-light);
+            border: 1px solid rgba(0,168,89,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .confirm-delivery-box p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .btn-confirm-delivery {
+            width: 100%;
+            padding: 13px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-confirm-delivery:hover { background: var(--primary-dark); }
+        .btn-confirm-delivery:disabled { background: #444; cursor: not-allowed; }
+
+        .auto-release-note {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        .escrow-released-badge {
+            background: rgba(0,168,89,0.15);
+            color: var(--primary);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            text-align: center;
+            margin: 16px 0;
+            font-weight: 600;
+        }
+
         /* ── ORDER SUMMARY ── */
         .order-summary {
             background: var(--surface2);
@@ -405,6 +456,9 @@
         <!-- TIMELINE -->
         <div class="timeline" id="timeline"></div>
 
+        <!-- CONFIRM DELIVERY (shown only when dispatched/delivered and escrow holding) -->
+        <div id="confirm-delivery-container"></div>
+
         <!-- ORDER ITEMS -->
         <div class="items-list">
             <div class="items-title">Items ordered</div>
@@ -527,7 +581,92 @@ function renderResult(order) {
     // Render timeline
     renderTimeline(order.order_status);
 
+    // Render confirm delivery section
+    renderEscrowSection(order);
+
     document.getElementById('result-card').classList.add('visible');
+}
+
+function renderEscrowSection(order) {
+    const container = document.getElementById('confirm-delivery-container');
+
+    if (order.order_status === 'delivered' && order.escrow_status === 'holding') {
+        const releaseTime = order.escrow_release_at
+            ? new Date(order.escrow_release_at).toLocaleString('en-RW', { dateStyle: 'medium', timeStyle: 'short' })
+            : 'soon';
+
+        container.innerHTML = `
+            <div class="confirm-delivery-box">
+                <p><strong>Did you receive your order in good condition?</strong><br>
+                Confirm now to release payment to the vendor, or it will auto-release on ${releaseTime}.</p>
+                <button class="btn-confirm-delivery" onclick="confirmDelivery('${order.id}')">
+                    ✅ Confirm Delivery & Release Payment
+                </button>
+                <div class="auto-release-note">⏱ Auto-releases in 24 hours if not confirmed</div>
+            </div>`;
+    } else if (order.escrow_status === 'released') {
+        container.innerHTML = `
+            <div class="escrow-released-badge">
+                ✅ Payment released to vendor — transaction complete
+            </div>`;
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+async function confirmDelivery(orderId) {
+    const btn = document.querySelector('.btn-confirm-delivery');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Releasing payment...';
+    }
+
+    try {
+        const { error } = await window._supabase.rpc('release_escrow', {
+            p_order_id: orderId,
+            p_trigger: 'buyer_confirmed'
+        });
+
+        if (error) throw error;
+
+        showToast2('Payment released to vendor! Thank you for confirming. 🎉');
+
+        // Refresh order data
+        const { data: updatedOrder } = await window._supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+
+        if (updatedOrder) renderResult(updatedOrder);
+
+    } catch (err) {
+        console.error('Confirm delivery error:', err);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '✅ Confirm Delivery & Release Payment';
+        }
+        showToast2('Failed to confirm delivery. Please try again.', true);
+    }
+}
+
+function showToast2(message, isError = false) {
+    const existing = document.getElementById('confirm-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'confirm-toast';
+    toast.style.cssText = `
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+        background: ${isError ? '#3a1a1a' : 'var(--surface)'};
+        border: 1px solid ${isError ? '#ff4d4d' : 'var(--primary)'};
+        border-radius: 12px; padding: 14px 22px; font-size: 0.85rem;
+        z-index: 999; max-width: 90%; text-align: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
 }
 
 function renderTimeline(currentStatus) {
