@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwandamket | Track Your Trip</title>
+    <link rel="icon" href="image.png" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #00A859;
+            --primary-dark: #007A40;
+            --primary-light: rgba(0,168,89,0.1);
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2a2e42;
+            --text: #f0f0f0;
+            --text-muted: #8a8fa8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 16px;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0,168,89,0.06) 0%, transparent 60%);
+        }
+
+        header {
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 560px; margin: 0 auto 32px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand img { width: 36px; height: 36px; border-radius: 8px; }
+        .brand-name { font-size: 1rem; font-weight: 700; color: var(--primary); letter-spacing: 1.5px; }
+
+        .back-link { font-size: 0.82rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .back-link:hover { color: var(--primary); }
+
+        .wrapper { max-width: 560px; margin: 0 auto; }
+
+        .page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; }
+        .page-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.5; }
+
+        .search-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; margin-bottom: 24px;
+        }
+
+        .search-row { display: flex; gap: 10px; }
+
+        .track-input {
+            flex: 1; padding: 13px 16px; background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 10px; color: var(--text); font-size: 0.95rem; font-family: 'Inter', sans-serif;
+            outline: none; text-transform: uppercase; letter-spacing: 1px; transition: border-color 0.2s;
+        }
+
+        .track-input:focus { border-color: var(--primary); }
+        .track-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--text-muted); }
+
+        .btn-track {
+            padding: 13px 20px; background: var(--primary); color: #fff; border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer;
+            transition: background 0.2s; white-space: nowrap;
+        }
+
+        .btn-track:hover { background: var(--primary-dark); }
+        .btn-track:disabled { background: #444; cursor: not-allowed; }
+
+        .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: none; }
+        .result-card.visible { display: block; }
+
+        .result-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+        .tracking-code { font-size: 1rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
+        .order-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+
+        .status-pill {
+            padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+        }
+        .status-pending  { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .status-quoted   { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .status-accepted, .status-driver_assigned { background: var(--primary-light); color: var(--primary); }
+        .status-in_progress { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .status-completed { background: var(--primary-light); color: var(--primary); }
+        .status-cancelled { background: rgba(255,77,77,0.15); color: #ff4d4d; }
+
+        .route-display {
+            background: var(--surface2); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+        }
+
+        .route-line { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600; }
+        .route-line .arrow { color: var(--text-muted); }
+        .route-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+
+        /* TIMELINE */
+        .timeline { margin: 20px 0; position: relative; }
+        .timeline-step { display: flex; gap: 14px; margin-bottom: 4px; position: relative; }
+
+        .step-left { display: flex; flex-direction: column; align-items: center; width: 32px; flex-shrink: 0; }
+
+        .step-dot {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; flex-shrink: 0; border: 2px solid var(--border); background: var(--surface2);
+            color: var(--text-muted); transition: all 0.3s;
+        }
+
+        .step-dot.done { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .step-dot.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 4px rgba(0,168,89,0.15); }
+
+        .step-line { width: 2px; flex: 1; min-height: 24px; background: var(--border); margin: 2px 0; transition: background 0.3s; }
+        .step-line.done { background: var(--primary); }
+
+        .step-right { padding: 4px 0 24px; flex: 1; }
+        .step-title { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); transition: color 0.3s; }
+        .step-title.done, .step-title.active { color: var(--text); }
+        .step-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+        .step-time { font-size: 0.72rem; color: var(--primary); margin-top: 3px; }
+
+        /* QUOTE ACCEPT BOX */
+        .quote-box {
+            background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px;
+            padding: 16px; margin: 16px 0; text-align: center;
+        }
+
+        .quote-amount { font-size: 1.6rem; font-weight: 700; color: #60a5fa; margin: 8px 0; }
+
+        .quote-box p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; }
+
+        .btn-accept-quote {
+            width: 100%; padding: 13px; background: var(--primary); color: #fff; border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.2s;
+        }
+
+        .btn-accept-quote:hover { background: var(--primary-dark); }
+        .btn-accept-quote:disabled { background: #444; cursor: not-allowed; }
+
+        /* CONFIRM DELIVERY style box reused for trip completion */
+        .confirm-box {
+            background: var(--primary-light); border: 1px solid rgba(0,168,89,0.3); border-radius: 12px;
+            padding: 16px; margin: 16px 0; text-align: center;
+        }
+
+        .confirm-box p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; }
+
+        .btn-confirm { width: 100%; padding: 13px; background: var(--primary); color: #fff; border: none; border-radius: 10px;
+            font-size: 0.9rem; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; transition: background 0.2s; }
+        .btn-confirm:hover { background: var(--primary-dark); }
+        .btn-confirm:disabled { background: #444; cursor: not-allowed; }
+
+        .auto-release-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 10px; }
+
+        .escrow-released-badge {
+            background: var(--primary-light); color: var(--primary); padding: 10px 14px; border-radius: 10px;
+            font-size: 0.8rem; text-align: center; margin: 16px 0; font-weight: 600;
+        }
+
+        .driver-info-box {
+            background: var(--surface2); border-radius: 10px; padding: 14px 16px; margin: 14px 0; display: flex; align-items: center; gap: 12px;
+        }
+
+        .driver-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .driver-name { font-size: 0.88rem; font-weight: 600; }
+        .driver-vehicle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        .order-summary { background: var(--surface2); border-radius: 10px; padding: 14px 16px; margin-top: 4px; }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px solid var(--border); }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { color: var(--text-muted); }
+        .summary-value { font-weight: 600; }
+        .summary-total { color: var(--primary); font-size: 0.9rem; }
+
+        .error-box {
+            background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.2); border-radius: 10px;
+            padding: 14px 16px; font-size: 0.85rem; color: #ff6b6b; display: none;
+        }
+        .error-box.visible { display: block; }
+
+        .live-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--primary); font-weight: 600; }
+        .live-dot::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--primary); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+
+        .btn-back-home {
+            display: block; text-align: center; margin-top: 20px; padding: 12px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 10px; color: var(--text-muted); text-decoration: none;
+            font-size: 0.85rem; transition: all 0.15s;
+        }
+        .btn-back-home:hover { color: var(--primary); border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header>
+    <a class="brand" href="index.html">
+        <img src="image.png" alt="Rwandamket">
+        <span class="brand-name">RWANDAMKET</span>
+    </a>
+    <a class="back-link" href="transport.html">← Book another ride</a>
+</header>
+
+<div class="wrapper">
+    <h1 class="page-title">Track Your Trip 🚗</h1>
+    <p class="page-sub">Enter your trip tracking code to see live status and accept driver quotes.</p>
+
+    <div class="search-box">
+        <div class="search-row">
+            <input type="text" class="track-input" id="track-input" placeholder="e.g. RMT-2D427CEF" maxlength="14">
+            <button class="btn-track" id="track-btn" onclick="trackTrip()">Track →</button>
+        </div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+
+    <div class="result-card" id="result-card">
+
+        <div class="result-header">
+            <div>
+                <div class="tracking-code" id="res-code"></div>
+                <div class="order-meta" id="res-meta"></div>
+            </div>
+            <div style="text-align:right;">
+                <span class="status-pill" id="res-status-pill"></span>
+                <div class="live-dot" style="margin-top:6px;">Live tracking</div>
+            </div>
+        </div>
+
+        <div class="route-display">
+            <div class="route-line" id="res-route"></div>
+            <div class="route-sub" id="res-route-sub"></div>
+        </div>
+
+        <!-- QUOTE ACCEPT BOX (shown only when status = quoted) -->
+        <div id="quote-container"></div>
+
+        <!-- TIMELINE -->
+        <div class="timeline" id="timeline"></div>
+
+        <!-- DRIVER INFO -->
+        <div id="driver-info-container"></div>
+
+        <!-- CONFIRM TRIP COMPLETE -->
+        <div id="confirm-container"></div>
+
+        <!-- SUMMARY -->
+        <div class="order-summary">
+            <div class="summary-row">
+                <span class="summary-label">Passenger</span>
+                <span class="summary-value" id="res-name"></span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Phone</span>
+                <span class="summary-value" id="res-phone"></span>
+            </div>
+            <div class="summary-row" id="res-amount-row" style="display:none;">
+                <span class="summary-label">Trip price</span>
+                <span class="summary-value summary-total" id="res-amount"></span>
+            </div>
+        </div>
+
+        <a class="btn-back-home" href="index.html">← Back to Rwandamket</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+
+const STEPS = [
+    { key: 'pending',   icon: '📝', title: 'Request Submitted', desc: 'Waiting for a verified driver to send a quote.' },
+    { key: 'quoted',    icon: '💬', title: 'Quote Received',    desc: 'Review the price and accept to confirm your ride.' },
+    { key: 'accepted',  icon: '✅', title: 'Trip Confirmed',    desc: 'Your driver is assigned and ready.' },
+    { key: 'in_progress', icon: '🚗', title: 'Trip In Progress', desc: 'You are on your way to your destination.' },
+    { key: 'completed', icon: '🏁', title: 'Trip Completed',    desc: 'You have arrived. Thanks for riding with Rwandamket!' },
+];
+
+const STATUS_ORDER = ['pending', 'quoted', 'accepted', 'driver_assigned', 'in_progress', 'completed'];
+
+let CURRENT_TRIP_ID = null;
+let REALTIME_CHANNEL = null;
+
+window.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+        document.getElementById('track-input').value = code.toUpperCase();
+        trackTrip();
+    }
+});
+
+async function trackTrip() {
+    const raw = document.getElementById('track-input').value.trim().toUpperCase();
+
+    hideError();
+    hideResult();
+
+    if (!raw || raw.length < 6) {
+        showError('Please enter a valid tracking code (e.g. RMT-2D427CEF)');
+        return;
+    }
+
+    const btn = document.getElementById('track-btn');
+    btn.disabled = true;
+    btn.textContent = 'Searching...';
+
+    try {
+        const { data: trips, error } = await window._supabase
+            .from('transport_requests')
+            .select('*')
+            .eq('tracking_code', raw)
+            .limit(1);
+
+        if (error) throw error;
+
+        if (!trips || trips.length === 0) {
+            showError('No trip found for tracking code "' + raw + '". Please check and try again.');
+            return;
+        }
+
+        const trip = trips[0];
+        CURRENT_TRIP_ID = trip.id;
+        await renderResult(trip);
+        subscribeToUpdates(trip.id);
+
+    } catch (err) {
+        showError('Failed to find trip. Please try again.');
+        console.error(err);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Track →';
+    }
+}
+
+async function renderResult(trip) {
+    document.getElementById('res-code').textContent = trip.tracking_code;
+    const placedDate = new Date(trip.created_at).toLocaleString('en-RW', { dateStyle: 'medium', timeStyle: 'short' });
+    document.getElementById('res-meta').textContent = 'Requested on ' + placedDate;
+
+    const pill = document.getElementById('res-status-pill');
+    pill.className = 'status-pill status-' + trip.status;
+    pill.textContent = trip.status.replace('_', ' ');
+
+    document.getElementById('res-route').innerHTML =
+        '<span>' + trip.pickup_location + '</span> <span class="arrow">→</span> <span>' + trip.dropoff_location + '</span>';
+
+    const pickupTime = new Date(trip.pickup_datetime).toLocaleString('en-RW', { dateStyle: 'medium', timeStyle: 'short' });
+    document.getElementById('res-route-sub').textContent =
+        'Pickup: ' + pickupTime + (trip.flight_number ? '  ·  ✈️ ' + trip.flight_number : '');
+
+    document.getElementById('res-name').textContent = trip.passenger_name || '—';
+    document.getElementById('res-phone').textContent = trip.passenger_phone || '—';
+
+    if (trip.quoted_price) {
+        document.getElementById('res-amount-row').style.display = 'flex';
+        document.getElementById('res-amount').textContent = Number(trip.quoted_price).toLocaleString() + ' RWF';
+    }
+
+    renderTimeline(trip.status);
+    renderQuoteBox(trip);
+    renderDriverInfo(trip);
+    renderConfirmBox(trip);
+
+    document.getElementById('result-card').classList.add('visible');
+}
+
+function renderTimeline(currentStatus) {
+    // driver_assigned counts as same stage as accepted for timeline purposes
+    const normalizedStatus = currentStatus === 'driver_assigned' ? 'accepted' : currentStatus;
+    const currentIdx = STEPS.findIndex(function(s) { return s.key === normalizedStatus; });
+    const container = document.getElementById('timeline');
+
+    if (currentStatus === 'cancelled') {
+        container.innerHTML = '<div class="timeline-step"><div class="step-left"><div class="step-dot" style="background:rgba(255,77,77,0.15); border-color:#ff4d4d; color:#ff4d4d;">✕</div></div><div class="step-right"><div class="step-title" style="color:#ff4d4d;">Trip Cancelled</div><div class="step-desc">This trip request was cancelled.</div></div></div>';
+        return;
+    }
+
+    container.innerHTML = STEPS.map(function(step, i) {
+        const isDone = i < currentIdx;
+        const isActive = i === currentIdx;
+        const isLast = i === STEPS.length - 1;
+
+        const dotClass = isDone ? 'done' : (isActive ? 'active' : '');
+        const lineClass = isDone ? 'done' : '';
+        const titleClass = isDone ? 'done' : (isActive ? 'active' : '');
+
+        return '' +
+            '<div class="timeline-step">' +
+                '<div class="step-left">' +
+                    '<div class="step-dot ' + dotClass + '">' + (isDone ? '✓' : step.icon) + '</div>' +
+                    (!isLast ? '<div class="step-line ' + lineClass + '"></div>' : '') +
+                '</div>' +
+                '<div class="step-right">' +
+                    '<div class="step-title ' + titleClass + '">' + step.title + '</div>' +
+                    '<div class="step-desc">' + (isActive ? '<strong>' + step.desc + '</strong>' : step.desc) + '</div>' +
+                    (isActive ? '<div class="step-time">● Current status</div>' : '') +
+                '</div>' +
+            '</div>';
+    }).join('');
+}
+
+function renderQuoteBox(trip) {
+    const container = document.getElementById('quote-container');
+
+    if (trip.status === 'quoted' && trip.quoted_price) {
+        container.innerHTML = '' +
+            '<div class="quote-box">' +
+                '<p><strong>A driver sent you a quote for this trip:</strong></p>' +
+                '<div class="quote-amount">' + Number(trip.quoted_price).toLocaleString() + ' RWF</div>' +
+                '<button class="btn-accept-quote" onclick="acceptQuote(\'' + trip.id + '\')">✅ Accept Quote & Confirm Trip</button>' +
+            '</div>';
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+function renderDriverInfo(trip) {
+    const container = document.getElementById('driver-info-container');
+
+    if (['accepted', 'driver_assigned', 'in_progress', 'completed'].includes(trip.status) && trip.assigned_driver_id) {
+        window._supabase
+            .from('drivers')
+            .select('full_name, vehicle_type, vehicle_plate, phone')
+            .eq('id', trip.assigned_driver_id)
+            .single()
+            .then(function(result) {
+                const driver = result.data;
+                if (driver) {
+                    container.innerHTML = '' +
+                        '<div class="driver-info-box">' +
+                            '<div class="driver-avatar">🚗</div>' +
+                            '<div>' +
+                                '<div class="driver-name">' + driver.full_name + '</div>' +
+                                '<div class="driver-vehicle">' + (driver.vehicle_type || 'Vehicle') + ' · ' + (driver.vehicle_plate || 'Plate pending') + ' · 📞 ' + driver.phone + '</div>' +
+                            '</div>' +
+                        '</div>';
+                }
+            });
+    } else if (['accepted', 'driver_assigned', 'in_progress', 'completed'].includes(trip.status)) {
+        container.innerHTML = '<div class="driver-info-box"><div class="driver-avatar">🚗</div><div><div class="driver-name">Driver assignment in progress</div><div class="driver-vehicle">Your driver details will appear here shortly</div></div></div>';
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+function renderConfirmBox(trip) {
+    const container = document.getElementById('confirm-container');
+
+    if (trip.status === 'completed' && trip.escrow_status === 'holding') {
+        const releaseTime = trip.escrow_release_at
+            ? new Date(trip.escrow_release_at).toLocaleString('en-RW', { dateStyle: 'medium', timeStyle: 'short' })
+            : 'soon';
+
+        container.innerHTML = '' +
+            '<div class="confirm-box">' +
+                '<p><strong>Did you arrive safely?</strong><br>Confirm now to release payment to your driver, or it will auto-release on ' + releaseTime + '.</p>' +
+                '<button class="btn-confirm" onclick="confirmTripComplete(\'' + trip.id + '\')">✅ Confirm Trip Complete</button>' +
+                '<div class="auto-release-note">⏱ Auto-releases in 24 hours if not confirmed</div>' +
+            '</div>';
+    } else if (trip.escrow_status === 'released') {
+        container.innerHTML = '<div class="escrow-released-badge">✅ Payment released to driver — trip complete</div>';
+    } else {
+        container.innerHTML = '';
+    }
+}
+
+async function acceptQuote(tripId) {
+    const btn = document.querySelector('.btn-accept-quote');
+    if (btn) { btn.disabled = true; btn.textContent = 'Confirming...'; }
+
+    try {
+        const { error } = await window._supabase
+            .from('transport_requests')
+            .update({ status: 'accepted', payment_status: 'pending' })
+            .eq('id', tripId);
+
+        if (error) throw error;
+
+        showFloatingToast('Trip confirmed! Proceed to payment.', false);
+
+        const { data: updated } = await window._supabase
+            .from('transport_requests')
+            .select('*')
+            .eq('id', tripId)
+            .single();
+
+        if (updated) renderResult(updated);
+
+    } catch (err) {
+        console.error('Accept quote error:', err);
+        showFloatingToast('Failed to accept quote. Please try again.', true);
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Accept Quote & Confirm Trip'; }
+    }
+}
+
+async function confirmTripComplete(tripId) {
+    const btn = document.querySelector('.btn-confirm');
+    if (btn) { btn.disabled = true; btn.textContent = 'Releasing payment...'; }
+
+    try {
+        const { error } = await window._supabase.rpc('release_escrow', {
+            p_order_id: tripId,
+            p_trigger: 'buyer_confirmed'
+        });
+
+        if (error) throw error;
+
+        showFloatingToast('Payment released to driver! Thank you. 🎉', false);
+
+        const { data: updated } = await window._supabase
+            .from('transport_requests')
+            .select('*')
+            .eq('id', tripId)
+            .single();
+
+        if (updated) renderResult(updated);
+
+    } catch (err) {
+        console.error('Confirm trip error:', err);
+        showFloatingToast('Failed to confirm. Please try again.', true);
+        if (btn) { btn.disabled = false; btn.textContent = '✅ Confirm Trip Complete'; }
+    }
+}
+
+function subscribeToUpdates(tripId) {
+    if (REALTIME_CHANNEL) window._supabase.removeChannel(REALTIME_CHANNEL);
+
+    REALTIME_CHANNEL = window._supabase
+        .channel('transport-trip-' + tripId)
+        .on('postgres_changes', {
+            event: 'UPDATE', schema: 'public', table: 'transport_requests', filter: 'id=eq.' + tripId
+        }, function(payload) {
+            renderResult(payload.new);
+        })
+        .subscribe();
+}
+
+function showError(msg) {
+    const box = document.getElementById('error-box');
+    box.textContent = msg;
+    box.classList.add('visible');
+}
+
+function hideError() { document.getElementById('error-box').classList.remove('visible'); }
+
+function hideResult() {
+    document.getElementById('result-card').classList.remove('visible');
+    if (REALTIME_CHANNEL) {
+        window._supabase.removeChannel(REALTIME_CHANNEL);
+        REALTIME_CHANNEL = null;
+    }
+}
+
+function showFloatingToast(message, isError) {
+    const existing = document.getElementById('floating-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'floating-toast';
+    toast.style.cssText = 'position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: ' +
+        (isError ? '#3a1a1a' : '#1a1d27') + '; border: 1px solid ' + (isError ? '#ff4d4d' : '#00A859') +
+        '; border-radius: 12px; padding: 14px 22px; font-size: 0.85rem; z-index: 999; max-width: 90%; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.3); color: #f0f0f0;';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.remove(); }, 4000);
+}
+
+document.getElementById('track-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') trackTrip();
+});
+</script>
+</body>
+</html>
