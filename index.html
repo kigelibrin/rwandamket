@@ -66,10 +66,22 @@
     <main>
 
         <!-- Hero -->
-        <section id="home" class="hero">
+        <section id="home" class="hero hero-slider">
+            <div class="hero-slides">
+                <div class="hero-slide active" style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400');"></div>
+                <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1400');"></div>
+                <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1400');"></div>
+                <div class="hero-slide" style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1400');"></div>
+            </div>
             <div class="hero-content">
-                <h1>Delivery Designed for <span class="text-green">Rwanda</span></h1>
-                <p>From local decor to event management—we bridge the gap between artisans and your doorstep.</p>
+                <h1>A Smarter Way to Move Through <span class="text-green">Rwanda</span></h1>
+                <p>The all-in-one solution for travelers and busy individuals — rides, stays, dining, and everyday essentials, all in one trusted app.</p>
+            </div>
+            <div class="hero-dots">
+                <span class="hero-dot active"></span>
+                <span class="hero-dot"></span>
+                <span class="hero-dot"></span>
+                <span class="hero-dot"></span>
             </div>
         </section>
 
@@ -237,5 +249,32 @@
     <script src="config.js"></script>
     <script src="api.js"></script>
     <script src="ui.js"></script>
+    <script>
+        // Hero image slider — auto-rotate every 4 seconds
+        (function() {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots   = document.querySelectorAll('.hero-dot');
+            let current  = 0;
+
+            if (slides.length === 0) return;
+
+            function showSlide(index) {
+                slides.forEach(function(s, i) { s.classList.toggle('active', i === index); });
+                dots.forEach(function(d, i) { d.classList.toggle('active', i === index); });
+            }
+
+            setInterval(function() {
+                current = (current + 1) % slides.length;
+                showSlide(current);
+            }, 4000);
+
+            dots.forEach(function(dot, i) {
+                dot.addEventListener('click', function() {
+                    current = i;
+                    showSlide(current);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
