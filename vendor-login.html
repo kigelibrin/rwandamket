@@ -265,7 +265,7 @@
             // Check if this user has a vendor profile
             const { data: vendor, error: vendorError } = await window._supabase
                 .from('vendor_profiles')
-                .select('id, business_name')
+                .select('id, business_name, service_type')
                 .eq('user_id', data.user.id)
                 .single();
 
@@ -274,10 +274,15 @@
                 throw new Error("No vendor profile found for this account. Contact support.");
             }
 
-            // Save vendor info and redirect
+            // Save vendor info and redirect based on service_type
             localStorage.setItem('vendor_id', vendor.id);
             localStorage.setItem('vendor_name', vendor.business_name);
-            window.location.href = 'dashboard.html';
+
+            if (vendor.service_type === 'transport') {
+                window.location.href = 'driver-dashboard.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
 
         } catch (err) {
             showError(err.message || 'Login failed. Please check your credentials.');
@@ -286,9 +291,21 @@
         }
     });
 
-    // If already logged in, redirect straight to dashboard
-    window._supabase?.auth.getSession().then(({ data: { session } }) => {
-        if (session) window.location.href = 'dashboard.html';
+    // If already logged in, redirect to the correct dashboard based on service_type
+    window._supabase?.auth.getSession().then(async ({ data: { session } }) => {
+        if (!session) return;
+
+        const { data: vendor } = await window._supabase
+            .from('vendor_profiles')
+            .select('service_type')
+            .eq('user_id', session.user.id)
+            .single();
+
+        if (vendor?.service_type === 'transport') {
+            window.location.href = 'driver-dashboard.html';
+        } else {
+            window.location.href = 'dashboard.html';
+        }
     });
 </script>
 </body>
