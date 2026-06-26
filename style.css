@@ -146,11 +146,52 @@ body.dark-mode .btn-secondary { background: #333; color: #fff; }
     justify-content: center;
     text-align: center;
     color: #ffffff;
-    background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                      url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200');
+    overflow: hidden;
+}
+
+.hero-slides {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+}
+
+.hero-slide {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
     background-size: cover;
     background-position: center;
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
 }
+
+.hero-slide.active { opacity: 1; }
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 0 20px;
+}
+
+.hero-dots {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.hero-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.hero-dot.active { background: #ffffff; width: 22px; border-radius: 4px; }
 
 .text-green { color: var(--accent); }
 .section-container { padding: 40px 20px; }
