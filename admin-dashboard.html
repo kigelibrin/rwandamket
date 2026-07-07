@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rwandamket | Admin Dashboard</title>
+    <link rel="icon" href="image.png" type="image/png">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary: #00A859; --primary-dark: #007A40; --primary-light: rgba(0,168,89,0.1);
+            --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a; --border: #2a2e42;
+            --text: #f0f0f0; --text-muted: #8a8fa8;
+            --warning: #f59e0b; --error: #ff4d4d; --info: #3b82f6;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        .sidebar {
+            position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
+            background: var(--surface); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; padding: 24px 0; z-index: 100;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid var(--border); }
+        .sidebar-brand img { width: 36px; height: 36px; border-radius: 8px; }
+        .sidebar-brand-text { font-size: 0.85rem; font-weight: 700; color: var(--primary); letter-spacing: 1px; }
+        .sidebar-brand-sub { font-size: 0.7rem; color: var(--text-muted); }
+        .nav-section { padding: 16px 12px 0; flex: 1; }
+        .nav-label { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; padding: 0 8px; margin-bottom: 6px; margin-top: 16px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+            cursor: pointer; font-size: 0.875rem; color: var(--text-muted); transition: all 0.15s;
+            margin-bottom: 2px; border: none; background: none; width: 100%; text-align: left; font-family: 'Inter', sans-serif;
+        }
+        .nav-item:hover { background: var(--surface2); color: var(--text); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+        .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+        .badge { margin-left: auto; background: var(--error); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center; }
+        .badge.green { background: var(--primary); }
+        .sidebar-bottom { padding: 16px 12px; border-top: 1px solid var(--border); }
+        .admin-info { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface2); margin-bottom: 8px; }
+        .admin-avatar { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,77,77,0.15); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .admin-name { font-size: 0.8rem; font-weight: 600; }
+        .admin-role { font-size: 0.7rem; color: var(--error); }
+        .btn-logout { width: 100%; padding: 9px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; }
+        .btn-logout:hover { border-color: var(--error); color: var(--error); }
+
+        .main { margin-left: 240px; min-height: 100vh; }
+        .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .topbar h1 { font-size: 1.1rem; font-weight: 700; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .refresh-btn { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-muted); font-size: 0.8rem; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; }
+        .refresh-btn:hover { color: var(--primary); border-color: var(--primary); }
+
+        .content { padding: 28px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .stat-value { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+        .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+        .section-title { font-size: 1rem; font-weight: 700; }
+
+        .filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+        .filter-tab { padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: 'Inter', sans-serif; transition: all 0.15s; }
+        .filter-tab:hover { color: var(--text); }
+        .filter-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .app-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; transition: border-color 0.2s; }
+        .app-card:hover { border-color: var(--primary); }
+        .app-card.pending { border-left: 3px solid var(--warning); }
+        .app-card.approved { border-left: 3px solid var(--primary); }
+        .app-card.rejected { border-left: 3px solid var(--error); }
+
+        .app-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 12px; }
+        .app-name { font-size: 0.95rem; font-weight: 700; }
+        .app-type { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+        .app-time { font-size: 0.72rem; color: var(--text-muted); }
+
+        .status-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .status-pending { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .status-approved { background: var(--primary-light); color: var(--primary); }
+        .status-rejected { background: rgba(255,77,77,0.15); color: var(--error); }
+
+        .app-meta { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+        .app-meta strong { color: var(--text); }
+
+        .app-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; font-style: italic; border-left: 2px solid var(--border); padding-left: 10px; }
+
+        .app-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .btn-action { padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; border: none; transition: all 0.15s; }
+        .btn-approve { background: var(--primary); color: #fff; }
+        .btn-reject { background: rgba(255,77,77,0.1); color: var(--error); }
+        .btn-action:hover { filter: brightness(1.15); }
+        .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .notif-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; transition: all 0.15s; }
+        .notif-card.unread { border-left: 3px solid var(--primary); }
+        .notif-card:hover { border-color: var(--primary); }
+        .notif-icon { font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; }
+        .notif-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 2px; }
+        .notif-msg { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; }
+        .notif-time { font-size: 0.7rem; color: var(--text-muted); }
+        .notif-read-btn { margin-left: auto; flex-shrink: 0; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: none; color: var(--text-muted); font-size: 0.7rem; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .notif-read-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .vendor-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; }
+        .vendor-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .vendor-name { font-size: 0.9rem; font-weight: 700; }
+        .vendor-type-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .type-goods { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .type-transport { background: rgba(168,85,247,0.15); color: #c084fc; }
+        .type-hotel { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .vendor-meta { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 1rem; color: var(--text); margin-bottom: 8px; }
+
+        .loading-state { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
+
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; font-size: 0.85rem; z-index: 999; transform: translateY(100px); opacity: 0; transition: all 0.3s; max-width: 300px; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-left: 3px solid var(--primary); }
+        .toast.error { border-left: 3px solid var(--error); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .reject-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .reject-modal.visible { display: flex; }
+        .reject-modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 400px; }
+        .reject-modal-box h3 { margin-bottom: 12px; }
+        .reject-reason { width: 100%; padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; min-height: 80px; resize: vertical; }
+        .reject-modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 6px; }
+            .sidebar-brand { border-bottom: none; padding: 8px; }
+            .nav-section { display: flex; flex-wrap: wrap; gap: 4px; padding: 0; }
+            .nav-label { display: none; }
+            .nav-item { padding: 7px 10px; font-size: 0.78rem; width: auto; }
+            .sidebar-bottom { width: 100%; display: flex; gap: 8px; align-items: center; }
+            .admin-info { flex: 1; margin-bottom: 0; }
+            .main { margin-left: 0; }
+            .content { padding: 16px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <img src="image.png" alt="Rwandamket">
+        <div>
+            <div class="sidebar-brand-text">RWANDAMKET</div>
+            <div class="sidebar-brand-sub">Admin Console</div>
+        </div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <button class="nav-item active" onclick="showPanel('overview')">
+            <span class="icon">📊</span> Overview
+        </button>
+        <button class="nav-item" onclick="showPanel('notifications')">
+            <span class="icon">🔔</span> Notifications
+            <span class="badge" id="notif-badge" style="display:none">0</span>
+        </button>
+
+        <div class="nav-label">Vendors</div>
+        <button class="nav-item" onclick="showPanel('applications')">
+            <span class="icon">📝</span> Applications
+            <span class="badge" id="app-badge" style="display:none">0</span>
+        </button>
+        <button class="nav-item" onclick="showPanel('vendors')">
+            <span class="icon">🏪</span> Active Vendors
+        </button>
+
+        <div class="nav-label">Marketplace</div>
+        <button class="nav-item" onclick="showPanel('orders')">
+            <span class="icon">📦</span> Orders
+        </button>
+        <button class="nav-item" onclick="showPanel('transport')">
+            <span class="icon">🚗</span> Transport
+        </button>
+    </div>
+
+    <div class="sidebar-bottom">
+        <div class="admin-info">
+            <div class="admin-avatar">🛡️</div>
+            <div>
+                <div class="admin-name" id="admin-name">Loading...</div>
+                <div class="admin-role">Administrator</div>
+            </div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">Sign out</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h1 id="topbar-title">Overview</h1>
+        <div class="topbar-right">
+            <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- OVERVIEW PANEL -->
+        <div class="panel active" id="panel-overview">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Vendors</div>
+                    <div class="stat-value" id="stat-vendors" style="color:var(--primary);">—</div>
+                    <div class="stat-sub">active on platform</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending Applications</div>
+                    <div class="stat-value" id="stat-apps" style="color:var(--warning);">—</div>
+                    <div class="stat-sub">awaiting your review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value" id="stat-orders">—</div>
+                    <div class="stat-sub">all time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Transport Requests</div>
+                    <div class="stat-value" id="stat-transport">—</div>
+                    <div class="stat-sub">all time</div>
+                </div>
+                <div class="stat-card" style="border-color:rgba(0,168,89,0.3);">
+                    <div class="stat-label">💰 Total Revenue</div>
+                    <div class="stat-value" id="stat-revenue" style="color:var(--primary); font-size:1.2rem;">—</div>
+                    <div class="stat-sub">RWF processed</div>
+                </div>
+                <div class="stat-card" style="border-color:rgba(0,168,89,0.3);">
+                    <div class="stat-label">💰 Commission Earned</div>
+                    <div class="stat-value" id="stat-commission" style="color:var(--primary); font-size:1.2rem;">—</div>
+                    <div class="stat-sub">RWF at 8%</div>
+                </div>
+            </div>
+
+            <div class="section-header"><div class="section-title">Recent Notifications</div></div>
+            <div class="card-list" id="overview-notifs">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- NOTIFICATIONS PANEL -->
+        <div class="panel" id="panel-notifications">
+            <div class="section-header">
+                <div class="section-title">All Notifications</div>
+                <button class="btn-action btn-approve" onclick="markAllRead()">Mark All Read</button>
+            </div>
+            <div class="card-list" id="notifs-list">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- APPLICATIONS PANEL -->
+        <div class="panel" id="panel-applications">
+            <div class="section-header">
+                <div class="section-title">Vendor Applications</div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterApps('pending', this)">Pending</button>
+                    <button class="filter-tab" onclick="filterApps('approved', this)">Approved</button>
+                    <button class="filter-tab" onclick="filterApps('rejected', this)">Rejected</button>
+                    <button class="filter-tab" onclick="filterApps('all', this)">All</button>
+                </div>
+            </div>
+            <div class="card-list" id="apps-list">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- ACTIVE VENDORS PANEL -->
+        <div class="panel" id="panel-vendors">
+            <div class="section-header">
+                <div class="section-title">Active Vendors</div>
+                <div class="filter-tabs">
+                    <button class="filter-tab active" onclick="filterVendors('all', this)">All</button>
+                    <button class="filter-tab" onclick="filterVendors('goods', this)">Goods</button>
+                    <button class="filter-tab" onclick="filterVendors('transport', this)">Transport</button>
+                    <button class="filter-tab" onclick="filterVendors('hotel', this)">Hotels</button>
+                </div>
+            </div>
+            <div class="card-list" id="vendors-list">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- ORDERS PANEL -->
+        <div class="panel" id="panel-orders">
+            <div class="section-header"><div class="section-title">All Marketplace Orders</div></div>
+            <div class="card-list" id="orders-list">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+        <!-- TRANSPORT PANEL -->
+        <div class="panel" id="panel-transport">
+            <div class="section-header"><div class="section-title">All Transport Requests</div></div>
+            <div class="card-list" id="transport-list">
+                <div class="loading-state">Loading...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- REJECT REASON MODAL -->
+<div class="reject-modal" id="reject-modal">
+    <div class="reject-modal-box">
+        <h3>Reject Application</h3>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">Provide a reason so the applicant knows what to improve:</p>
+        <textarea class="reject-reason" id="reject-reason" placeholder="e.g. Incomplete business description, missing phone number..."></textarea>
+        <div class="reject-modal-actions">
+            <button class="btn-action btn-reject" onclick="confirmReject()">Confirm Reject</button>
+            <button class="btn-action" style="background:var(--surface2); color:var(--text-muted);" onclick="closeRejectModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+let ADMIN_ID = null;
+let ALL_APPS = [];
+let ALL_VENDORS = [];
+let ALL_ORDERS = [];
+let ALL_TRANSPORT = [];
+let ALL_NOTIFS = [];
+let CURRENT_APP_FILTER = 'pending';
+let CURRENT_VENDOR_FILTER = 'all';
+let PENDING_REJECT_ID = null;
+let REALTIME_CHANNEL = null;
+
+// ── BOOT ──
+async function init() {
+    var sessionResult = await window._supabase.auth.getSession();
+    var session = sessionResult.data.session;
+    var sessionError = sessionResult.error;
+
+    if (sessionError || !session) {
+        window.location.replace('admin-login.html');
+        return;
+    }
+
+    var adminResult = await window._supabase
+        .from('admin_users')
+        .select('id, full_name')
+        .eq('user_id', session.user.id)
+        .single();
+
+    if (adminResult.error || !adminResult.data) {
+        await window._supabase.auth.signOut();
+        window.location.replace('admin-login.html');
+        return;
+    }
+
+    ADMIN_ID = adminResult.data.id;
+    document.getElementById('admin-name').textContent = adminResult.data.full_name;
+
+    await loadAll();
+    subscribeToRealtime();
+}
+
+async function loadAll() {
+    await Promise.all([
+        loadApplications(),
+        loadVendors(),
+        loadOrders(),
+        loadTransport(),
+        loadNotifications()
+    ]);
+    updateOverviewStats();
+    renderOverviewNotifs();
+}
+
+// ── APPLICATIONS ──
+async function loadApplications() {
+    var result = await window._supabase
+        .from('vendor_applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (result.error) return;
+    ALL_APPS = result.data || [];
+
+    var pending = ALL_APPS.filter(function(a) { return a.status === 'pending'; });
+    var badge = document.getElementById('app-badge');
+    if (pending.length > 0) {
+        badge.textContent = pending.length;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+
+    renderApplications(ALL_APPS, CURRENT_APP_FILTER);
+}
+
+function renderApplications(apps, filter) {
+    var filtered = filter === 'all' ? apps : apps.filter(function(a) { return a.status === filter; });
+    var container = document.getElementById('apps-list');
+
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">📝</div><h3>No ' + filter + ' applications</h3></div>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(function(app) {
+        var time = new Date(app.created_at).toLocaleString('en-RW', { dateStyle: 'medium', timeStyle: 'short' });
+        var typeIcon = app.service_type === 'transport' ? '🚗' : app.service_type === 'hotel' ? '🏨' : '🛍️';
+
+        var extraMeta = '';
+        if (app.service_type === 'transport' && app.fleet_size) {
+            extraMeta = '🚗 Fleet: <strong>' + app.fleet_size + ' vehicles</strong>';
+        } else if (app.service_type === 'hotel') {
+            extraMeta = '🏨 Rooms: <strong>' + (app.room_count || '—') + '</strong> · ⭐ ' + (app.star_rating || '—') + ' stars' + (app.amenities ? ' · ' + app.amenities : '');
+        } else if (app.category) {
+            extraMeta = '📦 Category: <strong>' + app.category + '</strong>';
+        }
+
+        var actions = '';
+        if (app.status === 'pending') {
+            actions = '<button class="btn-action btn-approve" onclick="approveApplication(\'' + app.id + '\', \'' + app.email + '\', \'' + app.business_name + '\', \'' + app.service_type + '\', \'' + app.city + '\')">✅ Approve & Create Login</button>' +
+                      '<button class="btn-action btn-reject" onclick="openRejectModal(\'' + app.id + '\')">✕ Reject</button>';
+        } else if (app.status === 'rejected' && app.rejection_reason) {
+            actions = '<div style="font-size:0.78rem; color:var(--error);">Rejected: ' + app.rejection_reason + '</div>';
+        }
+
+        return '<div class="app-card ' + app.status + '">' +
+            '<div class="app-top">' +
+                '<div>' +
+                    '<div class="app-name">' + typeIcon + ' ' + app.business_name + '</div>' +
+                    '<div class="app-type">' + app.service_type + ' · ' + app.city + ' · Applied ' + time + '</div>' +
+                '</div>' +
+                '<span class="status-badge status-' + app.status + '">' + app.status + '</span>' +
+            '</div>' +
+            '<div class="app-meta">👤 <strong>' + app.contact_name + '</strong> · 📧 ' + app.email + ' · 📞 ' + app.phone + '</div>' +
+            (extraMeta ? '<div class="app-meta">' + extraMeta + '</div>' : '') +
+            (app.business_description ? '<div class="app-desc">"' + app.business_description + '"</div>' : '') +
+            '<div class="app-actions">' + actions + '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function filterApps(filter, btn) {
+    CURRENT_APP_FILTER = filter;
+    document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    renderApplications(ALL_APPS, filter);
+}
+
+// ── APPROVE APPLICATION ──
+async function approveApplication(appId, email, businessName, serviceType, city) {
+    var btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+        var tempPassword = 'Rmk' + Math.random().toString(36).slice(2, 8) + '!';
+
+        var signUpResult = await window._supabase.auth.admin.createUser({
+            email: email,
+            password: tempPassword,
+            email_confirm: true
+        });
+
+        if (signUpResult.error) throw signUpResult.error;
+
+        var newUserId = signUpResult.data.user.id;
+
+        var insertResult = await window._supabase
+            .from('vendor_profiles')
+            .insert([{
+                user_id: newUserId,
+                business_name: businessName,
+                service_type: serviceType,
+                city: city
+            }]);
+
+        if (insertResult.error) throw insertResult.error;
+
+        var updateResult = await window._supabase
+            .from('vendor_applications')
+            .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+            .eq('id', appId);
+
+        if (updateResult.error) throw updateResult.error;
+
+        showToast('✅ ' + businessName + ' approved! Login: ' + email + ' / ' + tempPassword, 'success');
+        await loadApplications();
+
+    } catch (err) {
+        console.error('Approve error:', err);
+        showToast('Failed: ' + err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '✅ Approve & Create Login';
+    }
+}
+
+// ── REJECT APPLICATION ──
+function openRejectModal(appId) {
+    PENDING_REJECT_ID = appId;
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-modal').classList.add('visible');
+}
+
+function closeRejectModal() {
+    PENDING_REJECT_ID = null;
+    document.getElementById('reject-modal').classList.remove('visible');
+}
+
+async function confirmReject() {
+    var reason = document.getElementById('reject-reason').value.trim();
+    if (!reason) { showToast('Please enter a rejection reason', 'error'); return; }
+
+    var result = await window._supabase
+        .from('vendor_applications')
+        .update({ status: 'rejected', rejection_reason: reason, reviewed_at: new Date().toISOString() })
+        .eq('id', PENDING_REJECT_ID);
+
+    if (result.error) { showToast('Failed to reject', 'error'); return; }
+
+    showToast('Application rejected.', 'success');
+    closeRejectModal();
+    await loadApplications();
+}
+
+// ── VENDORS ──
+async function loadVendors() {
+    var result = await window._supabase
+        .from('vendor_profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (result.error) return;
+    ALL_VENDORS = result.data || [];
+    renderVendors(ALL_VENDORS, CURRENT_VENDOR_FILTER);
+}
+
+function renderVendors(vendors, filter) {
+    var filtered = filter === 'all' ? vendors : vendors.filter(function(v) { return v.service_type === filter; });
+    var container = document.getElementById('vendors-list');
+
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🏪</div><h3>No vendors yet</h3></div>';
+        return;
+    }
+
+    container.innerHTML = filtered.map(function(v) {
+        var typeClass = v.service_type === 'transport' ? 'type-transport' : v.service_type === 'hotel' ? 'type-hotel' : 'type-goods';
+        var typeLabel = v.service_type === 'transport' ? '🚗 Transport' : v.service_type === 'hotel' ? '🏨 Hotel' : '🛍️ Goods';
+
+        return '<div class="vendor-card">' +
+            '<div class="vendor-top">' +
+                '<div class="vendor-name">' + v.business_name + '</div>' +
+                '<span class="vendor-type-badge ' + typeClass + '">' + typeLabel + '</span>' +
+            '</div>' +
+            '<div class="vendor-meta">' +
+                '📍 ' + (v.city || '—') +
+                ' · 💰 Wallet: <strong>' + Number(v.wallet_balance || 0).toLocaleString() + ' RWF</strong>' +
+                ' · ⏳ Escrow: ' + Number(v.escrow_balance || 0).toLocaleString() + ' RWF' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+function filterVendors(filter, btn) {
+    CURRENT_VENDOR_FILTER = filter;
+    document.querySelectorAll('#panel-vendors .filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    renderVendors(ALL_VENDORS, filter);
+}
+
+// ── ORDERS ──
+async function loadOrders() {
+    var result = await window._supabase
+        .from('orders')
+        .select('id, customer_name, total_amount, commission_amount, payment_status, order_status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+    if (result.error) return;
+    ALL_ORDERS = result.data || [];
+    renderOrders();
+}
+
+function renderOrders() {
+    var container = document.getElementById('orders-list');
+    if (!ALL_ORDERS.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><h3>No orders yet</h3></div>';
+        return;
+    }
+
+    container.innerHTML = ALL_ORDERS.map(function(o) {
+        var time = new Date(o.created_at).toLocaleString('en-RW', { dateStyle: 'short', timeStyle: 'short' });
+        return '<div class="app-card ' + (o.payment_status === 'paid' ? 'approved' : 'pending') + '">' +
+            '<div class="app-top">' +
+                '<div>' +
+                    '<div class="app-name">' + o.customer_name + '</div>' +
+                    '<div class="app-type">' + time + '</div>' +
+                '</div>' +
+                '<span class="status-badge status-' + (o.payment_status === 'paid' ? 'approved' : 'pending') + '">' + o.payment_status + '</span>' +
+            '</div>' +
+            '<div class="app-meta">💰 <strong>' + Number(o.total_amount || 0).toLocaleString() + ' RWF</strong> · Commission: ' + Number(o.commission_amount || 0).toLocaleString() + ' RWF · Status: ' + o.order_status + '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── TRANSPORT ──
+async function loadTransport() {
+    var result = await window._supabase
+        .from('transport_requests')
+        .select('id, passenger_name, pickup_location, dropoff_location, quoted_price, status, payment_status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+    if (result.error) return;
+    ALL_TRANSPORT = result.data || [];
+    renderTransport();
+}
+
+function renderTransport() {
+    var container = document.getElementById('transport-list');
+    if (!ALL_TRANSPORT.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🚗</div><h3>No transport requests yet</h3></div>';
+        return;
+    }
+
+    container.innerHTML = ALL_TRANSPORT.map(function(t) {
+        var time = new Date(t.created_at).toLocaleString('en-RW', { dateStyle: 'short', timeStyle: 'short' });
+        return '<div class="app-card ' + (t.status === 'completed' ? 'approved' : 'pending') + '">' +
+            '<div class="app-top">' +
+                '<div>' +
+                    '<div class="app-name">🚗 ' + t.passenger_name + '</div>' +
+                    '<div class="app-type">' + t.pickup_location + ' → ' + t.dropoff_location + ' · ' + time + '</div>' +
+                '</div>' +
+                '<span class="status-badge status-' + (t.status === 'completed' ? 'approved' : 'pending') + '">' + t.status + '</span>' +
+            '</div>' +
+            '<div class="app-meta">💰 Quote: <strong>' + (t.quoted_price ? Number(t.quoted_price).toLocaleString() + ' RWF' : 'Pending') + '</strong> · Payment: ' + t.payment_status + '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── NOTIFICATIONS ──
+async function loadNotifications() {
+    var result = await window._supabase
+        .from('admin_notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+    if (result.error) return;
+    ALL_NOTIFS = result.data || [];
+
+    var unread = ALL_NOTIFS.filter(function(n) { return !n.is_read; });
+    var badge = document.getElementById('notif-badge');
+    if (unread.length > 0) {
+        badge.textContent = unread.length;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+
+    renderNotifications(ALL_NOTIFS);
+}
+
+function renderNotifications(notifs) {
+    var container = document.getElementById('notifs-list');
+    if (!notifs.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🔔</div><h3>No notifications yet</h3></div>';
+        return;
+    }
+
+    container.innerHTML = notifs.map(function(n) {
+        var time = new Date(n.created_at).toLocaleString('en-RW', { dateStyle: 'short', timeStyle: 'short' });
+        var icon = n.type === 'new_application' ? '📝' : n.type === 'new_order' ? '📦' : n.type === 'dispute' ? '⚠️' : '🔔';
+
+        return '<div class="notif-card ' + (n.is_read ? '' : 'unread') + '">' +
+            '<div class="notif-icon">' + icon + '</div>' +
+            '<div style="flex:1;">' +
+                '<div class="notif-title">' + n.title + '</div>' +
+                '<div class="notif-msg">' + (n.message || '') + '</div>' +
+                '<div class="notif-time">' + time + '</div>' +
+            '</div>' +
+            (!n.is_read ? '<button class="notif-read-btn" onclick="markRead(\'' + n.id + '\')">Mark read</button>' : '') +
+        '</div>';
+    }).join('');
+}
+
+function renderOverviewNotifs() {
+    var container = document.getElementById('overview-notifs');
+    var recent = ALL_NOTIFS.slice(0, 5);
+    if (!recent.length) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">🔔</div><h3>No notifications yet</h3></div>';
+        return;
+    }
+
+    container.innerHTML = recent.map(function(n) {
+        var time = new Date(n.created_at).toLocaleString('en-RW', { dateStyle: 'short', timeStyle: 'short' });
+        var icon = n.type === 'new_application' ? '📝' : n.type === 'new_order' ? '📦' : '🔔';
+        return '<div class="notif-card ' + (n.is_read ? '' : 'unread') + '">' +
+            '<div class="notif-icon">' + icon + '</div>' +
+            '<div><div class="notif-title">' + n.title + '</div><div class="notif-msg">' + (n.message || '') + '</div><div class="notif-time">' + time + '</div></div>' +
+        '</div>';
+    }).join('');
+}
+
+async function markRead(notifId) {
+    await window._supabase.from('admin_notifications').update({ is_read: true }).eq('id', notifId);
+    await loadNotifications();
+}
+
+async function markAllRead() {
+    await window._supabase.from('admin_notifications').update({ is_read: true }).eq('is_read', false);
+    showToast('All notifications marked as read', 'success');
+    await loadNotifications();
+}
+
+// ── OVERVIEW STATS ──
+function updateOverviewStats() {
+    document.getElementById('stat-vendors').textContent = ALL_VENDORS.length;
+    document.getElementById('stat-apps').textContent = ALL_APPS.filter(function(a) { return a.status === 'pending'; }).length;
+    document.getElementById('stat-orders').textContent = ALL_ORDERS.length;
+    document.getElementById('stat-transport').textContent = ALL_TRANSPORT.length;
+
+    var totalRevenue = ALL_ORDERS.filter(function(o) { return o.payment_status === 'paid'; }).reduce(function(s, o) { return s + (o.total_amount || 0); }, 0);
+    var totalCommission = ALL_ORDERS.filter(function(o) { return o.payment_status === 'paid'; }).reduce(function(s, o) { return s + (o.commission_amount || 0); }, 0);
+
+    document.getElementById('stat-revenue').textContent = totalRevenue.toLocaleString();
+    document.getElementById('stat-commission').textContent = totalCommission.toLocaleString();
+}
+
+// ── PANEL SWITCHING ──
+function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    document.getElementById('panel-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+
+    var titles = { overview: 'Overview', notifications: 'Notifications', applications: 'Vendor Applications', vendors: 'Active Vendors', orders: 'Marketplace Orders', transport: 'Transport Requests' };
+    document.getElementById('topbar-title').textContent = titles[name] || 'Admin';
+}
+
+// ── REALTIME ──
+function subscribeToRealtime() {
+    REALTIME_CHANNEL = window._supabase
+        .channel('admin-realtime')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'admin_notifications' }, function(payload) {
+            showToast('🔔 ' + payload.new.title, 'success');
+            loadNotifications();
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'vendor_applications' }, function() {
+            loadApplications();
+        })
+        .subscribe();
+}
+
+// ── LOGOUT ──
+async function handleLogout() {
+    await window._supabase.auth.signOut();
+    window.location.replace('admin-login.html');
+}
+
+// ── TOAST ──
+function showToast(message, type) {
+    type = type || 'success';
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(function() { toast.classList.remove('show'); }, 4000);
+}
+
+init();
+</script>
+</body>
+</html>
