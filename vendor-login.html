@@ -228,6 +228,23 @@
         <div class="back-link">
             <a href="index.html">← Back to Rwandamket Marketplace</a>
         </div>
+
+        <div class="back-link" style="margin-top: 10px;">
+            <a href="vendor-signup.html">🤝 Become a Vendor — Apply Here</a>
+        </div>
+
+        <div class="back-link" style="margin-top: 10px;">
+            <a href="#" id="forgot-link">Forgot password?</a>
+        </div>
+
+        <div id="forgot-form" style="display:none; margin-top:14px;">
+            <div class="error-msg" id="reset-error" style="display:none;"></div>
+            <div id="reset-success" style="display:none; background:rgba(0,168,89,0.1); border:1px solid rgba(0,168,89,0.3); color:#00A859; padding:11px 15px; border-radius:10px; font-size:0.82rem; margin-bottom:12px;"></div>
+            <input type="email" id="reset-email" placeholder="Enter your email address" style="width:100%; padding:12px 14px; background:var(--surface2); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:0.9rem; font-family:'Inter',sans-serif; outline:none; margin-bottom:10px;">
+            <button onclick="sendPasswordReset()" style="width:100%; padding:12px; background:var(--primary); color:#fff; border:none; border-radius:10px; font-size:0.88rem; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif;">
+                Send Reset Link
+            </button>
+        </div>
     </div>
 </div>
 
@@ -307,6 +324,41 @@
             window.location.href = 'dashboard.html';
         }
     });
+
+    // Forgot password toggle
+    document.getElementById('forgot-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        const form = document.getElementById('forgot-form');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    });
+
+    async function sendPasswordReset() {
+        const email = document.getElementById('reset-email').value.trim();
+        const errorEl = document.getElementById('reset-error');
+        const successEl = document.getElementById('reset-success');
+
+        errorEl.style.display = 'none';
+        successEl.style.display = 'none';
+
+        if (!email) {
+            errorEl.textContent = 'Please enter your email address.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const { error } = await window._supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/vendor-reset-password.html'
+        });
+
+        if (error) {
+            errorEl.textContent = error.message;
+            errorEl.style.display = 'block';
+        } else {
+            successEl.textContent = '✅ Reset link sent! Check your email inbox.';
+            successEl.style.display = 'block';
+            document.getElementById('reset-email').value = '';
+        }
+    }
 </script>
 </body>
 </html>
