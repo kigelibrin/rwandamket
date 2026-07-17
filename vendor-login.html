@@ -308,22 +308,29 @@
         }
     });
 
-    // If already logged in, redirect to the correct dashboard based on service_type
-    window._supabase?.auth.getSession().then(async ({ data: { session } }) => {
-        if (!session) return;
+    // If already logged in, redirect to the correct dashboard
+    // Skip auto-redirect if user just logged out (prevents infinite loop)
+    const justLoggedOut = new URLSearchParams(window.location.search).get('logout') === 'true';
 
-        const { data: vendor } = await window._supabase
-            .from('vendor_profiles')
-            .select('service_type')
-            .eq('user_id', session.user.id)
-            .single();
+    if (!justLoggedOut) {
+        window._supabase?.auth.getSession().then(async ({ data: { session } }) => {
+            if (!session) return;
 
-        if (vendor?.service_type === 'transport') {
-            window.location.href = 'driver-dashboard.html';
-        } else {
-            window.location.href = 'dashboard.html';
-        }
-    });
+            const { data: vendor } = await window._supabase
+                .from('vendor_profiles')
+                .select('service_type')
+                .eq('user_id', session.user.id)
+                .single();
+
+            if (!vendor) return; // No vendor profile — stay on login, don't loop
+
+            if (vendor.service_type === 'transport') {
+                window.location.replace('driver-dashboard.html');
+            } else {
+                window.location.replace('dashboard.html');
+            }
+        });
+    }
 
     // Forgot password toggle
     document.getElementById('forgot-link').addEventListener('click', function(e) {
