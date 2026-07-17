@@ -653,7 +653,7 @@ async function init() {
         await window._supabase.auth.signOut();
         localStorage.removeItem('vendor_id');
         localStorage.removeItem('vendor_name');
-        window.location.replace('vendor-login.html');
+        window.location.replace('vendor-login.html?logout=true');
         return;
     }
 
@@ -664,7 +664,7 @@ async function init() {
         .eq('user_id', session.user.id)
         .single();
 
-    if (!vendor) { window.location.href = 'vendor-login.html'; return; }
+    if (!vendor) { window.location.replace('vendor-login.html?logout=true'); return; }
 
     VENDOR_ID = vendor.id;
     document.getElementById('sidebar-vendor-name').textContent = vendor.business_name;
@@ -916,7 +916,7 @@ async function handleLogout() {
     localStorage.removeItem('vendor_name');
     // Use replace() so dashboard is removed from browser history
     // This prevents back button from returning to dashboard after logout
-    window.location.replace('vendor-login.html');
+    window.location.replace('vendor-login.html?logout=true');
 }
 
 // ── TOAST ──
