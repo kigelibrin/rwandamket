@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rwandamket | Driver Dashboard</title>
+    <title>Rwandamket | Transport Company Dashboard</title>
     <link rel="icon" href="image.png" type="image/png">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -216,7 +216,7 @@
         <img src="image.png" alt="Rwandamket">
         <div>
             <div class="sidebar-brand-text">RWANDAMKET</div>
-            <div class="sidebar-brand-sub">Driver Dashboard</div>
+            <div class="sidebar-brand-sub">Transport Company Dashboard</div>
         </div>
     </div>
 
@@ -381,7 +381,7 @@ async function init() {
     const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
     if (sessionError || !session) {
         await window._supabase.auth.signOut();
-        window.location.replace('vendor-login.html');
+        window.location.replace('vendor-login.html?logout=true');
         return;
     }
 
@@ -745,7 +745,7 @@ function subscribeToRequests() {
 
 async function handleLogout() {
     await window._supabase.auth.signOut();
-    window.location.replace('vendor-login.html');
+    window.location.replace('vendor-login.html?logout=true');
 }
 
 function showToast(message, type) {
