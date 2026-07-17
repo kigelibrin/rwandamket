@@ -296,7 +296,7 @@
             localStorage.setItem('vendor_name', vendor.business_name);
 
             if (vendor.service_type === 'transport') {
-                window.location.href = 'driver-dashboard.html';
+                window.location.href = 'transport-dashboard.html';
             } else {
                 window.location.href = 'dashboard.html';
             }
@@ -325,7 +325,7 @@
             if (!vendor) return; // No vendor profile — stay on login, don't loop
 
             if (vendor.service_type === 'transport') {
-                window.location.replace('driver-dashboard.html');
+                window.location.replace('transport-dashboard.html');
             } else {
                 window.location.replace('dashboard.html');
             }
