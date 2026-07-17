@@ -270,9 +270,9 @@
 <script>
 
 const STEPS = [
-    { key: 'pending',   icon: '📝', title: 'Request Submitted', desc: 'Waiting for a verified driver to send a quote.' },
+    { key: 'pending',   icon: '📝', title: 'Request Submitted', desc: 'Waiting for a verified transport company to send a quote.' },
     { key: 'quoted',    icon: '💬', title: 'Quote Received',    desc: 'Review the price and accept to confirm your ride.' },
-    { key: 'accepted',  icon: '✅', title: 'Trip Confirmed',    desc: 'Your driver is assigned and ready.' },
+    { key: 'accepted',  icon: '✅', title: 'Trip Confirmed',    desc: 'A driver from the company has been assigned and is ready.' },
     { key: 'in_progress', icon: '🚗', title: 'Trip In Progress', desc: 'You are on your way to your destination.' },
     { key: 'completed', icon: '🏁', title: 'Trip Completed',    desc: 'You have arrived. Thanks for riding with Rwandamket!' },
 ];
@@ -407,7 +407,7 @@ function renderQuoteBox(trip) {
     if (trip.status === 'quoted' && trip.quoted_price) {
         container.innerHTML = '' +
             '<div class="quote-box">' +
-                '<p><strong>A driver sent you a quote for this trip:</strong></p>' +
+                '<p><strong>A transport company sent you a quote for this trip:</strong></p>' +
                 '<div class="quote-amount">' + Number(trip.quoted_price).toLocaleString() + ' RWF</div>' +
                 '<button class="btn-accept-quote" onclick="acceptQuote(\'' + trip.id + '\')">✅ Accept Quote & Confirm Trip</button>' +
             '</div>';
@@ -439,7 +439,7 @@ function renderDriverInfo(trip) {
                 }
             });
     } else if (['accepted', 'driver_assigned', 'in_progress', 'completed'].includes(trip.status)) {
-        container.innerHTML = '<div class="driver-info-box"><div class="driver-avatar">🚗</div><div><div class="driver-name">Driver assignment in progress</div><div class="driver-vehicle">Your driver details will appear here shortly</div></div></div>';
+        container.innerHTML = '<div class="driver-info-box"><div class="driver-avatar">🚗</div><div><div class="driver-name">Driver assignment in progress</div><div class="driver-vehicle">Driver details from the company will appear here shortly</div></div></div>';
     } else {
         container.innerHTML = '';
     }
@@ -455,12 +455,12 @@ function renderConfirmBox(trip) {
 
         container.innerHTML = '' +
             '<div class="confirm-box">' +
-                '<p><strong>Did you arrive safely?</strong><br>Confirm now to release payment to your driver, or it will auto-release on ' + releaseTime + '.</p>' +
+                '<p><strong>Did you arrive safely?</strong><br>Confirm now to release payment to the transport company, or it will auto-release on ' + releaseTime + '.</p>' +
                 '<button class="btn-confirm" onclick="confirmTripComplete(\'' + trip.id + '\')">✅ Confirm Trip Complete</button>' +
                 '<div class="auto-release-note">⏱ Auto-releases in 24 hours if not confirmed</div>' +
             '</div>';
     } else if (trip.escrow_status === 'released') {
-        container.innerHTML = '<div class="escrow-released-badge">✅ Payment released to driver — trip complete</div>';
+        container.innerHTML = '<div class="escrow-released-badge">✅ Payment released to transport company — trip complete</div>';
     } else {
         container.innerHTML = '';
     }
