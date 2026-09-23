@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/supabase/client'
 
@@ -26,7 +26,7 @@ type Order = {
 
 const STATUS_FLOW = ['received', 'preparing', 'delivered']
 
-export default function VendorOrdersPage() {
+function VendorOrdersContent() {
   const router = useRouter()
   const supabase = createClient()
   const searchParams = useSearchParams()
@@ -210,5 +210,13 @@ export default function VendorOrdersPage() {
         })}
       </div>
     </main>
+  )
+}
+
+export default function VendorOrdersPage() {
+  return (
+    <Suspense fallback={<main style={{ padding: '2rem' }}><p>Loading...</p></main>}>
+      <VendorOrdersContent />
+    </Suspense>
   )
 }
