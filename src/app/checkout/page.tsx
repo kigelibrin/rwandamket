@@ -21,11 +21,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     async function checkAuth() {
       const { data } = await supabase.auth.getUser()
-      if (!data.user) {
-        router.push('/login')
-        return
-      }
-      setUserId(data.user.id)
+      setUserId(data.user?.id || null)
       setCheckingAuth(false)
     }
     checkAuth()
@@ -33,7 +29,7 @@ export default function CheckoutPage() {
 
   async function handlePlaceOrder(e: React.FormEvent) {
     e.preventDefault()
-    if (items.length === 0 || !userId) return
+    if (items.length === 0) return
 
     setLoading(true)
     setError('')
@@ -43,7 +39,7 @@ export default function CheckoutPage() {
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
-        customer_id: userId,
+        customer_id: userId || null,
         customer_name: customerName,
         delivery_address: deliveryAddress,
         phone_number: phoneNumber,
@@ -81,7 +77,7 @@ export default function CheckoutPage() {
   }
 
   if (checkingAuth) {
-    return <main style={{ padding: '2rem' }}><p>Checking your account...</p></main>
+    return <main style={{ padding: '2rem' }}><p>Loading...</p></main>
   }
 
   if (items.length === 0) {
